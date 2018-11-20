@@ -1,0 +1,88 @@
+/* Подключаем стить для отображения логин пользователя в тэге <p>*/
+.navbar-nav>li>p {
+    color: #219AE4;
+    padding: 15px;
+    line-height: 20px;
+    margin: 0;
+}
+
+/* Выравнивание блока по центру*/
+.align-center {
+    text-align: center;
+}
+/* Блок для обеспечения отображения картинки-превью корректно
+ * по максимальной высоте и ширине
+ */
+.image-preview-parent {
+    max-width: 320px;
+    max-height: 240px;
+}
+
+.image-preview {
+    max-height: inherit;
+}
+
+/* Блок для ограничения ширины маленькой кнопки*/
+.btn-my-xs {
+     width: 22px;
+}
+
+/* Блок для обрезания внутреннего содержимого элементов*/
+.my-hidden-owerflow {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;"
+}
+
+/* Блок для выравнивания элементов вряд как в таблице*/
+.my-inline-parent {
+    display: table-row;
+    width: 100%;
+}
+
+.my-inline {
+    display: table-cell;
+    margin: 3px;
+}
+
+/* Блок для выравнивания элементов слева и справа*/
+.my-float-left {
+    float: left;
+}
+
+.my-float-right {
+    float: right;
+}
+
+/* Растянутое по границам выравнивание текста*/
+.text-justify {
+    text-align: justify;
+}
+
+/* Ставим стиль для метки "Авторизируйтесь" */
+nav ul > li#label {
+    padding-bottom: 15px;
+    padding-top: 15px;
+    line-height: 20px;
+    color: #57a0c0;
+}
+
+/* Убираем margin */
+.no-margin {
+    margin: 0;
+}
+
+/* Блок для реализации показать/скрыть без JS и jQuery */
+.my-dropdown-block{
+    cursor: pointer;
+}
+.my-dropdown-block-parent + input{
+    display: none; /* Скрываем чекбокс */
+}
+.my-dropdown-block-parent + input + div {
+    display:none;
+}
+.my-dropdown-block-parent + input:checked + div {
+    display:block;
+}
+/*--*/

@@ -1,0 +1,7 @@
+2018-11-12T14:06:56+00:00 Error in DB query: SELECT user.* FROM user WHERE user.session_id=:UserSessionId with params: {"UserSessionId":"dock0f3d2jfisq68s992b6cn10"}
+2018-11-12T14:10:02+00:00 Error in DB query: SELECT user.* FROM user WHERE user.session_id=:UserSessionId with params: {"UserSessionId":"dock0f3d2jfisq68s992b6cn10"}
+2018-11-12T14:16:56+00:00 Error in DB query: SELECT user.* FROM user WHERE user.session_id=:UserSessionId with params: {"UserSessionId":"dock0f3d2jfisq68s992b6cn10"}
+2018-11-12T14:17:14+00:00 Error in DB query: SELECT user.* FROM user WHERE user.session_id=:UserSessionId with params: {"UserSessionId":"dock0f3d2jfisq68s992b6cn10"}
+2018-11-12T14:17:52+00:00 Error in DB query: SELECT user.* FROM user WHERE user.session_id=:UserSessionId with params: {"UserSessionId":"dock0f3d2jfisq68s992b6cn10"}
+2018-11-12T14:19:52+00:00 Error in DB query: SELECT user.* FROM user WHERE user.session_id=:UserSessionId with params: {"UserSessionId":"dock0f3d2jfisq68s992b6cn10"}
+2018-11-12T14:22:20+00:00 Error in DB query: SELECT user.* FROM user WHERE user.session_id=:UserSessionId with params: {"UserSessionId":"dock0f3d2jfisq68s992b6cn10"}

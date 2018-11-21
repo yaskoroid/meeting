@@ -12,9 +12,6 @@ use core\Service\ServiceLocator;
 use Service;
 use Entity;
 
-/*
- * Класс модели для отображения страницы пользователя
- */
 class User
 {
     /**

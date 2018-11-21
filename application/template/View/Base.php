@@ -56,6 +56,6 @@
     </div>
 </nav>
 <!-- Подключаем конкретную страницу (экшн) -->
-<?php include "application/template/View/" . $contentView; ?>
+<?php include "application/template/View/" . $derivedView; ?>
 </body>
 </html>

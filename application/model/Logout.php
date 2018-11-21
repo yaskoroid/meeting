@@ -8,9 +8,8 @@
 
 namespace model;
 
-use core\ServiceLocator;
+use core\Service\ServiceLocator;
 use Service;
-
 
 class Logout
 {

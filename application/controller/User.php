@@ -11,30 +11,18 @@ namespace controller;
 use core\Controller;
 use model;
 
-/*
- * Класс выводит страницу пользователя
- */
-class User extends Controller
-{
+class User extends Controller {
 
-    public function __construct()
-    {
-        // Создаем модель и вид из родителя
+    public function __construct() {
         $this->model = new model\User();
         parent::__construct();
     }
 
-    // Основное действие контроллера
-    public function actionIndex()
-    {
-        // Генерируем данные для вида и сам вид
+    public function actionIndex() {
         $this->view->generate('User', 'Base', $this->model->getData());
     }
 
-    // Основное действие контроллера
-    public function actionJson()
-    {
-        // Генерируем ответ на AJAX запрос
+    public function actionJson() {
         try {
             $result = array(
                 'error'    => null,

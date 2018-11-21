@@ -131,4 +131,11 @@ class ServiceLocator extends core\Service\BaseServiceLocator {
     public static function dateTimeService() {
         return self::_factory()->get("Service\\DateTime");
     }
+
+    /**
+     * @return Service\Template
+     */
+    public static function templateService() {
+        return self::_factory()->get("Service\\Template");
+    }
 }

@@ -8,21 +8,12 @@
 
 namespace controller;
 
-
 use core\Controller;
 
-/*
- * Класс вы водит страницу 404
- */
-class Error404 extends Controller
-{
+class Error404 extends Controller {
 
-    // Основное действие контроллера
-    public function actionIndex()
-    {
-        // Отправляем заголовок 404
+    public function actionIndex() {
         header('HTTP/1.1 404 Not Found');
-        // Создаем вид страницы 404
         $this->view->generate('Error404', 'Base', array('title' => 'Страница 404'));
     }
 }

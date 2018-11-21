@@ -1,10 +1,6 @@
 <?php
 namespace core;
 
-/*
- * Базовый класс контроллера, содержит вид, модель
- * и метод основного действия
- */
 abstract class Controller
 {
     /**
@@ -19,10 +15,8 @@ abstract class Controller
 
     function __construct()
     {
-        // Создадим объект вида
         $this->view = new View();
     }
 
-    // Метод основного экшна (обязательный)
     abstract function actionIndex();
 }

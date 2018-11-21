@@ -27,7 +27,7 @@ class Autoloader
         'controller'  => 'application\\controller',
         'entity'      => 'application\\src\\Entity',
         'service'     => 'application\\src\\Service',
-        'respect'     => 'application\\vendor\\Relational\\library\\Respect',
+        'respect'     => 'vendor\\Relational\\library\\Respect',
     );
 
     public function __construct()
@@ -41,11 +41,9 @@ class Autoloader
      */
     public static function getClassPath($className) {
         $className = self::_getNamespaceMustBe($className);
-
         $pathParts = explode('\\', $className);
-        unset($pathParts[0]);
-
-        return dirname(__FILE__) . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $pathParts) . '.php';
+        $projectPath = substr(dirname(__FILE__), 0, strrpos(dirname(__FILE__), DIRECTORY_SEPARATOR));
+        return $projectPath . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $pathParts) . '.php';
     }
 
     /**

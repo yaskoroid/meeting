@@ -12,9 +12,6 @@ use core\Model;
 use core\Service\ServiceLocator;
 use Service;
 
-/*
- * Класс модели для отобрадения страницы авторизации
- */
 class Login extends Model
 {
     /**
@@ -22,11 +19,9 @@ class Login extends Model
      */
     private $_authService;
 
-    function __construct() {
-        $this->_initServices();
-    }
-
-    // Массив с результатом и метаданными
+    /**
+     * @var array
+     */
     private $result = array(
         "page" => "Login",
         "title" => "Авторизация",
@@ -34,14 +29,22 @@ class Login extends Model
         "keywords" => "Авторизация, Web приложение"
     );
 
-    // Возвращаем метаданные
+    function __construct() {
+        $this->_initServices();
+    }
+
+    private function _initServices() {
+        $this->_authService = ServiceLocator::authService();
+    }
+
     public function getData()
     {
         return $this->result;
     }
 
-    /*
-     * Функция проверяет правильно ли введен логин и пароль
+    /**
+     * @param string $login
+     * @param string $password
      */
     public function login($login = '', $password = '')
     {
@@ -57,7 +60,4 @@ class Login extends Model
         );
     }
 
-    private function _initServices() {
-        $this->_authService = ServiceLocator::authService();
-    }
 }

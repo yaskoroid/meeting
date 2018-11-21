@@ -84,11 +84,9 @@ class Auth extends Basic
             $this->_storeUserSessionValues($user);
         }
 
-        // Удаляем переменные сессии
         session_unset();
 
-        // Удаляем сессию
-        session_destroy();
+        if (session_id() !== '') session_destroy();
     }
 
     /**

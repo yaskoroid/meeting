@@ -8,25 +8,16 @@
 
 namespace controller;
 
-
 use core\Controller;
 use model;
-/*
- * Класс делает логаут и редирект на главную
- */
-class Logout extends Controller
-{
-    function __construct()
-    {
-        // Создаем модель и вид из родителя
+
+class Logout extends Controller {
+    function __construct() {
         $this->model = new model\Logout();
         parent::__construct();
     }
 
-    // Основное действие контроллера
-    public function actionIndex()
-    {
-        // На главную
+    public function actionIndex() {
         header('Location:/');
     }
 }

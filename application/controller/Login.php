@@ -11,41 +11,24 @@ namespace controller;
 use core\Controller;
 use model;
 
-/*
- * Класс выводит страницу логина
- */
-class Login extends Controller
-{
+class Login extends Controller {
 
-    function __construct()
-    {
-        // Создаем модель и вид из родителя
+    function __construct() {
         $this->model = new model\Login();
         parent::__construct();
     }
 
-    // Основное действие контроллера
-    public function actionIndex()
-    {
-        // Если отправляется форма
-        if (!empty($_POST))
-        {
-            // Вызываем метод авторизации из модели
+    public function actionIndex() {
+        if (!empty($_POST)) {
             $data = $this->model->login($_POST['login2'],$_POST['password']);
 
-            // Проверяем получилось ли авторизироваться
             if (empty($data['error']))
-            {
                 $this->model->setCustomizableSessionValues();
-            }
-            // Выводим вид с результатом авторизации
+
             $this->view->generate('Login', 'Base', $data);
-        }
-        else
-        {
-            // Выводим вид
-            $this->view->generate('Login', 'Base', $this->model->getData());
+            return;
         }
 
+        $this->view->generate('Login', 'Base', $this->model->getData());
     }
 }

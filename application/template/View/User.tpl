@@ -1,3 +1,5 @@
+{% extends "base.tpl" %}
+{% block pageContent %}
 <script type="text/javascript" src="/js/users/users.js"></script>
 <div class="container">
     <div class="starter-template">
@@ -6,3 +8,4 @@
         </form>
     </div>
 </div>
+{% endblock %}

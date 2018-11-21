@@ -14,6 +14,7 @@ class Email
     public $id;
     public $userIdFrom;
     public $userIdTo;
+    public $type;
     public $title;
     public $body;
     public $css;

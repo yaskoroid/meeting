@@ -58,15 +58,15 @@ class Profile extends Basic
         }
     }
 
-
     public function createUser() {
-
-
 
     }
 
-    public function updateUser() {
-
+    /**
+     * @param Entity\Mapper $user
+     */
+    public function updateUser($user) {
+        $this->_meetingService->saveUser($user);
     }
 
     /**
@@ -153,11 +153,18 @@ class Profile extends Basic
     /**
      * @param Entity\User[] $users
      */
-    public function filterSecureUserFields(&$users) {
+    public function filterSecureUsersFields(&$users) {
         foreach ($users as $user) {
-            foreach ($this->_secureUserFields as $secureUserField) {
-                unset($user->{$secureUserField});
-            }
+            $this->filterSecureUserFields($user);
+        }
+    }
+
+    /**
+     * @param Entity\User $user
+     */
+    public function filterSecureUserFields(&$user) {
+        foreach ($this->_secureUserFields as $secureUserField) {
+            unset($user->{$secureUserField});
         }
     }
 }

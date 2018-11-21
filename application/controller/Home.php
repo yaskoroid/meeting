@@ -24,16 +24,16 @@ class Home extends Controller {
             if (isset($_POST['addTask'])) {
 
                 $this->model->createTask($_POST);
-                $this->view->generate('Home', 'Base', $this->model->getData());
+                $this->view->generate('Home', $this->model->getData());
             } elseif (isset($_POST['ajax'])) {
                 // Генерируем ответ на AJAX запрос
                 $this->view->generateJson($this->model->handleAjaxJson($_POST));
             } else {
-                $this->view->generate('Home', 'Base', $this->model->getData());
+                $this->view->generate('Home', $this->model->getData());
             }
             return;
         }
 
-        $this->view->generate('Home', 'Base', $this->model->getData());
+        $this->view->generate('Home', $this->model->getData());
     }
 }

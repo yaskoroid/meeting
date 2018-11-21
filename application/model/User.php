@@ -71,7 +71,7 @@ class User
 
     // Массив с результатом и метаданными
     private $_pageDefaults = array(
-        'page'        => 'Users',
+        'page'        => 'User',
         'title'       => 'Братья и сестры собрания',
         'description' => 'Собрание. Все братья и сестры участвующие в школе',
         'keywords'    => 'Собрание, братья, сестры'
@@ -312,7 +312,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
         $foundedUsersCollection['permissions']['users'] = $permissionsForUsers;
         $foundedUsersCollection['permissions']['create'] = $this->_permissionService->getPermissionsForUsersTypeCreate();
 
-        $this->_userProfileService->filterSecureUserFields($foundedUsersCollection['users']);
+        $this->_userProfileService->filterSecureUsersFields($foundedUsersCollection['users']);
 
         return $foundedUsersCollection;
     }

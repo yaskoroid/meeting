@@ -54,7 +54,7 @@ class Utils extends Basic
     public function checkPassword($password = '', $passwordHash = '', $salt = '')
     {
         // Проверяем совпадает ли пароль
-        if (!$this->createPassword($password, $salt) === $passwordHash) {
+        if ($this->createPassword($password, $salt) !== $passwordHash) {
             throw new \Exception('Bad password');
         }
     }

@@ -8,16 +8,12 @@
 
 namespace model;
 
-use application\core\Model;
-use application\vendor\db\DbProvider;
-use application\vendor\helper\Downloader;
-use application\vendor\helper\Helper;
-use application\vendor\helper\Image;
+use core;
 
 /*
  * Класс модели для отображения домашней страницы
  */
-class Home extends Model
+class Home extends core\Model
 {
 
     // Максимальная длинна задачи в симв
@@ -25,10 +21,10 @@ class Home extends Model
 
     // Массив с результатом и метаданными
     private $result = array(
-        "page" => "Home",
-        "title" => "Приложение-задачник",
-        "description" => "Приложение-задачник. Тестовое задание по разработке на PHP, MySQL, Bootstrap, HTML, CSS, MVC, OOP",
-        "keywords" => "Web, приложение, задачник, разработка, тестовое, задание, PHP, MySQL, Bootstrap, HTML, CSS, MVC, OOP"
+        'page'        => 'Home',
+        'title'       => 'Приложение-задачник',
+        'description' => 'Приложение-задачник',
+        'keywords'    => 'Web приложение-задачник'
     );
 
     // Размеры изображениий задач
@@ -84,134 +80,12 @@ class Home extends Model
      */
     public function getData()
     {
-        // Массив с текущими результатами
-        $res = array();
-
-        // Определяем действия пользователя по изменению страницы или сортировки
-        $this->prepareSessionValues();
-
-        // Определяем текущую страницу
-        $this->pageNumber = !isset($_SESSION[$this->pageNumberPrefix]) ? 1 : $_SESSION[$this->pageNumberPrefix];
-
-        // Определяем сортировку
-        $this->sort = !isset($_SESSION[$this->pageSorting]) ? $this->sortings["pageHomeSessionSortLoginUp"] : $_SESSION[$this->pageSorting];
-
-        try {
-            // Подготавливаем запрос и обращаемся к БД
-            $db_result = DbProvider::query($this->prepareQuery());
-
-            // Проверяем результат
-            if (empty($db_result['error'])) {
-                $tasks = array();
-
-                // Инициализируем массив задач для отображения вида
-                while ($myrow = $db_result['content']->fetch_assoc())
-                {
-                    // Вставляем в массив значения
-                    array_push($tasks, $myrow);
-
-                    // Определяем индекс последнего элемента задачи
-                    $countM1 = count($tasks) - 1;
-
-                    // Вставляем в последний элемент задачи ключ
-                    // с ссылкой на изображение задачи
-                    $tasks[$countM1]['img_link'] =
-                        Downloader::IMG_USERS_FOLDER . "/task_"
-                        . $tasks[$countM1]['id']
-                        . "."
-                        . $tasks[$countM1]['ext'];
-                }
-
-                // Инициализируем массив с ссылками на страницы
-                $this->pagesArrayInit();
-            } else {
-                $tasks = $db_result['content'];
-            }
-
-            // Формируем все необходимые данные для отображения вида
-            $res = array(
-                "error" => $this->resultOfAddTask['error'] == null
-                    ? $db_result['error'] : $this->resultOfAddTask['response'],
-                "tasks" => $tasks,
-                "users" => $this->users,
-                "taskLenght" => $this->taskLenght,
-                "viewFormAction" => "/" . "home" . "/" . "index",
-                "pageNumber" => $this->pageNumber,
-                "pageCount" => $this->pageCount,
-                "pagesArray" => $this->pagesArray,
-                "imageWidth" => $this->imageWidth,
-                "imageHeight" => $this->imageHeight,
-                "resultOfAddTask" => $this->resultOfAddTask);
-        } catch (\Exception $e) {
-            $res = array(
-                "error" => 1,
-                "content" => "Error! Model return " . $e->getMessage());
-        }
-        return array_merge($this->result, $res);
+        return array_merge($this->result, array());
     }
 
-    /*
-     * Функция определяет изменил ли пользователь значения
-     * текущей страницы и сортировки и записывает их в массив сессий
-     */
-    private function prepareSessionValues()
-    {
-        // Есть ли данные
-        if (!empty($_POST))
-        {
-            foreach($_POST as $key=>$value)
-            {
-                // Существует ли необходимый ключ в $_POST
-                if (array_key_exists($key, $this->sortings)) {
-                    $_SESSION[$this->pageSorting] = $this->sortings[$key];
-                }
-
-                // Существует ли ключ измененния текущей страницы
-                if (strpos($key, $this->pageNumberPrefix) !== false)
-                {
-                    // Определяем новую страницу
-                    $page = substr($key, strlen($this->pageNumberPrefix), strlen($key));
-                    if (is_integer((int)$page)) {
-                        $_SESSION[$this->pageNumberPrefix] = $page;
-                    }
-                }
-            }
-        }
-    }
-
-    /*
-     * Функция подготавливает запрос к БД исходя из
-     * данных о текущей странице, сортировке и количестве
-     * задач на странице
-     */
-    private function prepareQuery()
-    {
-        return "
-SELECT
-task.id,
-task.ext,
-task.task,
-task.done,
-\"user\".login AS login,
-users.email AS email
-FROM task
-INNER JOIN users
-ON task.id_user = users.id
-" . $this->sort .
-"
-LIMIT
-" . ($this->pageNumber - 1) * $this->countRowsOnPage .
-"
-,
-" . $this->countRowsOnPage;
-    }
-
-    /*
-     * Функция возвращает массив всех пользователей с элементами ("id" => "login")
-     */
     private function getUsers() {
         // Обращаемся к БД
-        $db_result = DbProvider::query("SELECT id,login FROM \"user\" ORDER BY login");
+       /* $db_result = DbProvider::query("SELECT id,login FROM \"user\" ORDER BY login");
         // Проверяем результат
         if (empty($db_result['error'])) {
             // Присваимаем значения
@@ -220,7 +94,7 @@ LIMIT
             }
         } else {
             $this->users = $db_result;
-        }
+        }*/
     }
 
     /*
@@ -343,6 +217,7 @@ VALUES ('$idUser','" .htmlspecialchars($task)."','".$ext."',0)");
      */
     private function initCountOfRowsAndPages()
     {
+        return;
         // Выделяем все данные
         $db_result = DbProvider::query("SELECT * FROM task");
         if (empty($db_result['error'])) {

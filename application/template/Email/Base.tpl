@@ -2,11 +2,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Contact form</title>
-    <style>{style}</style>
+    <style>{{style}}</style>
 <body>
-<h1>{title}</h1>
-<h2>{subTitle}</h2>
-<p>{text}</p>
-{body}
+{% block emailContent %}
+<div>No email content, sorry</div>
+{% endblock %}
 </body>
 </head>

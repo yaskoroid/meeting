@@ -1,3 +1,5 @@
+{% extends "base.tpl" %}
+{% block pageContent %}
 <div class="container">
     <h1>
         Ошибка 404
@@ -11,3 +13,4 @@
         <img class="center-block img-responsive" src="/images/etc/404.jpg">
     </div>
 </div>
+{% endblock %}

@@ -20,11 +20,11 @@ abstract class Base
     abstract public function get();
 
     protected function getRun() {
-        $result = '';
+        $result = array();
         /** @var Utils $utilsService */
         $utilsService = ServiceLocator::utilsService();
         foreach($this as $key => $value) {
-            $result .= 'DEF_' . $utilsService->camelCaseToUnderline($key) . " = '" . $value . "';\n";
+            $result['DEF_' . $utilsService->camelCaseToUnderline($key)] = $value;
         }
         return $result;
     }

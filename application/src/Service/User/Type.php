@@ -11,8 +11,10 @@ namespace Service\User;
 use Service\Basic;
 use Service\Repository\Meeting;
 use Entity\UserType;
+use Entity\User;
 use core\Service\ServiceLocator;
 use Service\Utils;
+use Twig\Node\Expression\Binary\EndsWithBinary;
 
 class Type extends Basic
 {
@@ -57,5 +59,18 @@ class Type extends Basic
             $usersTypes = $this->_utilsService->buildIndex($usersTypesNotChecked);
         }
         return $usersTypes;
+    }
+
+    /**
+     * @param User $user
+     * @return UserType
+     */
+    public function getUserType($user) {
+        $usersTypes = $this->getUsersTypes();
+
+        if (!is_array($usersTypes))
+            return null;
+
+        return $this->_utilsService->arrayGetRecursive($usersTypes, array($user->userTypeId));
     }
 }

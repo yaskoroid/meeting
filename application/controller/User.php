@@ -19,7 +19,7 @@ class User extends Controller {
     }
 
     public function actionIndex() {
-        $this->view->generate('User', 'Base', $this->model->getData());
+        $this->view->generate('User', $this->model->getData());
     }
 
     public function actionJson() {

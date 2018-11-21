@@ -14,6 +14,6 @@ class Error404 extends Controller {
 
     public function actionIndex() {
         header('HTTP/1.1 404 Not Found');
-        $this->view->generate('Error404', 'Base', array('title' => 'Страница 404'));
+        $this->view->generate('Error404', array('title' => 'Страница 404'));
     }
 }

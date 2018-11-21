@@ -20,15 +20,10 @@ class Login extends Controller {
 
     public function actionIndex() {
         if (!empty($_POST)) {
-            $data = $this->model->login($_POST['login2'],$_POST['password']);
-
-            if (empty($data['error']))
-                $this->model->setCustomizableSessionValues();
-
-            $this->view->generate('Login', 'Base', $data);
+            $this->view->generate('Login', $this->model->login($_POST['login'], $_POST['password']));
             return;
         }
 
-        $this->view->generate('Login', 'Base', $this->model->getData());
+        $this->view->generate('Login', $this->model->getData());
     }
 }

@@ -166,6 +166,15 @@ var_dump($search);
     }
 
     /**
+     * @param Entity\User $user
+     * @throws \Exception
+     */
+    public function saveUser($user) {
+        $this->_mapper->user->persist($user);
+        $this->_mapper->flush();
+    }
+
+    /**
      * @param Entity\Email $email
      * @throws \Exception
      */

@@ -15,8 +15,7 @@ use Service;
 class Template extends Basic {
 
     public function __construct() {
-        require_once $GLOBALS['config']['paths']['vendor'] . $GLOBALS['config']['autoload']['Twig-2.5.0'];
-        \Twig_Autoloader::register();
+        require_once $GLOBALS['config']['autoload']['Twig-2.5.0'];
     }
 
     /**
@@ -33,7 +32,7 @@ class Template extends Basic {
         $loader = new Twig_Loader_Filesystem($GLOBALS['config']['paths']['templates'][$templateType]);
         $twig   = new Twig_Environment($loader, array(
             'cache'         => 'twig_compilation_cache',
-            'autoescape'    => true,
+            //'autoescape'    => true,
             'auto_reload'   => true,
         ));
         /*$variables['controller'] = $controller;

@@ -14,7 +14,7 @@ class Route {
 
         // Defaults
         $controllerName = 'Home';
-        $actionName = 'Index';
+        $actionName     = 'Index';
 
         // Trim GET parameters
         $requestUri = strpos($_SERVER['REQUEST_URI'], '?') !== false
@@ -26,7 +26,7 @@ class Route {
 
         // Check controller and action
         if (!empty($routes[1])) $controllerName = ucfirst($routes[1]);
-        if (!empty($routes[2])) $actionName = ucfirst($routes[2]);
+        if (!empty($routes[2])) $actionName     = ucfirst($routes[2]);
 
         // Get names
         $modelName = $controllerName;

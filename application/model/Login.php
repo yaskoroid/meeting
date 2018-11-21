@@ -22,11 +22,11 @@ class Login extends Model
     /**
      * @var array
      */
-    private $result = array(
-        "page" => "Login",
-        "title" => "Авторизация",
-        "description" => "Авторизация в приложении",
-        "keywords" => "Авторизация, Web приложение"
+    private $_result = array(
+        'page'        => 'Login',
+        'title'       => 'Авторизация',
+        'description' => 'Авторизация в приложении',
+        'keywords'    => 'Авторизация, Web приложение'
     );
 
     function __construct() {
@@ -39,16 +39,17 @@ class Login extends Model
 
     public function getData()
     {
-        return $this->result;
+        return $this->_result;
     }
 
     /**
      * @param string $login
      * @param string $password
+     * @return array
      */
     public function login($login = '', $password = '')
     {
-        array_merge($this->result, $this->_authService->auth($login, $password)
+        return array_merge($this->_result, $this->_authService->auth($login, $password)
             ? array(
                 'error'    => null,
                 'response' => 'You successfully logged in'

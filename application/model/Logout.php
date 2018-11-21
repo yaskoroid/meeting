@@ -20,6 +20,9 @@ class Logout
 
     function __construct() {
         $this->_authService = ServiceLocator::authService();
+    }
+
+    public function actionIndex() {
         $this->_authService->deauth();
     }
 }

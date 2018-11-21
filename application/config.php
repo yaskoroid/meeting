@@ -6,6 +6,8 @@ define(DB_USER_PASSWORD,"user_skoroid");
 define(DB_NAME,"iskoroid");*/
 namespace application;
 
+$projectPath = substr(dirname(__FILE__), 0, strrpos(dirname(__FILE__), DIRECTORY_SEPARATOR));
+
 // Данные для подключения к БД на локалке
 $GLOBALS['config']['database']['meeting'] = array(
     'host' => 'localhost',
@@ -26,9 +28,14 @@ $GLOBALS['site'] = array(
     'http' => 'http',
     'domain' => 'roman.com',
 );
-$GLOBALS['config']['paths']['vendor'] = __DIR__ . '/../vendor';
-$GLOBALS['config']['autoload']['Twig-2.5.0'] = '/twig/autoload.php';
+
+$GLOBALS['config']['paths']['vendor'] = $projectPath . '/vendor';
+$GLOBALS['config']['composer']['autoload'] = $GLOBALS['config']['paths']['vendor'] . '/autoload.php';
+$GLOBALS['config']['autoload']['Twig-2.5.0'] = $GLOBALS['config']['composer']['autoload'];
 $GLOBALS['config']['paths']['templates'] = array(
-    'view'  => '/template/View',
-    'email' => '/template/Email',
+    'view'  => $projectPath . '/application/template/View',
+    'email' => $projectPath . '/application/template/Email',
+);
+$GLOBALS['config']['paths']['templates']['css'] = array(
+    'email' => $projectPath . '/application/template/Email/css',
 );

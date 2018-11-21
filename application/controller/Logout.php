@@ -18,6 +18,7 @@ class Logout extends Controller {
     }
 
     public function actionIndex() {
+        $this->model->actionIndex();
         header('Location:/');
     }
 }

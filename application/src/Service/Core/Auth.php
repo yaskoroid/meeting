@@ -50,6 +50,7 @@ class Auth extends Basic
 
     public function authBySession() {
         session_start();
+
         /** @var Entity\User $user */
         $user = $this->_userProfileService->getUserBySessionId($_COOKIE['PHPSESSID']);
         if ($user === null) {
@@ -74,15 +75,17 @@ class Auth extends Basic
         foreach ($customizableSessionValues as $cookieName=>$value) {
             setcookie($cookieName, $value, $expires, '/');
         }
+        setcookie('PHPSESSID', $user->sessionId, $expires, '/');
     }
 
     private function _deauthentication() {
-        $this->_contextService->clearUser();
         /** @var Entity\User $user */
         $user = $this->_contextService->getUser();
         if ($user !== null) {
             $this->_storeUserSessionValues($user);
         }
+
+        $this->_contextService->clearUser();
 
         session_unset();
 
@@ -98,7 +101,7 @@ class Auth extends Basic
 
         $sessionCookies = array();
 
-        // Удаляем кастомизированные параметры сессии
+        // Remove custom session values
         foreach ($_COOKIE as $cookie=>$value) {
             if (strpos($cookie, 'SESSION_') === 0) {
                 setcookie($cookie, null, -1, '/');
@@ -110,8 +113,9 @@ class Auth extends Basic
             $user->customizableSessionValues = json_encode($sessionCookies, true);
         }
         $user->sessionId = $_COOKIE['PHPSESSID'];
+        setcookie('PHPSESSID', null, -1, '/');
 
-        $this->_userProfileService->storeUser($user);
+        $this->_userProfileService->updateUser($user);
     }
 
     private function _initServices() {

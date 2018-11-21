@@ -15,7 +15,7 @@ use Entity;
 /*
  * Класс модели для отображения страницы пользователя
  */
-class ModelUsers
+class User
 {
     /**
      * @var Service\Context

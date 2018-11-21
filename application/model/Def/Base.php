@@ -11,7 +11,7 @@ namespace model\Def;
 use core\Service\ServiceLocator;
 use Service\Utils;
 
-abstract class Def
+abstract class Base
 {
     public $constPaginationCountOfPagesNearCurrent = 1; // Количество страниц с каждой стороны от текущей (целое больше 1)
     public $constPhoneStart = '+380';
@@ -21,6 +21,7 @@ abstract class Def
 
     protected function getRun() {
         $result = '';
+        /** @var Utils $utilsService */
         $utilsService = ServiceLocator::utilsService();
         foreach($this as $key => $value) {
             $result .= 'DEF_' . $utilsService->camelCaseToUnderline($key) . " = '" . $value . "';\n";

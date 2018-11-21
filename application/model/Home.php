@@ -17,7 +17,7 @@ use application\vendor\helper\Image;
 /*
  * Класс модели для отображения домашней страницы
  */
-class ModelHome extends Model
+class Home extends Model
 {
 
     // Максимальная длинна задачи в симв

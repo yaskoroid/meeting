@@ -14,13 +14,13 @@ use core\Controller;
 /*
  * Класс выводит о приложении
  */
-class ControllerAbout extends Controller
+class About extends Controller
 {
 
     function actionIndex()
     {
         // TODO: Implement actionIndex() method.
         // Генерируем вид задачи для тестового задания
-        $this->view->generate("About", "Template");
+        $this->view->generate('About', 'Base');
     }
 }

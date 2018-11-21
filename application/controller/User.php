@@ -9,18 +9,18 @@
 namespace controller;
 
 use core\Controller;
-use model\ModelUsers;
+use model;
 
 /*
  * Класс выводит страницу пользователя
  */
-class ControllerUser extends Controller
+class User extends Controller
 {
 
     public function __construct()
     {
         // Создаем модель и вид из родителя
-        $this->model = new ModelUsers();
+        $this->model = new model\User();
         parent::__construct();
     }
 
@@ -28,7 +28,7 @@ class ControllerUser extends Controller
     public function actionIndex()
     {
         // Генерируем данные для вида и сам вид
-        $this->view->generate("User", "Template", $this->model->getData());
+        $this->view->generate('User', 'Base', $this->model->getData());
     }
 
     // Основное действие контроллера

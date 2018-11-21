@@ -14,7 +14,7 @@ namespace model\Def;
  * Если значение начинается с const - то оно не попадет в куки,
  * а значит будет всегда вибираться только это значение
  */
-class DefUser extends Def
+class User extends Base
 {
     public $usersCountOnPage = 3;
     public $constUsersCountOnPageValues = '1,3,5,10,20,50,100,500';

@@ -25,8 +25,8 @@ class View
         $def = $this->_getDef($contentView);
 
         // Изменим знчения так, чтобы получить имена файлов
-        $contentView = "View" . $contentView . ".php";
-        $templateView = "View" . $templateView . ".php";
+        $contentView  = $contentView . ".php";
+        $templateView = $templateView . ".php";
 
         // Если в данном view используется модель, то переменная $data не пустая
         if (!empty($data)) {
@@ -37,7 +37,7 @@ class View
         }
 
         // Подключаем файл
-        require "application/view/" . $templateView;
+        require "application/template/View/" . $templateView;
     }
 
     /**
@@ -46,7 +46,7 @@ class View
      */
     function generateJson(array $data = array()) {
         // Подключаем файл
-        require "application/view/ViewAjax.php";
+        require "application/template/View/Ajax.php";
     }
 
     /**
@@ -56,7 +56,7 @@ class View
      */
     private function _getDef($view) {
         // Подключаем файл
-        $defClassName = 'model\\Def\\Def' . $view;
+        $defClassName = 'model\\Def\\' . $view;
         $defFileName = \Autoloader::getClassPath($defClassName);
         if (file_exists($defFileName)) {
             return new $defClassName;

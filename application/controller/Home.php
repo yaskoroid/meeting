@@ -9,18 +9,18 @@
 namespace controller;
 
 use core\Controller;
-use model\ModelHome;
+use model;
 
 /*
  * Класс выводит главную страницу
  */
-class ControllerHome extends Controller
+class Home extends Controller
 {
 
     public function __construct()
     {
         // Создаем модель и вид из родителя
-        $this->model = new ModelHome();
+        $this->model = new model\Home();
         parent::__construct();
     }
 
@@ -35,18 +35,18 @@ class ControllerHome extends Controller
                 // Добавляем задачу
                 $this->model->createTask($_POST);
                 // Генерируем данные для вида и сам вид
-                $this->view->generate("Home", "Template", $this->model->getData());
+                $this->view->generate('Home', 'Base', $this->model->getData());
             } elseif (isset($_POST['ajax'])) {
                 // Генерируем ответ на AJAX запрос
                 $this->view->generateJson($this->model->handleAjaxJson($_POST));
             } else {
                 // Генерируем ответ на другие действия пользователя
                 // например сортировка и изменение страницы
-                $this->view->generate("Home", "Template", $this->model->getData());
+                $this->view->generate('Home', 'Base', $this->model->getData());
             }
         } else {
             // Генерируем данные для вида и сам вид
-            $this->view->generate("Home", "Template", $this->model->getData());
+            $this->view->generate('Home', 'Base', $this->model->getData());
         }
     }
 }

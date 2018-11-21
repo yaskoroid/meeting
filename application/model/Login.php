@@ -15,7 +15,7 @@ use Service;
 /*
  * Класс модели для отобрадения страницы авторизации
  */
-class ModelLogin extends Model
+class Login extends Model
 {
     /**
      * @var Service\Auth

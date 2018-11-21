@@ -26,3 +26,6 @@ $GLOBALS['site'] = array(
     'http' => 'http',
     'domain' => 'roman.com',
 );
+$GLOBALS['config']['paths']['vendor'] = '../vendor';
+$GLOBALS['config']['autoload']['Twig-2.5.0'] = '/twig/autoload.php';
+$GLOBALS['config']['paths']['templates'] = '/view';

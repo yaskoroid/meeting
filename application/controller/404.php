@@ -14,7 +14,7 @@ use core\Controller;
 /*
  * Класс вы водит страницу 404
  */
-class Controller404 extends Controller
+class Error404 extends Controller
 {
 
     // Основное действие контроллера
@@ -23,6 +23,6 @@ class Controller404 extends Controller
         // Отправляем заголовок 404
         header('HTTP/1.1 404 Not Found');
         // Создаем вид страницы 404
-        $this->view->generate("404", "Template", array("title" => "Страница 404"));
+        $this->view->generate('Error404', 'Base', array('title' => 'Страница 404'));
     }
 }

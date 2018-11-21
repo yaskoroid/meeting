@@ -9,18 +9,18 @@
 namespace controller;
 
 use core\Controller;
-use model\ModelLogin;
+use model;
 
 /*
  * Класс выводит страницу логина
  */
-class ControllerLogin extends Controller
+class Login extends Controller
 {
 
     function __construct()
     {
         // Создаем модель и вид из родителя
-        $this->model = new ModelLogin();
+        $this->model = new model\Login();
         parent::__construct();
     }
 
@@ -32,25 +32,19 @@ class ControllerLogin extends Controller
         {
             // Вызываем метод авторизации из модели
             $data = $this->model->login($_POST['login2'],$_POST['password']);
+
             // Проверяем получилось ли авторизироваться
             if (empty($data['error']))
             {
-                $_SESSION['login'] = $_POST['login2'];
-                $_SESSION['level'] = $data['level'];
-                $_SESSION['unregistered'] = 0;
-                setcookie("login", $_POST['login2'], null, "/");
-                setcookie("level", $data['level'], null, "/");
-                setcookie("unregistered", 0, null, "/");
-
                 $this->model->setCustomizableSessionValues();
             }
             // Выводим вид с результатом авторизации
-            $this->view->generate("Login", "Template", $data);
+            $this->view->generate('Login', 'Base', $data);
         }
         else
         {
             // Выводим вид
-            $this->view->generate("Login", "Template", $this->model->getData());
+            $this->view->generate('Login', 'Base', $this->model->getData());
         }
 
     }

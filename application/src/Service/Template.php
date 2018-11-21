@@ -17,7 +17,7 @@ class Template extends Basic {
 
     public function __construct() {
         parent::__construct();
-        require_once $GLOBALS['config']['paths']['vendor'] . $GLOBALS['config']['autoload']['Twig-1.3'] . '/Twig/Autoloader.php';
+        require_once $GLOBALS['config']['paths']['vendor'] . $GLOBALS['config']['autoload']['Twig-2.5.0'];
         \Twig_Autoloader::register();
     }
 
@@ -32,8 +32,8 @@ class Template extends Basic {
      */
     public function render($templateName, $variables = array(), $controller = null) {
         $loader = new Twig_Loader_Filesystem($GLOBALS['config']['paths']['templates']);
-        $twig = new Twig_Environment($loader, array(
-            'cache'         => false,
+        $twig   = new Twig_Environment($loader, array(
+            'cache'         => 'twig_compilation_cache',
             'autoescape'    => true,
             'auto_reload'   => true,
         ));

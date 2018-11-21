@@ -43,8 +43,8 @@ class Route
         }
 
         //Определяем имена классов модели, контроллера и метода действия
-        $modelName = 'Model' . $controllerName;
-        $controllerName = 'Controller' . $controllerName;
+        $modelName = $controllerName;
+        $controllerName = $controllerName;
         $actionName = 'action' . $actionName;
 
         $modelClassName = 'model\\' . $modelName;
@@ -90,6 +90,6 @@ class Route
     private function errorPage404()
     {
         $host = 'http://' . $_SERVER['HTTP_HOST'] . '/';
-        header('Location:' . $host . '404');
+        header('Location:' . $host . 'error404');
     }
 }

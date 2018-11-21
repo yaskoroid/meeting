@@ -9,7 +9,7 @@
 namespace Service;
 
 use core\Service\ServiceLocator;
-use component\Email;
+use component;
 use Entity;
 use Service\Repository\Meeting;
 use Service;
@@ -50,7 +50,7 @@ class Email extends Basic
     /**
      * @return Entity\Email
      */
-    public function create($userIdFrom, $userIdTo, ) {
+    public function create($userIdFrom, $userIdTo ) {
 
     }
 

@@ -10,16 +10,16 @@ namespace controller;
 
 
 use core\Controller;
-use model\ModelLogout;
+use model;
 /*
  * Класс делает логаут и редирект на главную
  */
-class ControllerLogout extends Controller
+class Logout extends Controller
 {
     function __construct()
     {
         // Создаем модель и вид из родителя
-        $this->model = new ModelLogout();
+        $this->model = new model\Logout();
         parent::__construct();
     }
 

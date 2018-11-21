@@ -12,7 +12,7 @@ use core\ServiceLocator;
 use Service;
 
 
-class ModelLogout
+class Logout
 {
     /**
      * @var Service\Auth;

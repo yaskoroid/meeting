@@ -1,7 +1,7 @@
 <?php
 
-/* user_create_confirm.tpl */
-class __TwigTemplate_868bf5908fc6100964fa45cdc49966eeddc516498a18e598c79b4b8ec0235d8d extends Twig_Template
+/* user_change_password_confirm.tpl */
+class __TwigTemplate_47753544c123a92ffe3bfeca41b7aea0e4e6106842531c6e9bcc5ff52e62091d extends Twig_Template
 {
     private $source;
 
@@ -12,7 +12,7 @@ class __TwigTemplate_868bf5908fc6100964fa45cdc49966eeddc516498a18e598c79b4b8ec02
         $this->source = $this->getSourceContext();
 
         // line 1
-        $this->parent = $this->loadTemplate("base.tpl", "user_create_confirm.tpl", 1);
+        $this->parent = $this->loadTemplate("base.tpl", "user_change_password_confirm.tpl", 1);
         $this->blocks = array(
             'emailContent' => array($this, 'block_emailContent'),
         );
@@ -56,7 +56,7 @@ class __TwigTemplate_868bf5908fc6100964fa45cdc49966eeddc516498a18e598c79b4b8ec02
 
     public function getTemplateName()
     {
-        return "user_create_confirm.tpl";
+        return "user_change_password_confirm.tpl";
     }
 
     public function isTraitable()
@@ -71,6 +71,14 @@ class __TwigTemplate_868bf5908fc6100964fa45cdc49966eeddc516498a18e598c79b4b8ec02
 
     public function getSourceContext()
     {
-        return new Twig_Source("", "user_create_confirm.tpl", "C:\\Program Files (x86)\\Ampps\\www\\roman.com\\application\\template\\Email\\user_create_confirm.tpl");
+        return new Twig_Source("{% extends \"base.tpl\" %}
+{% block emailContent %}
+<h1>{{ title }}</h1>
+<form method=\"{{ method }}\" action=\"{{ action }}\">
+    <p>{{ text }}</p>
+    <a href=\"{{action}}\">Подтерждение</a>
+    <button type=\"submit\" class=\"btn btn-success\">Подтерждение</button><br>
+</form>
+{% endblock %}", "user_change_password_confirm.tpl", "C:\\Program Files (x86)\\Ampps\\www\\roman.com\\application\\template\\Email\\user_change_password_confirm.tpl");
     }
 }

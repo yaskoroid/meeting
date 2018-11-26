@@ -10,10 +10,7 @@ namespace model;
 
 use core;
 
-/*
- * Класс модели для отображения домашней страницы
- */
-class Home extends core\Model
+class Home extends Model
 {
 
     // Максимальная длинна задачи в симв
@@ -67,6 +64,7 @@ class Home extends core\Model
      */
     function __construct()
     {
+        parent::__construct();
         // Определяем пользователей
         $this->getUsers();
 
@@ -245,7 +243,7 @@ VALUES ('$idUser','" .htmlspecialchars($task)."','".$ext."',0)");
     /*
      * Функция обрабатывает AJAX запрос пользователя
      */
-    public function handleAjaxJson($post)
+    public function handleAjaxJson2($post)
     {
 
         // Определяем намерение AJAX

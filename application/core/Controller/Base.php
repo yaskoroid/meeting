@@ -1,26 +1,26 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Skoroid
- * Date: 30.10.2018
- * Time: 10:14
- */
+namespace core\Controller;
 
-namespace controller;
+use core\View;
+use core\Model;
 
-use core\Controller;
-use model;
+abstract class Base {
 
-class User extends Controller\Base {
+    /**
+     * @var Model\Base
+     */
+    public $model;
 
-    public function __construct() {
-        $this->model = new model\User();
-        parent::__construct();
+    /**
+     * @var View\Base
+     */
+    public $view;
+
+    function __construct() {
+        $this->view = new View\Base();
     }
 
-    public function actionIndex() {
-        $this->view->generate('User', $this->model->getData());
-    }
+    abstract function actionIndex();
 
     public function actionJson() {
         try {

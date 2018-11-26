@@ -8,8 +8,6 @@
 
 namespace Service;
 
-use Service\Basic;
-
 class Utils extends Basic
 {
     /**

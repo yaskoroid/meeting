@@ -27,13 +27,14 @@ class Auth extends Basic
     private $_userProfileService;
 
     function __construct() {
-        $this->_initServices();
+        self::_initServices();
     }
 
     /**
      * @param string $login
      * @param string $password
-     * @return bool
+     * @throws \InvalidArgumentException
+     * @return array
      */
     public function auth($login, $password) {
         session_start();
@@ -41,11 +42,12 @@ class Auth extends Basic
         $user = $this->_userProfileService->getUserByLoginAndPassword($login, $password);
         if ($user === null) {
             $this->_deauthentication();
-            return false;
+            throw new \InvalidArgumentException('Bad login or password');
         }
         $this->_contextService->setUser($user);
-        $this->_setUserAndSessionCookie($user);
-        return true;
+        return array(
+            'cookies' => $this->_setUserAndSessionCookie($user)
+        );
     }
 
     public function authBySession() {
@@ -66,16 +68,27 @@ class Auth extends Basic
 
     /**
      * @param Entity\User $user
+     * @return array
      */
     private function _setUserAndSessionCookie($user) {
         $customizableSessionValues = json_decode($user->customizableSessionValues, true);
         if (!is_array($customizableSessionValues))
-            return;
+            return array();
         $expires = time() + 86400 * 365 * 3;
+        $cookies = array();
         foreach ($customizableSessionValues as $cookieName=>$value) {
-            setcookie($cookieName, $value, $expires, '/');
+            $cookies[$cookieName] = array(
+                'value'   => $value,
+                'expires' => $expires,
+                'path'    => '/',
+            );
         }
-        setcookie('PHPSESSID', $user->sessionId, $expires, '/');
+        $cookies['PHPSESSID'] = array(
+            'value'   => $user->sessionId,
+            'expires' => $expires,
+            'path'    => '/',
+        );
+        return $cookies;
     }
 
     private function _deauthentication() {

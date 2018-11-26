@@ -57,7 +57,7 @@ class Email extends Basic
 
     function __construct() {
         require_once $GLOBALS['config']['autoload']['PhpMailer-6.0.6'];
-        $this->_initServices();
+        self::_initServices();
     }
 
     private function _initServices() {
@@ -78,7 +78,7 @@ class Email extends Basic
     public function create($userEmailTo, $type, $hash = null) {
         $currentUser = $this->_contextService->getUser();
         if ($currentUser === null)
-            throw new \InvalidArgumentException('Context uer is not defined');
+            throw new \InvalidArgumentException('Context user is not defined');
 
         $email = new Entity\Email();
         $email->userEmailFrom = $currentUser->email;

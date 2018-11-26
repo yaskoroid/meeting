@@ -20,7 +20,7 @@ class Mapper
     //private $_utilsService;
 
     function __construct() {
-        //$this->_initServices();
+        //self::_initServices();
     }
 
     /**

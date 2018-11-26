@@ -1,7 +1,7 @@
 <?php
-namespace core;
+namespace core\Model;
 
-abstract class Model
+abstract class Base
 {
     abstract public function getData();
 }

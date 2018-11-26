@@ -51,7 +51,7 @@ abstract class Repository extends Basic
     private $_mapperNamespace = 'Entity';
 
     function __construct() {
-        $this->_initServices();
+        self::_initServices();
     }
 
     /**

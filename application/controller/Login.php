@@ -11,7 +11,7 @@ namespace controller;
 use core\Controller;
 use model;
 
-class Login extends Controller {
+class Login extends Controller\Base {
 
     function __construct() {
         $this->model = new model\Login();
@@ -19,11 +19,6 @@ class Login extends Controller {
     }
 
     public function actionIndex() {
-        if (!empty($_POST)) {
-            $this->view->generate('Login', $this->model->login($_POST['login'], $_POST['password']));
-            return;
-        }
-
         $this->view->generate('Login', $this->model->getData());
     }
 }

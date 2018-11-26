@@ -12,7 +12,7 @@ use core\Service\ServiceLocator;
 use Service;
 use Entity;
 
-class User
+class User extends Model
 {
     /**
      * @var Service\Context
@@ -50,11 +50,6 @@ class User
     private $_userTypeService;
 
     /**
-     * @var Service\Utils
-     */
-    private $_utilsService;
-
-    /**
      * @var Service\Auth
      */
     private $_authService;
@@ -83,7 +78,8 @@ class User
      */
     function __construct()
     {
-        $this->_initServices();
+        parent::__construct();
+        self::_initServices();
     }
 
     protected function _initServices() {
@@ -94,7 +90,6 @@ class User
         $this->_permissionService        = ServiceLocator::permissionService();
         $this->_userProfileService       = ServiceLocator::userProfileService();
         $this->_userTypeService          = ServiceLocator::userTypeService();
-        $this->_utilsService             = ServiceLocator::utilsService();
         $this->_authService              = ServiceLocator::authService();
         $this->_emailService             = ServiceLocator::emailService();
         $this->_changeConfirmService = ServiceLocator::changeConfirmService();
@@ -233,29 +228,9 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
     /**
      * @param array $post
      * @return array
-     * @throws \Throwable
      * @throws \Exception
      */
-    public function handleAjaxJson(array $post)
-    {
-        $methodName = $this->_utilsService->spacedStringToMethodName($post['intent']);
-        $methodName = preg_replace('/_/', '', $methodName);
-        $methodName = '_' . $methodName;
-        if (empty($methodName))
-            throw new \InvalidArgumentException('Bad intent');
-
-        if (!method_exists($this, $methodName))
-            throw new \InvalidArgumentException('No such method for this intent');
-
-        return $this->{$methodName}($post);
-    }
-
-    /**
-     * @param array $post
-     * @return array
-     * @throws \Exception
-     */
-    private function _getSortingFields(array $post) {
+    protected function _getSortingFields(array $post) {
 
         if (!$this->_contextService->getUser()) {
             throw new \Exception('No permission to unauthenticated user');
@@ -281,7 +256,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @return array
      * @throws \InvalidArgumentException
      */
-    private function _getUsersBySearch(array $post) {
+    protected function _getUsersBySearch(array $post) {
 
         $permissionsUserForRead = $this->_permissionService->getPermissionsForUserTypesAndSelf(array('read'));
         if (count($permissionsUserForRead) !== 3) {
@@ -322,7 +297,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @return bool
      * @throws \InvalidArgumentException
      */
-    private function _getIsLoginPossible(array $post) {
+    protected function _getIsLoginPossible(array $post) {
         $userChangeConfirm = new Entity\ChangeConfirm();
         $userChangeConfirm->newValue = "asd";
         $userChangeConfirm->comment = "345";
@@ -357,7 +332,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @return mixed
      * @throws \InvalidArgumentException
      */
-    private function _storeUser(array $post) {
+    protected function _storeUser(array $post) {
 
         is_numeric($post['id'])
             ? $this->updateUser($post)
@@ -369,7 +344,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @return mixed
      * @throws \InvalidArgumentException
      */
-    private function _createUser(array $post) {
+    protected function _createUser(array $post) {
 
         if (!$this->_permissionService->getPermissionForUserCreate($post['userTypeId']))
             throw new \InvalidArgumentException('No permission to create user');
@@ -385,7 +360,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @return mixed
      * @throws \InvalidArgumentException
      */
-    private function _updateUser(array $post) {
+    protected function _updateUser(array $post) {
         $user = $this->__getUserCheckPermission($post, 'user', 'update');
 
         $this->__validateStoreData($post, $user);
@@ -399,7 +374,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @return string
      * @throws \InvalidArgumentException
      */
-    private function _deteteUser($post)
+    protected function _deteteUser($post)
     {
         $user = $this->__getUserCheckPermission($post, 'user', 'delete');
 
@@ -407,14 +382,14 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
         // @TODO notify by email
     }
 
-    private function _passwordUpdate(array $post) {
+    protected function _passwordUpdate(array $post) {
         $user = $this->__getUserCheckPermission($post, 'password', 'update');
 
         // @TODO create userModifiedField
         // @TODO send to email letter with change password instructions
     }
 
-    private function _emailUpdate(array $post) {
+    protected function _emailUpdate(array $post) {
         $user = $this->__getUserCheckPermission($post, 'email', 'update');
 
         $this->_validatorService->check(
@@ -428,7 +403,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
         // @TODO send to email letter with change email instructions
     }
 
-    private function _userTypeUpdate(array $post) {
+    protected function _userTypeUpdate(array $post) {
         $user = $this->__getUserCheckPermission($post, 'userTypeId');
 
 
@@ -443,7 +418,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @param string|null $permission
      * @return Entity\User
      */
-    private function __getUserCheckPermission(array $post, $field, $permission = null) {
+    protected function __getUserCheckPermission(array $post, $field, $permission = null) {
         if (!is_numeric($post['id']))
             throw new \InvalidArgumentException("User id was not found to {$permission} {$field}");
 
@@ -461,7 +436,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @param array $data
      * @param Entity\User|null $user
      */
-    private function __validateStoreData(array $data, $user = null) {
+    protected function __validateStoreData(array $data, $user = null) {
         if (!is_array($data))
             throw new \InvalidArgumentException('Data must be an array');
 
@@ -494,7 +469,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
     /**
      * @param array $data
      */
-    private function __validateUserCommonData(array $data) {
+    protected function __validateUserCommonData(array $data) {
 
         $this->_validatorService->check(
             array(

@@ -39,7 +39,7 @@ class Profile extends Basic
     );
 
     function __construct() {
-        $this->_initServices();
+        self::_initServices();
     }
 
     private function _initServices() {

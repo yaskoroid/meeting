@@ -11,7 +11,8 @@ namespace controller;
 use core\Controller;
 use model;
 
-class Logout extends Controller {
+class Logout extends Controller\Base {
+
     function __construct() {
         $this->model = new model\Logout();
         parent::__construct();

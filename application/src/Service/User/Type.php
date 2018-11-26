@@ -29,7 +29,7 @@ class Type extends Basic
     private $_meetingService;
 
     function __construct() {
-        $this->_initServices();
+        self::_initServices();
     }
 
     private function _initServices() {

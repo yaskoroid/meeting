@@ -10,7 +10,7 @@ namespace controller;
 
 use core\Controller;
 
-class Error404 extends Controller {
+class Error404 extends Controller\Base {
 
     public function actionIndex() {
         header('HTTP/1.1 404 Not Found');

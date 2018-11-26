@@ -8,7 +8,6 @@
 
 namespace model;
 
-use core\Model;
 use core\Service\ServiceLocator;
 use Service;
 
@@ -30,35 +29,30 @@ class Login extends Model
     );
 
     function __construct() {
-        $this->_initServices();
+        parent::__construct();
+        self::_initServices();
     }
 
-    private function _initServices() {
+    protected function _initServices() {
         $this->_authService = ServiceLocator::authService();
     }
 
-    public function getData()
-    {
+    public function getData() {
         return $this->_result;
     }
 
     /**
-     * @param string $login
-     * @param string $password
+     * @param array $post
      * @return array
      */
-    public function login($login = '', $password = '')
+    protected function _getLogin(array $post)
     {
-        return array_merge($this->_result, $this->_authService->auth($login, $password)
-            ? array(
-                'error'    => null,
-                'response' => 'You successfully logged in'
-            )
-            : array(
-                'error'    => true,
-                'response' => 'Bad login or password'
+        $result = $this->_authService->auth($post['login'], $post['password']);
+        return array_merge(
+            $result,
+            array(
+                'text' => 'You successfully logged in',
             )
         );
     }
-
 }

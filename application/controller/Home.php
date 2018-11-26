@@ -11,7 +11,7 @@ namespace controller;
 use core\Controller;
 use model;
 
-class Home extends Controller {
+class Home extends Controller\Base {
 
     public function __construct() {
         $this->model = new model\Home();
@@ -33,6 +33,8 @@ class Home extends Controller {
             }
             return;
         }
+
+        unset($_POST);
 
         $this->view->generate('Home', $this->model->getData());
     }

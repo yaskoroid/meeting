@@ -13,10 +13,6 @@ use Service\Utils;
 
 abstract class Base
 {
-    public $constPaginationCountOfPagesNearCurrent = 1; // Количество страниц с каждой стороны от текущей (целое больше 1)
-    public $constPhoneStart = '+380';
-    public $constPhoneNumberLength = 12;
-
     abstract public function get();
 
     protected function getRun() {

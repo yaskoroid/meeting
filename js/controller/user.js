@@ -28,7 +28,7 @@ $(document).ready(function() {
         setUsersObjectProperyAndSessionCookieByDefault(defaultVariableName, value) {
             var variable = window.helper.getObjectVariableNameByDefault(defaultVariableName);
             document.users[variable] = value;
-            window.cookies.setByDefualt(defaultVariableName, document.users[variable])
+            window.cookies.setByDefault(defaultVariableName, document.users[variable])
         }
         setUsersObjectProperyAndSessionCookieByCookie(cookieVariableName, value) {
             var variable = window.helper.getObjectVariableNameBySessionCookie(cookieVariableName);
@@ -38,7 +38,7 @@ $(document).ready(function() {
         getDefaultOrSessionCookie(defaultVariableName) {
             var cookie = window.cookies.getDefault(defaultVariableName);
             if (cookie === undefined) {
-                window.cookies.setByDefualt(defaultVariableName, window[defaultVariableName]);
+                window.cookies.setByDefault(defaultVariableName, window[defaultVariableName]);
                 return window[defaultVariableName];
             }
             return cookie;
@@ -52,7 +52,7 @@ $(document).ready(function() {
             div.classList= 'table-responsive js-search-block';
 
             var table = document.createElement('table');
-            table.classList = "table table-striped table-hover";
+            table.classList = 'table table-striped table-hover';
 
             var tbody = document.createElement('tbody');
 
@@ -148,8 +148,7 @@ $(document).ready(function() {
             td = document.createElement('td');
             td.classList = 'js-search-block-spinner';
             var i = document.createElement('i');
-            i.classList = 'fas fa-spinner fa-spin';
-            i.style = 'font-size:24px;color:#4f9ee2';
+            i.classList = 'fas fa-spinner fa-spin my-spinner';
 
             td.appendChild(i);
             tr.appendChild(td);
@@ -183,7 +182,7 @@ $(document).ready(function() {
                 '<tbody>' +
                 '<tr class="js-users-block-spinner">' +
                 '<td class="text-center">' +
-                '<i class="fas fa-spinner fa-spin" style="font-size:24px;color:#4f9ee2">' +
+                '<i class="fas fa-spinner fa-spin my-spinner">' +
                 '</i>' +
                 '</td>' +
                 '</tr>' +

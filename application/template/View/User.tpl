@@ -1,6 +1,6 @@
 {% extends "base.tpl" %}
 {% block pageContent %}
-<script type="text/javascript" src="/js/users/users.js"></script>
+<script type="text/javascript" src="/js/controller/user.js"></script>
 <div class="container">
     <div class="starter-template">
         <!-- Содержимое страницы в форме -->

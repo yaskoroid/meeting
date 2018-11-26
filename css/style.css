@@ -85,4 +85,8 @@ nav ul > li#label {
 .my-dropdown-block-parent + input:checked + div {
     display:block;
 }
+.my-spinner {
+    font-size:24px;
+    color:#4f9ee2
+}
 /*--*/

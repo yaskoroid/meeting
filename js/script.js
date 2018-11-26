@@ -34,7 +34,7 @@ window.cookies = {
         cookieName = 'SESSION_' + cookieName;
         window.cookies.set(cookieName, cookieValue, exdays);
     },
-    setByDefualt : function(defaultVariableName, defaultValue) {
+    setByDefault : function(defaultVariableName, defaultValue) {
         var isThisDefualtConst = window.helper.isDefualtConst(defaultVariableName);
         if (!isThisDefualtConst)
             window.cookies.setSession(window.cookies.getNameFromDefaultVariableName(defaultVariableName), defaultValue);
@@ -194,6 +194,7 @@ $.fn.myNotify = function(params) {
         '</div>'
     });
 };
+
 $(document).ready(function() {
 
     $.fn.iNotify = function(message, type) {

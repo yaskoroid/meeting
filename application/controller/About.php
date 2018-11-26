@@ -10,11 +10,9 @@ namespace controller;
 
 use core\Controller;
 
-class About extends Controller
-{
+class About extends Controller\Base {
 
-    function actionIndex()
-    {
+    function actionIndex() {
         // TODO: Implement actionIndex() method.
         $this->view->generate('About');
     }

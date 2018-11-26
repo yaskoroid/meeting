@@ -1,18 +1,19 @@
 {% extends "base.tpl" %}
 {% block pageContent %}
+<script type="text/javascript" src="/js/controller/login.js"></script>
 <div class="container">
-    <form action="" name="form" method="post" class="form-horizontal">
+    <form action="" name="loginForm" method="post" class="form-horizontal">
         <div class="form-group col-sm-12">
             <h2 class="form-signin-heading">Авторизация</h2>
         </div>
         <div class="form-group">
-            <label for="inputEmail" class="control-label col-sm-3">Пользователь</label>
+            <label class="control-label col-sm-3">Пользователь</label>
             <div class="col-sm-9">
                 <input type="text" name="login" class="form-control" placeholder="Логин" required autofocus>
             </div>
         </div>
         <div class="form-group">
-            <label for="inputPassword" class="control-label col-sm-3">Пароль</label>
+            <label class="control-label col-sm-3">Пароль</label>
             <div class="col-sm-9">
                 <input type="password" name="password" class="form-control" placeholder="Пароль" required>
             </div>

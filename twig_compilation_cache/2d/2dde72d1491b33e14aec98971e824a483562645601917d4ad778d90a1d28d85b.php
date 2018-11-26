@@ -1,7 +1,7 @@
 <?php
 
 /* base.tpl */
-class __TwigTemplate_554b565fd87dde74dd879b7b9f3c64936dfcfc49bc8f556752df9b893203c2d0 extends Twig_Template
+class __TwigTemplate_f5f94eb188f1207487730300400969e283590b9fc39c6764edd8cdc2ef35a574 extends Twig_Template
 {
     private $source;
 
@@ -64,6 +64,17 @@ class __TwigTemplate_554b565fd87dde74dd879b7b9f3c64936dfcfc49bc8f556752df9b89320
 
     public function getSourceContext()
     {
-        return new Twig_Source("", "base.tpl", "C:\\Program Files (x86)\\Ampps\\www\\roman.com\\application\\template\\Email\\base.tpl");
+        return new Twig_Source("<!DOCTYPE html>
+<head>
+    <meta charset=\"UTF-8\">
+    <title>Contact form</title>
+    <style>{{style}}</style>
+<body>
+{% block emailContent %}
+<div>No email content, sorry</div>
+{% endblock %}
+</body>
+</head>
+", "base.tpl", "C:\\Program Files (x86)\\Ampps\\www\\roman.com\\application\\template\\Email\\base.tpl");
     }
 }

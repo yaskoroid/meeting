@@ -11,9 +11,9 @@ require 'application/Autoloader.php';
 
 require 'functions.php';
 
-require 'core/Model.php';
-require 'core/View.php';
-require 'core/Controller.php';
+require 'core/Model/Base.php';
+require 'core/View/Base.php';
+require 'core/Controller/Base.php';
 require 'core/Route.php';
 
 // Запускаем роутинг запросов пользователя

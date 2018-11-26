@@ -57,7 +57,7 @@ class ChangeConfirm extends Basic
     private $_userProfileService;
 
     function __construct() {
-        $this->_initServices();
+        self::_initServices();
     }
 
     private function _initServices() {

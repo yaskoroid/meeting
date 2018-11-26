@@ -11,7 +11,7 @@ namespace model;
 use core\Service\ServiceLocator;
 use Service;
 
-class Logout
+class Logout extends Model
 {
     /**
      * @var Service\Auth;
@@ -19,6 +19,7 @@ class Logout
     private $_authService;
 
     function __construct() {
+        parent::__construct();
         $this->_authService = ServiceLocator::authService();
     }
 

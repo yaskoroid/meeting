@@ -1,7 +1,7 @@
 <?php
 
-/* user.tpl */
-class __TwigTemplate_8eb3c60acc7460d0a335e7b18525ba46428f5527e221b0def1add864720c5c33 extends Twig_Template
+/* error404.tpl */
+class __TwigTemplate_d3e0787cbfe98396b93ec8b912c21b9600c611c49fe100a83572124aa5fb60f0 extends Twig_Template
 {
     private $source;
 
@@ -12,7 +12,7 @@ class __TwigTemplate_8eb3c60acc7460d0a335e7b18525ba46428f5527e221b0def1add864720
         $this->source = $this->getSourceContext();
 
         // line 1
-        $this->parent = $this->loadTemplate("base.tpl", "user.tpl", 1);
+        $this->parent = $this->loadTemplate("base.tpl", "error404.tpl", 1);
         $this->blocks = array(
             'pageContent' => array($this, 'block_pageContent'),
         );
@@ -32,12 +32,17 @@ class __TwigTemplate_8eb3c60acc7460d0a335e7b18525ba46428f5527e221b0def1add864720
     public function block_pageContent($context, array $blocks = array())
     {
         // line 3
-        echo "<script type=\"text/javascript\" src=\"/js/users/users.js\"></script>
-<div class=\"container\">
-    <div class=\"starter-template\">
-        <!-- Содержимое страницы в форме -->
-        <form name=\"formTasks\" method=\"post\" enctype=\"multipart/form-data\" class=\"js-main-form\">
-        </form>
+        echo "<div class=\"container\">
+    <h1>
+        Ошибка 404
+    </h1>
+
+    <h2>
+        Страница на найдена!
+    </h2>
+
+    <div class=\"col-md-12\">
+        <img class=\"center-block img-responsive\" src=\"/images/etc/404.jpg\">
     </div>
 </div>
 ";
@@ -45,7 +50,7 @@ class __TwigTemplate_8eb3c60acc7460d0a335e7b18525ba46428f5527e221b0def1add864720
 
     public function getTemplateName()
     {
-        return "user.tpl";
+        return "error404.tpl";
     }
 
     public function isTraitable()
@@ -60,6 +65,21 @@ class __TwigTemplate_8eb3c60acc7460d0a335e7b18525ba46428f5527e221b0def1add864720
 
     public function getSourceContext()
     {
-        return new Twig_Source("", "user.tpl", "C:\\Program Files (x86)\\Ampps\\www\\roman.com\\application\\template\\View\\user.tpl");
+        return new Twig_Source("{% extends \"base.tpl\" %}
+{% block pageContent %}
+<div class=\"container\">
+    <h1>
+        Ошибка 404
+    </h1>
+
+    <h2>
+        Страница на найдена!
+    </h2>
+
+    <div class=\"col-md-12\">
+        <img class=\"center-block img-responsive\" src=\"/images/etc/404.jpg\">
+    </div>
+</div>
+{% endblock %}", "error404.tpl", "C:\\Program Files (x86)\\Ampps\\www\\roman.com\\application\\template\\View\\error404.tpl");
     }
 }

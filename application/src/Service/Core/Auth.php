@@ -115,7 +115,7 @@ class Auth extends Basic
         $user->sessionId = $_COOKIE['PHPSESSID'];
         setcookie('PHPSESSID', null, -1, '/');
 
-        $this->_userProfileService->updateUser($user);
+        $this->_userProfileService->saveUser($user);
     }
 
     private function _initServices() {

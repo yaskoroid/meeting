@@ -119,10 +119,10 @@ class ServiceLocator extends core\Service\BaseServiceLocator {
     }
 
     /**
-     * @return Service\User\ChangeConfirm
+     * @return Service\ChangeConfirm
      */
-    public static function userChangeConfirmService() {
-        return self::_factory()->get("Service\\User\\ChangeConfirm");
+    public static function changeConfirmService() {
+        return self::_factory()->get("Service\\ChangeConfirm");
     }
 
     /**

@@ -4,6 +4,9 @@ namespace core;
 use core\Service\ServiceLocator;
 use model\Def;
 use Service;
+use Twig\Profiler\Node\EnterProfileNode;
+
+use Entity;
 
 class View {
 
@@ -36,8 +39,6 @@ class View {
         $this->_templateService    = ServiceLocator::templateService();
         $this->_userProfileService = ServiceLocator::userProfileService();
         $this->_userTypeService    = ServiceLocator::userTypeService();
-        $this->_emailService    = ServiceLocator::emailService();
-        print $this->_emailService->create('1', '2', Service\Email::USER_CREATE_CONFIRM);
     }
 
     /**
@@ -46,6 +47,14 @@ class View {
      */
     function generate($derivedView, array $data = array())
     {
+        //@TODO test som code
+        $this->changeConfirmService = ServiceLocator::changeConfirmService();
+        //var_dump($this->changeConfirmService->createChangeUserCreation($this->_userProfileService->getRandomUser()));
+        //var_dump($this->changeConfirmService->createAfterConfirmUser('2436ff971f7d2c0c3077da88b8deec7c81ae1c804485b7ef41f208402a932b65e9549171c8adc51f9f28e0fa1f25e088a222e19dceb3aee7ea92879e484ce9e7'));
+        var_dump($this->changeConfirmService->changeAfterConfirmUserPassword('fd3404e6253f4a66ae2569d7d421682bd0cb8563141cac6f3c722c5cdcbf73793fc5d30144639003c88a460bea9450b357e3cd031be561fdf81dd1dbe15778c3', 'asdfsdf'));
+
+
+
         $data['def']  = $this->_getDef($derivedView);
 
         $user = $this->_contextService->getUser();

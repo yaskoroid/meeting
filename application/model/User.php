@@ -67,7 +67,7 @@ class User
     /**
      * @var Service\User\ChangeConfirm
      */
-    private $_userChangeConfirmService;
+    private $_changeConfirmService;
 
     // Массив с результатом и метаданными
     private $_pageDefaults = array(
@@ -97,7 +97,7 @@ class User
         $this->_utilsService             = ServiceLocator::utilsService();
         $this->_authService              = ServiceLocator::authService();
         $this->_emailService             = ServiceLocator::emailService();
-        $this->_userChangeConfirmService = ServiceLocator::userChangeConfirmService();
+        $this->_changeConfirmService = ServiceLocator::changeConfirmService();
     }
 
     /*
@@ -323,7 +323,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @throws \InvalidArgumentException
      */
     private function _getIsLoginPossible(array $post) {
-        $userChangeConfirm = new Entity\UserChangeConfirm();
+        $userChangeConfirm = new Entity\ChangeConfirm();
         $userChangeConfirm->newValue = "asd";
         $userChangeConfirm->comment = "345";
         $userChangeConfirm->userId = "1";
@@ -390,7 +390,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
 
         $this->__validateStoreData($post, $user);
 
-        return $this->_userProfileService->updateUser($post);
+        return $this->_userProfileService->saveUser($post);
         // @TODO notify by email
     }
 

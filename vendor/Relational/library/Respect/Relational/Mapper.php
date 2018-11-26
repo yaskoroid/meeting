@@ -91,7 +91,6 @@ class Mapper extends AbstractMapper implements
         }
             
         return parent::persist($object, $onCollection);
-        
     }
     
     /**

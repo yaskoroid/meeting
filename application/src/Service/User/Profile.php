@@ -58,14 +58,36 @@ class Profile extends Basic
         }
     }
 
+    /**
+     * @return Entity\User
+     */
+    public function getRandomUser() {
+        $result = new Entity\User();
+        $result->name = $GLOBALS['config']['admin']['name'];
+        $result->surname = $GLOBALS['config']['admin']['surname'];
+        $result->email = $GLOBALS['config']['admin']['email'];
+        $result->userTypeId = 1;
+        $result->login = 'shlabuda';
+        $result->password = '';
+        $result->salt = '';
+        $result->isReady = 1;
+        $result->isReadyOnlyForPartnership = 0;
+        $result->comment = 'Test, unreal account, you can remove it';
+        $result->sex = 1;
+        $result->phone = '+380665635421';
+        $result->customizableSessionValues = '';
+        $result->sessionId = '';
+        return $result;
+    }
+
     public function createUser() {
 
     }
 
     /**
-     * @param Entity\Mapper $user
+     * @param Entity\User $user
      */
-    public function updateUser($user) {
+    public function saveUser($user) {
         $this->_meetingService->saveUser($user);
     }
 

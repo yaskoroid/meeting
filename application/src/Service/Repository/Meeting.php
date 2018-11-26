@@ -84,17 +84,6 @@ class Meeting extends Repository
     }
 
     /**
-     *
-     */
-    //SELECT COLUMN_NAME,COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS where TABLE_SCHEMA = 'roman' AND TABLE_NAME = 'user'
-    /*public function getUserColumns() {
-        $columns = array(
-            'COLUMN_NAME', 'COLUMN_COMMENT'
-        );
-        $userTableColumnsList = $this->_loadObjectsColumns('user', $columns);
-    }*/
-
-    /**
      * @param string[] $fieldsToSearchIn
      * @param string $search
      * @param string $orderBy
@@ -138,12 +127,7 @@ class Meeting extends Repository
         $objects = $select->limit($limit[0].','.$limit[1])->fetchAll(function($obj) {
             return Factory::createEntity((array) $obj, 'Entity\\User');
         });
-/*var_dump($fieldsToSearchIn);
-var_dump($search);
 
-        var_dump($orderBy);
-        var_dump($direction);
-        var_dump($limit);*/
         return $objects;
     }
 
@@ -167,7 +151,6 @@ var_dump($search);
 
     /**
      * @param Entity\User $user
-     * @throws \Exception
      */
     public function saveUser($user) {
         $this->_mapper->user->persist($user);
@@ -176,19 +159,72 @@ var_dump($search);
 
     /**
      * @param Entity\Email $email
-     * @throws \Exception
      */
     public function saveEmail($email) {
         $this->_mapper->email->persist($email);
         $this->_mapper->flush();
     }
 
+
     /**
-     * @param Entity\UserChangeConfirm $userChangeConfirm
-     * @throws \Exception
+     * @param Entity\ChangeConfirm[] $changesConfirms
+     * @throws \InvalidArgumentException
      */
-    public function saveUserChangeConfirm($userChangeConfirm) {
-        $this->_mapper->userChangeConfirm->persist($userChangeConfirm);
+    public function saveChangesConfirms($changesConfirms) {
+        if (!is_array($changesConfirms))
+            throw new \InvalidArgumentException('Changes confirms to save must be an array');
+
+        foreach ($changesConfirms as $changeConfirm) {
+            $this->_mapper->{$this->realProperty('changeConfirm')}->persist($changeConfirm);
+        }
         $this->_mapper->flush();
+    }
+
+    /**
+     * @param string $entityName
+     * @param array $filter
+     * @return Entity\ChangeConfirm[]
+     */
+    public function getChangeConfirmByEntityNameAndFilter($entityName, $filter) {
+        $this->filterRealProperty($filter);
+        return $this->_mapper->{$this->realProperty('changeConfirm')}(
+            array_merge(
+                $filter,
+                array(
+                    $this->realProperty('entityName') => $this->realProperty($entityName)
+                )
+            )
+        )->fetchAll();
+    }
+
+    /**
+     * @param Entity\ChangeConfirm[] $changesConfirms
+     */
+    public function removeChangesConfirms($changesConfirms) {
+        foreach ($changesConfirms as $changeConfirm) {
+            $this->_mapper->{$this->realProperty('changeConfirm')}->remove($changeConfirm);
+        }
+        $this->_mapper->flush();
+    }
+
+    /**
+     * @param string $entityName
+     * @param array $hashes
+     */
+    public function removeChangesConfirmsByHashes($entityName, $hashes) {
+
+        /** @var Entity\ChangeConfirm[] $result */
+        $changesConfirms =
+            $this->_db
+            ->select('*')
+            ->from('change_confirm')
+            ->where(array('entity_name' => $this->realProperty($entityName)))
+            ->and("hash IN ('" . implode("','", $hashes) . "')")
+            ->fetchAll(function($obj) {
+                return Factory::createEntity((array) $obj, 'Entity\\ChangeConfirm');
+            });
+
+        if (count($changesConfirms) > 0)
+            $this->removeChangesConfirms($changesConfirms);
     }
 }

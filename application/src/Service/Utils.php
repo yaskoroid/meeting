@@ -12,6 +12,56 @@ use Service\Basic;
 
 class Utils extends Basic
 {
+    /**
+     * @return string
+     */
+    public function createRandomChar() {
+        return chr(rand(33, 126));
+    }
+
+    /**
+     * @param int $length
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    public function createRandomString($length) {
+        if (!is_int($length))
+            throw new \InvalidArgumentException('Bad string length');
+
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++)
+            $randomString .= $this->createRandomChar();
+        return $randomString;
+    }
+
+    /**
+     * @param string $data
+     * @return string
+     */
+    public function createHash128($data) {
+        return hash('sha512', $data, false);
+    }
+
+    /**
+     * @return string
+     */
+    public function createRandomHash128() {
+        return $this->createHash128($this->createRandomString(100));
+    }
+
+    /**
+     * @param int $length
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    public function createSalt($length = 10)
+    {
+        if (!is_int($length))
+            throw new \InvalidArgumentException('Bad salt length');
+
+        $length = ($length > 10 || $length < 0) ? 10 : $length;
+        return $this->createRandomString($length);
+    }
 
     /**
      * @param string $password
@@ -19,29 +69,7 @@ class Utils extends Basic
      * @return string
      */
     public function createPassword($password = '', $salt = '') {
-
-        // Указана ли соль
         return empty($salt) ? md5($password) : md5(md5($password) . md5($salt));
-    }
-
-    /**
-     * @param int $n
-     * @return string
-     * @throws \Exception
-     */
-    public function createSalt($n = 10)
-    {
-        if (!is_int($n))
-            throw new \Exception('Bad salt length');
-
-        $n = ($n > 10 || $n < 0) ? 10 : $n;
-
-        $salt = '';
-
-        for ($i = 0; $i < $n; $i++)
-            $salt .= chr(rand(33, 126));
-
-        return $salt;
     }
 
     /**
@@ -51,9 +79,8 @@ class Utils extends Basic
      * @return bool
      * @throws \Exception
      */
-    public function checkPassword($password = '', $passwordHash = '', $salt = '')
-    {
-        // Проверяем совпадает ли пароль
+    public function checkPassword($password = '', $passwordHash = '', $salt = '') {
+
         if ($this->createPassword($password, $salt) !== $passwordHash) {
             throw new \Exception('Bad password');
         }

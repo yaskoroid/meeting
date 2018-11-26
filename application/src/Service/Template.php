@@ -32,12 +32,8 @@ class Template extends Basic {
         $loader = new Twig_Loader_Filesystem($GLOBALS['config']['paths']['templates'][$templateType]);
         $twig   = new Twig_Environment($loader, array(
             'cache'         => 'twig_compilation_cache',
-            //'autoescape'    => true,
             'auto_reload'   => true,
         ));
-        /*$variables['controller'] = $controller;
-        $variables['c'] = $controller;
-        $twig->addExtension(new Service\Twig\Extension());*/
         return $twig->render($templateName, $variables);
     }
 }

@@ -17,14 +17,24 @@ class Factory
      */
     private static $_utilsService;
 
-    public static function createEntity(array $fields, $entityClassName) {
+    /**
+     * @param array $fields
+     * @param string $entityClassName
+     * @param bool|false $isCamelCase
+     * @return mixed
+     * @throws \Exception
+     */
+    public static function createEntity(array $fields, $entityClassName, $isCamelCase = false) {
         if (is_null(self::$_utilsService)) {
             self::$_utilsService = ServiceLocator::utilsService();
         }
 
         $entity = new $entityClassName;
         foreach ($entity as $name=>$value) {
-            $keyInFields = self::$_utilsService->camelCaseToUnderline($name, false);
+            $keyInFields = $isCamelCase
+                ? $name
+                : self::$_utilsService->camelCaseToUnderline($name, false);
+
             if (array_key_exists($keyInFields, $fields)) {
                 $entity->$name = $fields[$keyInFields];
             }

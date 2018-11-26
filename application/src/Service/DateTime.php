@@ -10,7 +10,6 @@ namespace Service;
 
 class DateTime extends Basic
 {
-
     /**
      * @return \DateTime;
      */
@@ -24,5 +23,35 @@ class DateTime extends Basic
      */
     public function formatMySql($dateTime) {
         return $dateTime->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * @return string;
+     */
+    public function formatMySqlUtc() {
+        return gmdate(
+            'Y-m-d H:i:s',
+            strtotime($this->formatMySql($this->now()))
+        );
+    }
+
+    /**
+     * @return string;
+     */
+    public function formatMySqlNextWeekUtc() {
+        return gmdate(
+            'Y-m-d H:i:s',
+            strtotime($this->formatMySql($this->now()) . ' + 1 week')
+        );
+    }
+
+    /**
+     * @return string;
+     */
+    public function formatMySqlNextHourUtc() {
+        return gmdate(
+            'Y-m-d H:i:s',
+            strtotime($this->formatMySql($this->now()) . ' + 1 hour')
+        );
     }
 }

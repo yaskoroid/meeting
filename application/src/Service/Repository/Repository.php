@@ -55,6 +55,36 @@ abstract class Repository extends Basic
     }
 
     /**
+     * @param string $property
+     * @return string
+     */
+    public function styledProperty($property) {
+        return $this->_mapper->getStyle()->styledProperty($property);
+    }
+
+    /**
+     * @param string $property
+     * @return string
+     */
+    public function realProperty($property) {
+        return $this->_mapper->getStyle()->realProperty($property);
+    }
+
+    /**
+     * @param string $filter
+     * @throws \InvalidArgumentException
+     */
+    public function filterRealProperty(&$filter) {
+        if (!is_array($filter))
+            throw new \InvalidArgumentException('Filter must be an array');
+
+        foreach ($filter as $key=>$value) {
+            unset($filter[$key]);
+            $filter[$this->realProperty($key)] = $value;
+        }
+    }
+
+    /**
      * @param \PDO $connection
      * @return Relational\Mapper
      */
@@ -183,6 +213,7 @@ abstract class Repository extends Basic
      */
     protected function _loadObjectByFilter(array $params, $objectName) {
         $this->_monitoringStartRepository("_loadObjectByFilter_{$objectName}");
+
         $object = $this->_mapper->$objectName($params)->fetch();
         $this->_monitoringStopRepository("_loadObjectByFilter_{$objectName}");
         if (!$this->_databaseService->isValidResult($object)) {

@@ -97,8 +97,7 @@ window.helper = {
 };
 
 window.pageBuilder = {
-    getPagesArray : function(pagesCount, pageCurrent, paginationCountOfPagesNearCurrent)
-    {
+    getPagesArray : function(pagesCount, pageCurrent, paginationCountOfPagesNearCurrent) {
         if (typeof pagesCount === 'string') pagesCount = parseInt(pagesCount);
         if (typeof pageCurrent === 'string') pageCurrent = parseInt(pageCurrent);
         if (typeof paginationCountOfPagesNearCurrent === 'string') paginationCountOfPagesNearCurrent = parseInt(paginationCountOfPagesNearCurrent);
@@ -145,6 +144,69 @@ window.pageBuilder = {
         return pagesArray;
     }
 };
+
+window.ajax = {
+    run : function(
+        path,
+        data,
+        successCallback,
+        completeCallback,
+        errorMessage = undefined,
+        responseTextSelector = undefined,
+        spinnerSelector = undefined,
+        async = true,
+        debug = false,
+        errorJsonCallback = undefined,
+        errorCallback = undefined
+    ) {
+
+        if (responseTextSelector) $(responseTextSelector).text('');
+        if (spinnerSelector) {
+            $(spinnerSelector).append('<div class="fas fa-spinner fa-spin my-spinner js-block-spinner"></div>');
+            var $spinner = $(spinnerSelector).find('.js-block-spinner');
+        }
+
+        errorMessage = errorMessage ? errorMessage += ': ' : '';
+        $.ajax({
+            url: document.location.origin + path,
+            method: 'post',
+            data: data,
+            dataType: 'json',
+            async: async,
+            complete: function () {
+                completeCallback()
+            },
+            error: function (xhr, status, error) {
+                if ($spinner) $spinner.remove();
+
+                typeof errorCallback === 'function'
+                    ? errorCallback(xhr, status, error)
+                    : $.fn.iNotify(errorMessage + status, 'warning');
+                if (debug) $('body').append(errorMessage + status);
+            },
+            success: function (json) {
+                if ($spinner) $spinner.remove();
+
+                if (json.error) {
+                    typeof errorJsonCallback === 'function'
+                        ? errorJsonCallback(json)
+                        : $.fn.iNotify(errorMessage + json.response, 'warning');
+
+                    if (debug) $('body').append(errorMessage + json.response);
+                    return;
+                }
+
+                if (typeof successCallback === 'function') {
+                    successCallback(json);
+                    return;
+                }
+
+                if (responseTextSelector)
+                    $(responseTextSelector).text(json.response.text).addClass('text-success');
+            }
+        });
+    }
+}
 
 $.fn.myNotify = function(params) {
     $.notify({
@@ -194,6 +256,14 @@ $.fn.myNotify = function(params) {
         '</div>'
     });
 };
+
+$.urlParam = function(name){
+    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+    if (results==null) {
+        return null;
+    }
+    return decodeURI(results[1]) || 0;
+}
 
 $(document).ready(function() {
 

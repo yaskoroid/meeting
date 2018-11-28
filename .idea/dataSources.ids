@@ -744,10 +744,10 @@
       <column name="entity_name" sqlType="VARCHAR" precision="100" scale="0" nullable="false" jdbcType="12" remarks="0KLQsNCx0LvQuNGG0LAg0L/QvtC70LUg0LIg0YHRgtGA0L7QutC1INC60L7RgtC+0YDQvtC5INC90YPQttC90L4g0LjQt9C80LXQvdC40YLRjA=="/>
       <column name="entity_id" sqlType="INT" precision="10" scale="0" nullable="true" jdbcType="4" remarks="aWQg0LjQtyDRgtCw0LHQu9C40YbRiyAndXNlcnMnINC/0L7Qu9GM0LfQvtCy0LDRgtC10LvRjyDQv9C+0LvQtSDQutC+0YLQvtGA0L7Qs9C+INC/0YDQtdC00LvQsNCz0LDQtdGC0YHRjyDQuNC30LzQtdC90LjRgtGM"/>
       <column name="type" sqlType="VARCHAR" precision="100" scale="0" nullable="false" jdbcType="12" remarks="0KLQuNC/INC40LfQvNC10L3QtdC90LjRjw=="/>
-      <column name="field" sqlType="VARCHAR" precision="50" scale="0" nullable="false" jdbcType="12" remarks="0J/QvtC70LUg0LjQtyDRgtCw0LHQu9C40YbRiyAndXNlcnMnJywg0LrQvtGC0L7RgNC+0LUg0L3Rg9C20L3QviDQuNC30LzQtdC90LjRgtGM"/>
+      <column name="field" sqlType="VARCHAR" precision="50" scale="0" nullable="true" jdbcType="12"/>
       <column name="value" sqlType="VARCHAR" precision="500" scale="0" nullable="true" jdbcType="12" remarks="0KHRgtCw0YDQvtC1INC30L3QsNGH0LXQvdC40LU="/>
-      <column name="new_value" sqlType="VARCHAR" precision="500" scale="0" nullable="false" jdbcType="12" remarks="0J3QvtCy0L7QtSDQt9C90LDRh9C10L3QuNC1"/>
-      <column name="hash" sqlType="INT" precision="10" scale="0" nullable="false" jdbcType="4" remarks="0KXRjdGI"/>
+      <column name="new_value" sqlType="VARCHAR" precision="500" scale="0" nullable="true" jdbcType="12" remarks="0J3QvtCy0L7QtSDQt9C90LDRh9C10L3QuNC1"/>
+      <column name="hash" sqlType="VARCHAR" precision="128" scale="0" nullable="false" jdbcType="12" remarks="0KXRjdGI"/>
       <column name="comment" sqlType="VARCHAR" precision="500" scale="0" nullable="false" jdbcType="12" remarks="0JrQvtC80LzQtdC90YLQsNGA0LjQuQ=="/>
       <column name="date_time_expires" sqlType="DATETIME" precision="19" scale="0" nullable="false" jdbcType="93" remarks="0JTQsNGC0LDQvtC90YfQsNC90LjRjyDQsNC60YLRg9Cw0LvRjNC90L7RgdGC0Lgg0LjQt9C80LXQvdC10L3QuNGPINC4INCy0YDQtdC80Y8g0L7Qug=="/>
       <primary-key name="PRIMARY" columns="id"/>

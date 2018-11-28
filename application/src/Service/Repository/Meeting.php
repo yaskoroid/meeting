@@ -158,6 +158,14 @@ class Meeting extends Repository
     }
 
     /**
+     * @param Entity\User $user
+     */
+    public function deleteUser($user) {
+        $this->_mapper->user->remove($user);
+        $this->_mapper->flush();
+    }
+
+    /**
      * @param Entity\Email $email
      */
     public function saveEmail($email) {

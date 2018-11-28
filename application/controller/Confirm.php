@@ -28,41 +28,52 @@ class Confirm extends Controller\Base {
         $this->view->generate('Confirm', $templateParams);
     }
 
-    function actionUsercreation() {
+    function actionUsercreationconfirmation() {
         $templateParams = array_merge(
             $this->model->getData(),
             array(
-                'header' => 'Подтверждение создания пользователя',
-                'action' => '',
-                'method' => 'post',
+                'header' => 'Подтверждение создания аккаунта',
+                'intent' => 'User creation confirmation',
+                'cancel' => array (
+                    'text' => 'Отменить создание аккаунта',
+                    'name' => 'cancelUserCreate',
+                ),
                 'submit' => array (
-                    'submitText' => 'Подтвердить создание пользователя',
-                    'submitName' => 'userCreate',
+                    'text' => 'Подтвердить создание аккаунта',
+                    'name' => 'userCreate',
                 )
             )
         );
 
-        if (!empty($_POST['usercreate']))
-            //var_dump($_POST);
-            $templateParams = array_merge(
-                $templateParams,
-                array(
-                    'response' => $this->model->usercreation($_GET['hash'])
-                )
-            );
+        $this->view->generate('Confirm', $templateParams);
+    }
 
-        unset($_POST);
+    function actionUserdeletionconfirmation() {
+        $templateParams = array_merge(
+            $this->model->getData(),
+            array(
+                'header' => 'Подтверждение удаление аккаунта',
+                'intent' => 'User deletion confirmation',
+                'cancel' => array (
+                    'text' => 'Отменить удаление аккаунта',
+                    'name' => 'cancelUserCreate',
+                ),
+                'submit' => array (
+                    'text' => 'Подтвердить удаление аккаунта',
+                    'name' => 'userCreate',
+                )
+            )
+        );
 
         $this->view->generate('Confirm', $templateParams);
     }
 
-    function actionPasswordchange() {
+    function actionUserpasswordchanging() {
         $templateParams = array_merge(
             $this->model->getData(),
             array(
                 'header' => 'Изменение пароля пользователя',
-                'action' => '',
-                'method' => 'post',
+                'intent' => 'User password changing',
                 'inputs' => array(
                     array(
                         'text'        => 'Новый пароль',
@@ -71,22 +82,56 @@ class Confirm extends Controller\Base {
                         'autofocus'   => true,
                     ),
                 ),
+                'cancel' => array (
+                    'text' => 'Отменить изменение пароля',
+                    'name' => 'cancelChangePassword',
+                ),
                 'submit' => array (
-                    'submitText' => 'Изменить пароль',
-                    'submitName' => 'changePassword',
+                    'text' => 'Изменить пароль',
+                    'name' => 'changePassword',
                 )
             )
         );
 
-        if (!empty($_POST))
-            $templateParams = array_merge(
-                $templateParams,
-                array(
-                    'response' => $this->model->passwordchange($_GET['hash'], $_POST['newPassword'])
-                )
-            );
+        $this->view->generate('Confirm', $templateParams);
+    }
 
-        unset($_POST);
+    function actionUserchangeemailrequestconfirmation() {
+        $templateParams = array_merge(
+            $this->model->getData(),
+            array(
+                'header' => 'Запрос на изменение email пользователя',
+                'intent' => 'User change email request confirmation',
+                'cancel' => array (
+                    'text' => 'Отменить разрешение измененить email',
+                    'name' => 'cancelChangeEmailRequest',
+                ),
+                'submit' => array (
+                    'text' => 'Разрешить изменение email',
+                    'name' => 'changeEmailRequest',
+                )
+            )
+        );
+
+        $this->view->generate('Confirm', $templateParams);
+    }
+
+    function actionUserchangeemailconfirmation() {
+        $templateParams = array_merge(
+            $this->model->getData(),
+            array(
+                'header' => 'Подтверждение изменения email пользователя',
+                'intent' => 'User change email confirmation',
+                'cancel' => array (
+                    'text' => 'Отменить изменение email',
+                    'name' => 'cancelChangeEmail',
+                ),
+                'submit' => array (
+                    'text' => 'Изменить email',
+                    'name' => 'changeEmail',
+                )
+            )
+        );
 
         $this->view->generate('Confirm', $templateParams);
     }

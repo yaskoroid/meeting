@@ -11,8 +11,7 @@ namespace model;
 use core\Service\ServiceLocator;
 use Service;
 
-class Logout extends Model
-{
+class Logout extends Model {
     /**
      * @var Service\Auth;
      */

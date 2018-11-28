@@ -21,6 +21,11 @@ class Validator extends Basic
      */
     private $_userProfileService;
 
+    /**
+     * @var Service\Utils
+     */
+    protected $_utilsService;
+
     function __construct()
     {
         self::_initServices();
@@ -28,6 +33,7 @@ class Validator extends Basic
 
     private function _initServices() {
         $this->_userProfileService = ServiceLocator::userProfileService();
+        $this->_utilsService       = ServiceLocator::utilsService();
     }
 
     /**
@@ -59,12 +65,31 @@ class Validator extends Basic
         $this->{'_'.$validator}($value);
     }
 
-    private function _login($login) {
+    /**
+     * @param string $string
+     * @param array $minmax
+     */
+    private function _strlen($string, $minmax) {
+        if (!is_array($minmax) || empty($minmax))
+            throw new \InvalidArgumentException('String min and max length values must be an not empty array');
 
-        if (empty($login))
-            throw new \InvalidArgumentException('Login is empty');
-        if (strlen($login) > 50)
-            throw new \InvalidArgumentException('Login length is over than 30');
+        $min = $this->_utilsService->arrayGetRecursive($minmax, array(0));
+        $max = $this->_utilsService->arrayGetRecursive($minmax, array(1));
+
+        if (!is_numeric($min) || $min < 0)
+            throw new \InvalidArgumentException('String max length must be positive numeric');
+        if (!is_numeric($max) || $max < 0)
+            throw new \InvalidArgumentException('String max length must be positive numeric');
+
+        if (strlen($string) > $max)
+            throw new \InvalidArgumentException("Length is over than $max");
+        if (strlen($string) < $min)
+            throw new \InvalidArgumentException("Length is less than $min");
+    }
+
+    private function _login($login) {
+        $this->_strlen($login, array(1, 50));
+
         $checkedLogin = preg_replace("/[^a-z0-9]/", "", $login);
 
         if ($checkedLogin !== $login) {
@@ -80,8 +105,14 @@ class Validator extends Basic
         throw new \InvalidArgumentException('User with this login has been already exists');
     }
 
+    private function _password($password) {
+        $this->_strlen($password, array(3, 50));
+    }
+
     private function _email($email)
     {
+        $this->_strlen($email, array(1, 80));
+
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             if (!checkdnsrr(substr($email, strpos($email, "@") + 1, strlen($email)), 'MX')) {
                 throw new \InvalidArgumentException('Bad email');

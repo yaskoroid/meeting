@@ -1,7 +1,14 @@
 {% extends "base.tpl" %}
 {% block pageContent %}
+<script type="text/javascript" src="/js/controller/confirm.js"></script>
+{% if intent is not empty %}
+<!-- Intent value -->
+<script type="text/javascript">
+    ACTION_INTENT = "{{ intent }}";
+</script>
+{% endif %}
 <div class="container">
-    <form action="{{action}}" name="confirmForm" method="{{method}}" class="form-horizontal">
+    <form action="" name="confirmForm" method="post" class="form-horizontal">
         <div class="form-group col-sm-12">
             <h2 class="form-signin-heading">{{header}}</h2>
         </div>
@@ -26,10 +33,17 @@
             </div>
         </div>
         {% endif %}
+        {% if cancel %}
+        <div class="form-group">
+            <div class="col-sm-12">
+                <button class="btn btn-lg btn-danger btn-block" type="cancel" name="{{cancel.name}}">{{cancel.text}}</button>
+            </div>
+        </div>
+        {% endif %}
         {% if submit %}
         <div class="form-group">
             <div class="col-sm-12">
-                <button class="btn btn-lg btn-primary btn-block" type="submit" name"{{submit.submitName}}">{{submit.submitText}}</button>
+                <button class="btn btn-lg btn-primary btn-block" type="submit" name="{{submit.name}}">{{submit.text}}</button>
             </div>
         </div>
         {% endif %}

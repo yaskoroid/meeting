@@ -9,11 +9,17 @@
 namespace controller;
 
 use core\Controller;
+use model;
 
 class Error404 extends Controller\Base {
 
+    public function __construct() {
+        $this->model = new model\Error404();
+        parent::__construct();
+    }
+
     public function actionIndex() {
         header('HTTP/1.1 404 Not Found');
-        $this->view->generate('Error404', array('title' => 'Страница 404'));
+        $this->view->generate('Error404', $this->model->getData());
     }
 }

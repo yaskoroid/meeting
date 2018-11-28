@@ -1,1 +1,2 @@
 2018-11-12T10:09:55+00:00 Error in query: SELECT COLUMN_NAME,COLUMN_COMMENT FROM user, SQLSTATE[42S22]: Column not found: 1054 Unknown column 'COLUMN_NAME' in 'field list'
+2018-11-28T16:16:48+00:00 Call to undefined method model\Login::createChangeUserPassword()

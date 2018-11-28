@@ -30,6 +30,11 @@ class Auth extends Basic
         self::_initServices();
     }
 
+    private function _initServices() {
+        $this->_contextService     = ServiceLocator::contextService();
+        $this->_userProfileService = ServiceLocator::userProfileService();
+    }
+
     /**
      * @param string $login
      * @param string $password
@@ -45,6 +50,10 @@ class Auth extends Basic
             throw new \InvalidArgumentException('Bad login or password');
         }
         $this->_contextService->setUser($user);
+
+        if (empty($user->sessionId))
+            $this->_storeUserSessionValues($user);
+
         return array(
             'cookies' => $this->_setUserAndSessionCookie($user)
         );
@@ -72,10 +81,18 @@ class Auth extends Basic
      */
     private function _setUserAndSessionCookie($user) {
         $customizableSessionValues = json_decode($user->customizableSessionValues, true);
-        if (!is_array($customizableSessionValues))
-            return array();
         $expires = time() + 86400 * 365 * 3;
         $cookies = array();
+
+        $cookies['PHPSESSID'] = array(
+            'value'   => $user->sessionId,
+            'expires' => $expires,
+            'path'    => '/',
+        );
+
+        if (!is_array($customizableSessionValues))
+            return $cookies;
+
         foreach ($customizableSessionValues as $cookieName=>$value) {
             $cookies[$cookieName] = array(
                 'value'   => $value,
@@ -83,11 +100,7 @@ class Auth extends Basic
                 'path'    => '/',
             );
         }
-        $cookies['PHPSESSID'] = array(
-            'value'   => $user->sessionId,
-            'expires' => $expires,
-            'path'    => '/',
-        );
+
         return $cookies;
     }
 
@@ -106,7 +119,7 @@ class Auth extends Basic
     }
 
     /**
-     * @param Entity\User $user
+     * @param Entity\User|null $user
      */
     private function _storeUserSessionValues($user = null) {
         if ($user === null)
@@ -129,10 +142,5 @@ class Auth extends Basic
         setcookie('PHPSESSID', null, -1, '/');
 
         $this->_userProfileService->saveUser($user);
-    }
-
-    private function _initServices() {
-        $this->_contextService     = ServiceLocator::contextService();
-        $this->_userProfileService = ServiceLocator::userProfileService();
     }
 }

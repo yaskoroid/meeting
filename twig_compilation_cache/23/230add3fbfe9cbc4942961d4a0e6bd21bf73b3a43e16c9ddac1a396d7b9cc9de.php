@@ -50,33 +50,39 @@ class __TwigTemplate_9ca765933e330dacb017c83abfc074f01995c4578fb283f61beb188faef
                 <input type=\"password\" name=\"password\" class=\"form-control\" placeholder=\"Пароль\" required>
             </div>
         </div>
+        <div class=\"form-group\">
+            <label class=\"control-label col-sm-6\">Забыли пароль?</label>
+            <div class=\"col-sm-12\">
+                <a class=\"js-forgot-password\" href=\"\">Отправить письмо для изменения пароля на Вашу почту</a>
+            </div>
+        </div>
         ";
-        // line 21
+        // line 27
         if (($context["response"] ?? null)) {
-            // line 22
+            // line 28
             echo "            <div class=\"form-group\">
                 <div class=\"col-sm-12\">
                     ";
-            // line 24
+            // line 30
             if ((($context["error"] ?? null) == null)) {
-                // line 25
+                // line 31
                 echo "                        <label class=\"text-light bg-success center-block\">";
                 echo twig_escape_filter($this->env, ($context["response"] ?? null), "html", null, true);
                 echo "</label>
                     ";
             } else {
-                // line 27
+                // line 33
                 echo "                        <label class=\"text-light bg-danger center-block\">";
                 echo twig_escape_filter($this->env, ($context["response"] ?? null), "html", null, true);
                 echo "</label>
                     ";
             }
-            // line 29
+            // line 35
             echo "                 </div>
              </div>
         ";
         }
-        // line 32
+        // line 38
         echo "        <div class=\"form-group\">
             <div class=\"col-sm-12\">
             <button class=\"btn btn-lg btn-primary btn-block\" type=\"submit\">Войти</button>
@@ -99,7 +105,7 @@ class __TwigTemplate_9ca765933e330dacb017c83abfc074f01995c4578fb283f61beb188faef
 
     public function getDebugInfo()
     {
-        return array (  80 => 32,  75 => 29,  69 => 27,  63 => 25,  61 => 24,  57 => 22,  55 => 21,  35 => 3,  32 => 2,  15 => 1,);
+        return array (  86 => 38,  81 => 35,  75 => 33,  69 => 31,  67 => 30,  63 => 28,  61 => 27,  35 => 3,  32 => 2,  15 => 1,);
     }
 
     public function getSourceContext()
@@ -122,6 +128,12 @@ class __TwigTemplate_9ca765933e330dacb017c83abfc074f01995c4578fb283f61beb188faef
             <label class=\"control-label col-sm-3\">Пароль</label>
             <div class=\"col-sm-9\">
                 <input type=\"password\" name=\"password\" class=\"form-control\" placeholder=\"Пароль\" required>
+            </div>
+        </div>
+        <div class=\"form-group\">
+            <label class=\"control-label col-sm-6\">Забыли пароль?</label>
+            <div class=\"col-sm-12\">
+                <a class=\"js-forgot-password\" href=\"\">Отправить письмо для изменения пароля на Вашу почту</a>
             </div>
         </div>
         {% if response %}

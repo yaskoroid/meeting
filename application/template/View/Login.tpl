@@ -18,6 +18,12 @@
                 <input type="password" name="password" class="form-control" placeholder="Пароль" required>
             </div>
         </div>
+        <div class="form-group">
+            <label class="control-label col-sm-6">Забыли пароль?</label>
+            <div class="col-sm-12">
+                <a class="js-forgot-password" href="">Отправить письмо для изменения пароля на Вашу почту</a>
+            </div>
+        </div>
         {% if response %}
             <div class="form-group">
                 <div class="col-sm-12">

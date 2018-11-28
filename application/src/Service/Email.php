@@ -22,8 +22,11 @@ class Email extends Basic
 {
     const THROW_EXCEPTIONS = true;
 
-    const USER_CREATE_CONFIRM          = 'user_create_confirm';
-    const USER_CHANGE_PASSWORD_CONFIRM = 'user_change_password_confirm';
+    const USER_CREATE_CONFIRM           = 'user_create_confirm';
+    const USER_DELETE_CONFIRM           = 'user_delete_confirm';
+    const USER_CHANGE_PASSWORD_CONFIRM  = 'user_change_password_confirm';
+    const USER_CHANGE_EMAIL_OLD_CONFIRM = 'user_change_email_old_confirm';
+    const USER_CHANGE_EMAIL_NEW_CONFIRM = 'user_change_email_new_confirm';
 
     /**
      * @var Service\Utils
@@ -72,10 +75,11 @@ class Email extends Basic
     /**
      * @param string $userEmailTo
      * @param string $type
+     * @param array|null $paramsForTemplate
      * @param string|null $hash
      * @return Entity\Email
      */
-    public function create($userEmailTo, $type, $hash = null) {
+    public function create($userEmailTo, $type, array $paramsForTemplate = null, $hash = null) {
         $currentUser = $this->_contextService->getUser();
         if ($currentUser === null)
             throw new \InvalidArgumentException('Context user is not defined');
@@ -85,9 +89,10 @@ class Email extends Basic
         $email->userEmailTo   = $userEmailTo;
         $email->type          = $type;
 
-        $action = $this->_getEmailAction($type, $hash);
+        $templateParams = $this->_getTemplate($type, $paramsForTemplate);
+        $action = $this->_getEmailAction($templateParams, $hash);
 
-        $this->_setTemplate($email, $type, $action);
+        $this->_setTemplate($email, $templateParams, $action);
         return $email;
     }
 
@@ -101,23 +106,21 @@ class Email extends Basic
         if (empty($email->userEmailFrom) || empty($email->userEmailTo))
             throw new \InvalidArgumentException('Email user send to or user send from is empty');
 
-        $userFromName = $userFromSurname = '';
         $userFrom = $this->_userProfileService->getUserByEmail($email->userEmailFrom);
-        if ($userFrom !== null) {
-            $userFromName    = $userFrom->name;
-            $userFromSurname = $userFrom->surname;
-        }
+        $from = '';
+        if ($userFrom !== null)
+            $from = "{$userFrom->name} {$userFrom->surname}";
 
         $userTo = $this->_userProfileService->getUserByEmail($email->userEmailTo);
-        if ($userTo !== null) {
-            $name    = $userTo->name;
-            $surname = $userTo->surname;
-        }
+        $to = "{$name} {$surname}";
+        if ($userTo !== null)
+            $to = "{$userTo->name} {$userTo->surname}";
+
 
         $mailer = $this->_getMailer();
 
-        $mailer->setFrom($email->userEmailFrom, $userFromName . $userFromSurname);
-        $mailer->addAddress($email->userEmailTo, $name . $surname);
+        $mailer->setFrom($email->userEmailFrom, $from);
+        $mailer->addAddress($email->userEmailTo, $to);
         $mailer->Subject  = $email->title;
         $mailer->Body     = $email->body;
         $this->monitoringStop('_sendEmail', 'EmailService');
@@ -166,12 +169,12 @@ class Email extends Basic
 
     /**
      * @param Entity\Email $email
-     * @param string $type
+     * @param array|null $templateParams
      * @param string|null $action
      */
-    private function _setTemplate(&$email, $type, $action = null)
+    private function _setTemplate(&$email, array $templateParams = null, $action = null)
     {
-        $templateParams = $this->_getTemplate($type);
+
         $style = '';
         $cssFiles = array();
         foreach ($templateParams['styles'] as $css) {
@@ -184,7 +187,7 @@ class Email extends Basic
         $email->title = $templateParams['title'];
 
         if ($action !== null )
-        $templateParams['action'] = $action;
+            $templateParams['action'] = $action;
 
         $email->body = $this->_templateService->render($templateParams['file'], $templateParams, 'email');
 
@@ -194,13 +197,12 @@ class Email extends Basic
     }
 
     /**
-     * @param string $type
+     * @param array $templateParams
      * @param string|null $hash
      * @return string
      * @throws \InvalidArgumentException
      */
-    private function _getEmailAction($type, $hash) {
-        $templateParams = $this->_getTemplate($type);
+    private function _getEmailAction(array $templateParams, $hash) {
 
         $controller = $templateParams['controller'];
         $action     = $templateParams['action'];
@@ -219,10 +221,15 @@ class Email extends Basic
         return $result;
     }
 
-    private function _getTemplate($template) {
+    /**
+     * @param $template
+     * @param array|null $paramsForTemplate
+     * @return mixed
+     */
+    private function _getTemplate($template, array $paramsForTemplate = null) {
         static $templates;
         if (is_null($templates))
-            $templates = $this->_getMailTemplates();
+            $templates = $this->_getMailTemplates($paramsForTemplate);
 
         $templateParams = $this->_utilsService->arrayGetRecursive($templates, array($template));
         if ($templateParams === null)
@@ -231,36 +238,96 @@ class Email extends Basic
         return $templateParams;
     }
 
-    private function _getMailTemplates() {
-        return array(
+    /**
+     * @param array|null $paramsForTemplate
+     * @return array
+     */
+    private function _getMailTemplates(array $paramsForTemplate = null) {
+        if (empty($paramsForTemplate)) $paramsForTemplate = array();
+        $result = array(
             self::USER_CREATE_CONFIRM => array(
-                'file'       => 'user_create_confirm.tpl',
-                'title'      => 'Письмо подтверждения регистрации',
-                'text'       => 'Для подтерждения создания аккаунта на сайте ' . $GLOBALS['site']['domain'] .
-                    ', нажмите на кнопку или перейдите о ссылке',
+                'file'       => 'change_confirm.tpl',
+                'title'      => 'Письмо подтверждения регистрации на сайте ' . $GLOBALS['site']['domain'],
+                'text'       => 'Для подтерждения или отмены создания аккаунта на сайте ' . $GLOBALS['site']['domain'] .
+                    ', перейдите о ссылке',
                 'comment'    => 'Email sent to user for confirmation his registration',
                 'method'     => 'post',
                 'controller' => 'confirm',
-                'action'     => 'usercreation',
+                'action'     => 'usercreationconfirmation',
+                'styles'     => array(
+                    'buttons_v0',
+                    'major_v0',
+                ),
+            ),
+            self::USER_DELETE_CONFIRM => array(
+                'file'       => 'change_confirm.tpl',
+                'title'      => 'Письмо удаления пользователя на сайте ' . $GLOBALS['site']['domain'],
+                'text'       => 'Для подтерждения или отмены удаления аккаунта на сайте ' . $GLOBALS['site']['domain'] .
+                    ', перейдите о ссылке',
+                'comment'    => 'Email sent to user for confirmation deletion his account',
+                'method'     => 'post',
+                'controller' => 'confirm',
+                'action'     => 'userdeletionconfirmation',
                 'styles'     => array(
                     'buttons_v0',
                     'major_v0',
                 ),
             ),
             self::USER_CHANGE_PASSWORD_CONFIRM => array(
-                'file'       => 'user_change_password_confirm.tpl',
-                'title'      => 'Письмо изменения пароля',
-                'text'       => 'Для изменения пароля от аккаунта на сайте ' . $GLOBALS['site']['domain'] .
-                    ', нажмите на кнопку или перейдите о ссылке',
+                'file'       => 'change_confirm.tpl',
+                'title'      => 'Письмо изменения пароля на сайте ' . $GLOBALS['site']['domain'],
+                'text'       => 'Для подтверждения или отмены изменения пароля от аккаунта на сайте ' . $GLOBALS['site']['domain'] .
+                    ', перейдите о ссылке',
                 'comment'    => 'Email sent to user for changing user password',
                 'method'     => 'post',
                 'controller' => 'confirm',
-                'action'     => 'passwordchange',
+                'action'     => 'userpasswordchanging',
                 'styles'     => array(
                     'buttons_v0',
                     'major_v0',
                 ),
             ),
         );
+
+        $newEmail = $this->_utilsService->arrayGetRecursive($paramsForTemplate, array('newEmail'));
+        if ($newEmail === null)
+            $newEmail = 'Не могу показать email';
+
+        $result[self::USER_CHANGE_EMAIL_OLD_CONFIRM] = array(
+            'file'       => 'change_confirm.tpl',
+            'title'      => 'Письмо изменения email аккаунта на сайте ' . $GLOBALS['site']['domain'],
+            'text'       => 'Для подтерждения или отмены изменения email вашего аккаунта на сайте ' . $GLOBALS['site']['domain'] .
+                ' на другой, перейдите о ссылке. Внимание! После этого, контроль над Вашим аккаунтом ' .
+                "будет остуществляться владельцем email - '$newEmail'" ,
+            'comment'    => 'Email sent to old user email for confirmation email changing',
+            'method'     => 'post',
+            'controller' => 'confirm',
+            'action'     => 'userchangeemailrequestconfirmation',
+            'styles'     => array(
+                'buttons_v0',
+                'major_v0',
+            ),
+        );
+
+        $oldEmail = $this->_utilsService->arrayGetRecursive($paramsForTemplate, array('oldEmail'));
+        if ($oldEmail === null)
+            $oldEmail = 'Не могу показать email';
+
+        $result[self::USER_CHANGE_EMAIL_NEW_CONFIRM] = array(
+            'file'       => 'change_confirm.tpl',
+            'title'      => 'Письмо изменения email аккаунта на сайте ' . $GLOBALS['site']['domain'],
+            'text'       => 'Для подтерждения или отмены изменения email вашего аккаунта на сайте ' . $GLOBALS['site']['domain'] .
+                " с '$oldEmail' на этот email, перейдите о ссылке",
+            'comment'    => 'Email sent to old user email for confirmation email changing',
+            'method'     => 'post',
+            'controller' => 'confirm',
+            'action'     => 'userchangeemailconfirmation',
+            'styles'     => array(
+                'buttons_v0',
+                'major_v0',
+            ),
+        );
+
+        return $result;
     }
 }

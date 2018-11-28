@@ -15,6 +15,11 @@ use Service;
 class Model extends Base {
 
     /**
+     * @var array
+     */
+    protected $_result = array();
+
+    /**
      * @var Service\Utils
      */
     protected $_utilsService;
@@ -23,12 +28,15 @@ class Model extends Base {
         self::_initServices();
     }
 
-    protected function _initServices() {
+    private function _initServices() {
         $this->_utilsService = ServiceLocator::utilsService();
     }
 
-    public function getData() {
-        return array();
+    /**
+     * @return array
+     */
+    public function getData(){
+        return $this->_result;
     }
 
     /**

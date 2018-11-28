@@ -1,7 +1,7 @@
 <?php
 
-/* user_create_confirm.tpl */
-class __TwigTemplate_d7a23fb8d1c338d2381256891ffec68d8543cfd79245ea233a373143ac076fda extends Twig_Template
+/* change_confirm.tpl */
+class __TwigTemplate_618784ee1582cba3cd768cffdcbeef8117052a5e1a234c6367b98e9426083384 extends Twig_Template
 {
     private $source;
 
@@ -12,7 +12,7 @@ class __TwigTemplate_d7a23fb8d1c338d2381256891ffec68d8543cfd79245ea233a373143ac0
         $this->source = $this->getSourceContext();
 
         // line 1
-        $this->parent = $this->loadTemplate("base.tpl", "user_create_confirm.tpl", 1);
+        $this->parent = $this->loadTemplate("base.tpl", "change_confirm.tpl", 1);
         $this->blocks = array(
             'emailContent' => array($this, 'block_emailContent'),
         );
@@ -48,15 +48,14 @@ class __TwigTemplate_d7a23fb8d1c338d2381256891ffec68d8543cfd79245ea233a373143ac0
     <a href=\"";
         // line 6
         echo twig_escape_filter($this->env, ($context["action"] ?? null), "html", null, true);
-        echo "\">Подтерждение</a>
-    <button type=\"submit\" class=\"btn btn-success\">Подтерждение</button><br>
+        echo "\">Продолжить на сайте</a>
 </form>
 ";
     }
 
     public function getTemplateName()
     {
-        return "user_create_confirm.tpl";
+        return "change_confirm.tpl";
     }
 
     public function isTraitable()
@@ -76,9 +75,8 @@ class __TwigTemplate_d7a23fb8d1c338d2381256891ffec68d8543cfd79245ea233a373143ac0
 <h1>{{ title }}</h1>
 <form method=\"{{ method }}\" action=\"{{ action }}\">
     <p>{{ text }}</p>
-    <a href=\"{{action}}\">Подтерждение</a>
-    <button type=\"submit\" class=\"btn btn-success\">Подтерждение</button><br>
+    <a href=\"{{action}}\">Продолжить на сайте</a>
 </form>
-{% endblock %}", "user_create_confirm.tpl", "C:\\Program Files (x86)\\Ampps\\www\\roman.com\\application\\template\\Email\\user_create_confirm.tpl");
+{% endblock %}", "change_confirm.tpl", "C:\\Program Files (x86)\\Ampps\\www\\roman.com\\application\\template\\Email\\change_confirm.tpl");
     }
 }

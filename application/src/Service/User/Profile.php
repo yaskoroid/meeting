@@ -95,7 +95,7 @@ class Profile extends Basic
      * @param Entity\User $user
      */
     public function deleteUser($user) {
-        $this->_meetingService->deleteUserById($user->id);
+        $this->_meetingService->deleteUser($user);
     }
 
     /**

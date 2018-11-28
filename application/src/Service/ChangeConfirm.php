@@ -18,8 +18,11 @@ use Symfony\Component\Process\Exception\LogicException;
 
 class ChangeConfirm extends Basic
 {
-    const CHANGE_USER_PASSWORD = 'change_user_password';
-    const CREATE_USER          = 'create_user';
+    const CREATE_USER               = 'create_user';
+    const DELETE_USER               = 'delete_user';
+    const CHANGE_USER_PASSWORD      = 'change_user_password';
+    const CHANGE_USER_EMAIL_REQUEST = 'change_user_email_request';
+    const CHANGE_USER_EMAIL         = 'change_user_email';
 
     /**
      * @var Service\Context
@@ -81,6 +84,7 @@ class ChangeConfirm extends Basic
         $email = $this->_emailService->create(
             $newUser->email,
             Service\Email::USER_CREATE_CONFIRM,
+            null,
             $hash
         );
 
@@ -103,29 +107,90 @@ class ChangeConfirm extends Basic
     public function createAfterConfirmUser($hash) {
         $this->_removeOld('User');
 
-        // @TODO find all change fields in db that not expires
         $userCreateChangesConfirms = $this->_findByEntityNameAndFilter('User',
             array(
-                'hash' => $hash,
-                'dateTimeExpires >=' => $this->_dateTimeService->formatMySqlUtc()
+                'type'               => self::CREATE_USER,
+                'hash'               => $hash,
+                'dateTimeExpires >=' => $this->_dateTimeService->formatMySqlUtc() . ' UTC'
             )
         );
 
-        if ($userCreateChangesConfirms === null)
-            throw new \LogicException('No user to create. Confirmation expired already');
+        if (empty($userCreateChangesConfirms))
+            throw new \LogicException('Confirmation user creation already expired or removed');
 
-        // @TODO create user entity
         $user = $this->_createUserByChangesConfirms($userCreateChangesConfirms);
 
-        // @TODO save user
         $this->_userProfileService->saveUser($user);
 
-        // @TODO delete user fields from db
         $this->_removeAllEntitiesByNewValueWithSameHash('User', 'email', $user->email);
 
-        // @TODO create password new field in db
-        $this->createChangeUserPassword($user, $hash);
+        $this->_contextService->executeInUserContext(function() use ($user, $hash){
+            $this->createChangeUserPassword($user, $hash);
+        }, $user);
+    }
 
+    /**
+     * @param Service\User $user
+     * @throws \Exception
+     */
+    public function createChangeUserDelete($user) {
+        $hash = $this->_utilsService->createRandomHash128();
+
+        $email = $this->_emailService->create(
+            $user->email,
+            Service\Email::USER_DELETE_CONFIRM,
+            null,
+            $hash
+        );
+
+        if (!$this->_emailService->send($email, $user->name, $user->surname))
+            throw new \Exception('Email not sent');
+
+        $this->_removeOld('User');
+        $this->_removeAllEntitiesByEntityIdAndType('User', self::DELETE_USER, $user->id);
+
+        $userDeleteChangeConfirm = $this->_createChangeConfirm(
+            $user->id,
+            null,
+            'User',
+            self::DELETE_USER,
+            null,
+            null,
+            $hash,
+            'Confirmation of user deletion',
+            $this->_dateTimeService->formatMySqlNextHourUtc());
+
+        $this->_saveChangesConfirms(array($userDeleteChangeConfirm));
+    }
+
+    /**
+     * @param string $hash
+     * @throws \InvalidArgumentException
+     * @throws \LogicException
+     */
+    public function changeAfterConfirmUserDelete($hash) {
+        $this->_removeOld('User');
+
+        $userDeleteChangesConfirms = $this->_findByEntityNameAndFilter('User',
+            array(
+                'type'               => self::DELETE_USER,
+                'hash'               => $hash,
+                'dateTimeExpires >=' => $this->_dateTimeService->formatMySqlUtc() . ' UTC'
+            )
+        );
+
+        if (empty($userDeleteChangesConfirms))
+            throw new \LogicException('Confirmation user deletion already expired or removed');
+
+        $userDeleteChangeConfirm = $userDeleteChangesConfirms[0];
+
+        $user = $this->_userProfileService->getUserById($userDeleteChangeConfirm->entityId);
+        if ($user === null)
+            throw new \InvalidArgumentException('No user found for this action');
+
+        $this->_userProfileService->deleteUser($user);
+
+        $this->_removeAllEntitiesByEntityIdAndType('User', self::DELETE_USER, $user->id);
     }
 
     /**
@@ -135,12 +200,12 @@ class ChangeConfirm extends Basic
     public function createChangeUserPassword($user) {
         $hash = $this->_utilsService->createRandomHash128();
 
-        // @TODO send confirmation email
         $email = $this->_emailService->create(
             $user->email,
             Service\Email::USER_CHANGE_PASSWORD_CONFIRM,
-                $hash
-            );
+            null,
+            $hash
+        );
 
         if (!$this->_emailService->send($email, $user->name, $user->surname))
             throw new \Exception('Email not sent');
@@ -173,17 +238,18 @@ class ChangeConfirm extends Basic
 
         $userPasswordChangesConfirms = $this->_findByEntityNameAndFilter('User',
             array(
-                'hash' => $hash,
-                'dateTimeExpires >=' => $this->_dateTimeService->formatMySqlUtc()
+                'type'               => self::CHANGE_USER_PASSWORD,
+                'hash'               => $hash,
+                'dateTimeExpires >=' => $this->_dateTimeService->formatMySqlUtc() . ' UTC'
             )
         );
 
-        if ($userPasswordChangesConfirms === null)
-            throw new \LogicException('No user to change password. Confirmation expired already');
+        if (empty($userPasswordChangesConfirms))
+            throw new \LogicException('Confirmation user password changing already expired or removed');
 
         $userPasswordChangeConfirm = $userPasswordChangesConfirms[0];
 
-        $newSalt = $this->_utilsService->createSalt();
+        $newSalt     = $this->_utilsService->createSalt();
         $newPassword = $this->_utilsService->createPassword($newPassword, $newSalt);
 
         $user = $this->_userProfileService->getUserById($userPasswordChangeConfirm->entityId);
@@ -200,21 +266,169 @@ class ChangeConfirm extends Basic
     }
 
     /**
-     * @param Service\ChangeConfirm $changeConfirm
+     * @param Service\User $user
+     * @param string $newEmail
+     * @throws \Exception
      */
-    private function _save($changeConfirm) {
+    public function createChangeUserEmailRequest($user, $newEmail) {
+        $hash = $this->_utilsService->createRandomHash128();
 
+        $email = $this->_emailService->create(
+            $user->email,
+            Service\Email::USER_CHANGE_EMAIL_OLD_CONFIRM,
+            array(
+                'newEmail' => $newEmail,
+            ),
+            $hash
+        );
+
+        if (!$this->_emailService->send($email, $user->name, $user->surname))
+            throw new \Exception('Email not sent');
+
+        $this->_removeOld('User');
+        $this->_removeAllEntitiesByEntityIdAndType('User', self::CHANGE_USER_EMAIL_REQUEST, $user->id);
+
+        $passwordChangeConfirm = $this->_createChangeConfirm(
+            $user->id,
+            $user->email,
+            'User',
+            self::CHANGE_USER_EMAIL_REQUEST,
+            'email',
+            $newEmail,
+            $hash,
+            'Confirmation of user email changing request',
+            $this->_dateTimeService->formatMySqlNextHourUtc());
+
+        $this->_saveChangesConfirms(array($passwordChangeConfirm));
+    }
+
+    /**
+     * @param string $hash
+     * @throws \InvalidArgumentException
+     * @throws \LogicException
+     * @throws \Exception
+     */
+    public function createAfterConfirmUserEmailRequestChangeUserEmail($hash) {
+        $this->_removeOld('User');
+
+        $userPasswordChangesConfirms = $this->_findByEntityNameAndFilter('User',
+            array(
+                'type'               => self::CHANGE_USER_EMAIL_REQUEST,
+                'hash'               => $hash,
+                'dateTimeExpires >=' => $this->_dateTimeService->formatMySqlUtc() . ' UTC'
+            )
+        );
+
+        if (empty($userPasswordChangesConfirms))
+            throw new \LogicException('Confirmation user email changing request already expired or removed');
+
+        $userPasswordChangeConfirm = $userPasswordChangesConfirms[0];
+
+        $user = $this->_userProfileService->getUserById($userPasswordChangeConfirm->entityId);
+        if ($user === null)
+            throw new \InvalidArgumentException('No user found for this action');
+
+        $this->_removeAllEntitiesByEntityIdAndType('User', self::CHANGE_USER_EMAIL_REQUEST, $user->id);
+
+        $email = $this->_contextService->executeInUserContext(function() use ($userPasswordChangeConfirm, $hash){
+            return $this->_emailService->create(
+                $userPasswordChangeConfirm->newValue,
+                Service\Email::USER_CHANGE_EMAIL_NEW_CONFIRM,
+                array(
+                    'oldEmail' => $userPasswordChangeConfirm->value,
+                ),
+                $hash
+            );
+        }, $user);
+
+        if (empty($email))
+            throw new \LogicException('Email not created');
+
+        if (!$this->_emailService->send($email, $user->name, $user->surname))
+            throw new \Exception('Email not sent');
+
+        $passwordChangeConfirm = $this->_createChangeConfirm(
+            $user->id,
+            $userPasswordChangeConfirm->value,
+            'User',
+            self::CHANGE_USER_EMAIL,
+            'email',
+            $userPasswordChangeConfirm->newValue,
+            $hash,
+            'Confirmation of user email changing',
+            $this->_dateTimeService->formatMySqlNextHourUtc());
+
+        $this->_saveChangesConfirms(array($passwordChangeConfirm));
+    }
+
+    /**
+     * @param string $hash
+     * @throws \InvalidArgumentException
+     * @throws \LogicException
+     */
+    public function changeAfterConfirmUserEmail($hash) {
+        $this->_removeOld('User');
+
+        $userPasswordChangesConfirms = $this->_findByEntityNameAndFilter('User',
+            array(
+                'type'               => self::CHANGE_USER_EMAIL,
+                'hash'               => $hash,
+                'dateTimeExpires >=' => $this->_dateTimeService->formatMySqlUtc() . ' UTC'
+            )
+        );
+
+        if (empty($userPasswordChangesConfirms))
+            throw new \LogicException('Confirmation user email changing already expired or removed');
+
+        $userPasswordChangeConfirm = $userPasswordChangesConfirms[0];
+
+        $user = $this->_userProfileService->getUserById($userPasswordChangeConfirm->entityId);
+        if ($user === null)
+            throw new \InvalidArgumentException('No user found for this action');
+
+        $user->email = $userPasswordChangeConfirm->newValue;
+
+        $this->_userProfileService->saveUser($user);
+
+        $this->_removeAllEntitiesByEntityIdAndType('User', self::CHANGE_USER_EMAIL, $user->id);
+    }
+
+    /**
+     * @param string $type
+     * @param string $hash
+     * @return bool
+     */
+    public function cancelUserChangeConfirm($type, $hash) {
+        return $this->_cancelChangeConfirm('User', $type, $hash);
+    }
+
+    /**
+     * @param string $entityName
+     * @param string $type
+     * @param string $hash
+     * @return bool
+     */
+    private function _cancelChangeConfirm($entityName, $type, $hash) {
+        return $this->_removeByEntityNameAndFilter(
+            $entityName,
+            array(
+                'type' => $type,
+                'hash' => $hash
+            )
+        );
     }
 
     /**
      * @param string $entityName
      * @param array $filter
+     * @return bool
      */
     private function _removeByEntityNameAndFilter($entityName, $filter) {
         $changesConfirms = $this->_findByEntityNameAndFilter($entityName, $filter);
-        if (count($changesConfirms) > 0)
-            return;
+        if (count($changesConfirms) === 0)
+            return false;
         $this->_meetingService->removeChangesConfirms($changesConfirms);
+        return true;
     }
 
     /**
@@ -318,6 +532,9 @@ class ChangeConfirm extends Basic
                 $this->_utilsService->arrayGetRecursive($userChangeConfirm, array('newValue'));
         }, $userChangesConfirms);
 
+        if (empty($userFields))
+            throw new \InvalidArgumentException('No user fields to create user');
+
         return Factory\Factory::createEntity($userFields, 'Entity\\User', true);
     }
 
@@ -325,10 +542,11 @@ class ChangeConfirm extends Basic
      * @param $entityName
      */
     private function _removeOld($entityName) {
-        $dateTimeNow = $this->_dateTimeService->formatMySqlUtc();
-        $this->_removeByEntityNameAndFilter($entityName,
+        $dateTimeNow = $this->_dateTimeService->formatMySqlUtc() . ' UTC';
+        $this->_removeByEntityNameAndFilter(
+            $entityName,
             array(
-                'dateTimeExpires <' => $dateTimeNow
+                'dateTimeExpires <=' => $dateTimeNow
             )
         );
     }
@@ -365,7 +583,7 @@ class ChangeConfirm extends Basic
         );
     }
 
-    private function _removeAllEntitiesByEntityIdAndType($entityName, $entityId, $type) {
+    private function _removeAllEntitiesByEntityIdAndType($entityName, $type, $entityId) {
 
         $foundedChangesConfirms = $this->_findByEntityNameAndFilter(
             $entityName,

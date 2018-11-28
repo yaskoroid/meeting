@@ -64,25 +64,13 @@ class User extends Model
      */
     private $_changeConfirmService;
 
-    // Массив с результатом и метаданными
-    private $_pageDefaults = array(
-        'page'        => 'User',
-        'title'       => 'Братья и сестры собрания',
-        'description' => 'Собрание. Все братья и сестры участвующие в школе',
-        'keywords'    => 'Собрание, братья, сестры'
-    );
-
-    /*
-     * В конструкторе определяем количество строк таблицы задач
-     * и всех пользователей с их id
-     */
-    function __construct()
-    {
+    function __construct() {
         parent::__construct();
         self::_initServices();
+        self::_initResult();
     }
 
-    protected function _initServices() {
+    private function _initServices() {
         $this->_contextService           = ServiceLocator::contextService();
         $this->_meetingService           = ServiceLocator::repositoryMeetingService();
         $this->_informationSchemaService = ServiceLocator::repositoryInformationSchemaService();
@@ -92,16 +80,16 @@ class User extends Model
         $this->_userTypeService          = ServiceLocator::userTypeService();
         $this->_authService              = ServiceLocator::authService();
         $this->_emailService             = ServiceLocator::emailService();
-        $this->_changeConfirmService = ServiceLocator::changeConfirmService();
+        $this->_changeConfirmService     = ServiceLocator::changeConfirmService();
     }
 
-    /*
-     * Основная функция.
-     * Получаем все необходимые данные для отображения вида
-     */
-    public function getData()
-    {
-        return $this->_pageDefaults;
+    private function _initResult() {
+        $this->_result = array(
+            'page'        => 'User',
+            'title'       => 'Братья и сестры собрания',
+            'description' => 'Собрание. Все братья и сестры участвующие в школе',
+            'keywords'    => 'Собрание, братья, сестры'
+        );
     }
 
     /*
@@ -374,8 +362,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @return string
      * @throws \InvalidArgumentException
      */
-    protected function _deteteUser($post)
-    {
+    protected function _deteteUser($post) {
         $user = $this->__getUserCheckPermission($post, 'user', 'delete');
 
         return $this->_userProfileService->deleteUser($user);

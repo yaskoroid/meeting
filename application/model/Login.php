@@ -10,6 +10,7 @@ namespace model;
 
 use core\Service\ServiceLocator;
 use Service;
+use Service\User;
 
 class Login extends Model
 {
@@ -19,34 +20,59 @@ class Login extends Model
     private $_authService;
 
     /**
-     * @var array
+     * @var Context
      */
-    private $_result = array(
-        'page'        => 'Login',
-        'title'       => 'Авторизация',
-        'description' => 'Авторизация в приложении',
-        'keywords'    => 'Авторизация, Web приложение'
-    );
+    private $_contextService;
+
+    /**
+     * @var User\Profile
+     */
+    private $_userProfileService;
+
+    /**
+     * @var Service\Validator
+     */
+    private $_validatorService;
+
+    /**
+     * @var Service\ChangeConfirm
+     */
+    private $_changeConfirmService;
 
     function __construct() {
         parent::__construct();
         self::_initServices();
+        self::_initResult();
     }
 
-    protected function _initServices() {
-        $this->_authService = ServiceLocator::authService();
+    private function _initServices() {
+        $this->_authService          = ServiceLocator::authService();
+        $this->_contextService       = ServiceLocator::contextService();
+        $this->_userProfileService   = ServiceLocator::userProfileService();
+        $this->_validatorService     = ServiceLocator::validatorService();
+        $this->_changeConfirmService = ServiceLocator::changeConfirmService();
     }
 
-    public function getData() {
-        return $this->_result;
+    private function _initResult() {
+        $this->_result = array(
+            'page'        => 'Login',
+            'title'       => 'Авторизация',
+            'description' => 'Авторизация в приложении',
+            'keywords'    => 'Авторизация, Web приложение'
+        );
     }
 
     /**
      * @param array $post
      * @return array
      */
-    protected function _getLogin(array $post)
-    {
+    protected function _getLogin(array $post) {
+        $this->_validatorService->check(
+            array(
+                'login' => $post['login']
+            )
+        );
+
         $result = $this->_authService->auth($post['login'], $post['password']);
         return array_merge(
             $result,
@@ -54,5 +80,28 @@ class Login extends Model
                 'text' => 'You successfully logged in',
             )
         );
+    }
+
+    /**
+     * @param array $post
+     * @return array
+     * @throws \InvalidArgumentException
+     */
+    protected function _createNewPasswordRequest(array $post) {
+        $this->_validatorService->check(
+            array(
+                'login' => $post['login']
+            )
+        );
+
+        $user = $this->_userProfileService->getUserByLogin($post['login']);
+        if ($user === null)
+            throw new \InvalidArgumentException('Bad login');
+
+        $this->_contextService->executeInUserContext(function() use ($user){
+            $this->_changeConfirmService->createChangeUserPassword($user);
+        }, $user);
+
+        return array('text' => 'Письмо успешно отправлено на email');
     }
 }

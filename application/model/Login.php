@@ -41,11 +41,9 @@ class Login extends Model
 
     function __construct() {
         parent::__construct();
-        self::_initServices();
-        self::_initResult();
     }
 
-    private function _initServices() {
+    protected function _initAjaxServices() {
         $this->_authService          = ServiceLocator::authService();
         $this->_contextService       = ServiceLocator::contextService();
         $this->_userProfileService   = ServiceLocator::userProfileService();
@@ -53,7 +51,9 @@ class Login extends Model
         $this->_changeConfirmService = ServiceLocator::changeConfirmService();
     }
 
-    private function _initResult() {
+    protected function _initRenderServices() {}
+
+    protected function _initRenderData() {
         $this->_result = array(
             'page'        => 'Login',
             'title'       => 'Авторизация',
@@ -67,11 +67,7 @@ class Login extends Model
      * @return array
      */
     protected function _getLogin(array $post) {
-        $this->_validatorService->check(
-            array(
-                'login' => $post['login']
-            )
-        );
+        $this->_validatorService->check(array('login' => $post['login']));
 
         $result = $this->_authService->auth($post['login'], $post['password']);
         return array_merge(
@@ -88,11 +84,7 @@ class Login extends Model
      * @throws \InvalidArgumentException
      */
     protected function _createNewPasswordRequest(array $post) {
-        $this->_validatorService->check(
-            array(
-                'login' => $post['login']
-            )
-        );
+        $this->_validatorService->check(array('login' => $post['login']));
 
         $user = $this->_userProfileService->getUserByLogin($post['login']);
         if ($user === null)

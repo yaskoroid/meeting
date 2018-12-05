@@ -44,7 +44,7 @@ class Base {
      * @param string $derivedView - dynamic content of view page
      * @param array $data - data of model
      */
-    function generate($derivedView, array $data = array())
+    function render($derivedView, array $data = array())
     {
         //@TODO test som code
         $this->changeConfirmService = ServiceLocator::changeConfirmService();
@@ -84,7 +84,7 @@ class Base {
      * Function shows content of array like a JSON
      * @param array $data
      */
-    function generateJson(array $data = array()) {
+    function renderJson(array $data = array()) {
         print json_encode($data, JSON_HEX_QUOT, 20);
     }
 

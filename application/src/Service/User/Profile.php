@@ -31,6 +31,11 @@ class Profile extends Basic
      */
     private $_permissionService;
 
+    /**
+     * @var Service\ChangeConfirm
+     */
+    private $_changeConfirmService;
+
     private $_secureUserFields = array(
         'password',
         'salt',
@@ -43,9 +48,9 @@ class Profile extends Basic
     }
 
     private function _initServices() {
-        $this->_utilsService      = ServiceLocator::utilsService();
-        $this->_meetingService    = ServiceLocator::repositoryMeetingService();
-        $this->_permissionService = ServiceLocator::permissionService();
+        $this->_utilsService         = ServiceLocator::utilsService();
+        $this->_meetingService       = ServiceLocator::repositoryMeetingService();
+        $this->_permissionService    = ServiceLocator::permissionService();
     }
 
     public function getUserBySessionId($sessionId)
@@ -131,7 +136,14 @@ class Profile extends Basic
      * @param array $permissionsUserFor
      * @return array
      */
-    public function getUsersBySearch($search, $sortingField, $sortingDirection, $pageNumber, $usersCountOnPage, $permissionsUserFor) {
+    public function getUsersBySearch(
+        $search,
+        $sortingField,
+        $sortingDirection,
+        $pageNumber,
+        $usersCountOnPage,
+        $permissionsUserFor)
+    {
 
         $fieldsToSearchIn = array('name', 'surname', 'email', 'login', 'comment', 'phone');
         $orderBy = $sortingField;
@@ -142,7 +154,14 @@ class Profile extends Basic
         );
 
         $result = array();
-        $result['users'] = $this->_meetingService->getUsersBySearch($fieldsToSearchIn, $search, $orderBy, $direction, $limit, $permissionsUserFor);
+        $result['users'] = $this->_meetingService->getUsersBySearch(
+            $fieldsToSearchIn,
+            $search,
+            $orderBy,
+            $direction,
+            $limit,
+            $permissionsUserFor
+        );
         $result['usersCount'] = $this->_meetingService->getAllUsersOfLastSearch();
 
         return $result;
@@ -188,5 +207,54 @@ class Profile extends Basic
         foreach ($this->_secureUserFields as $secureUserField) {
             unset($user->{$secureUserField});
         }
+    }
+
+    /**
+     * @param array $columns
+     */
+    public function filterSecureUserColumns(&$columns) {
+        foreach ($this->_secureUserFields as $secureUserField) {
+            foreach ($columns as $key=>$column) {
+                if (isset($column[$this->_utilsService->camelCaseToUnderline($secureUserField, false)]))
+                    unset($columns[$key]);
+            }
+        }
+    }
+
+    /**
+     * @param array $valuesForGettingUser
+     * @return Entity\User
+     */
+    public function getUserByArray(array $valuesForGettingUser) {
+        $this->_validateUserArray($valuesForGettingUser);
+
+        return new Entity\User();
+    }
+
+    /**
+     * @param array $valuesForCheckingUser
+     */
+    private function _validateUserArray(array $valuesForCheckingUser, array $files) {
+
+        $checkValidators = array(
+            'strlen' => array(
+                array($valuesForCheckingUser['name'],    array(1, 50)),
+                array($valuesForCheckingUser['surname'], array(1, 50)),
+                array($valuesForCheckingUser['comment'], array(1, 500)),
+            ),
+            'login'                  => $valuesForCheckingUser['login'],
+            'email'                  => $valuesForCheckingUser['email'],
+            'emailNotExists'         => $valuesForCheckingUser['email'],
+            'emailUserCreateConfirm' => $valuesForCheckingUser['email'],
+            'userTypeId'             => $valuesForCheckingUser['userTypeId'],
+            'phone'                  => $valuesForCheckingUser['phone'],
+            'zeroone'                =>
+                array (
+                    $valuesForCheckingUser['sex'],
+                    $valuesForCheckingUser['isReady'],
+                    $valuesForCheckingUser['isReadyOnlyForPartnership']
+                ),
+            'extImage'               => $files['image']['name'],
+        );
     }
 }

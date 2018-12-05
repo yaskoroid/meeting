@@ -12,10 +12,13 @@ class Error404 extends Model {
 
     function __construct() {
         parent::__construct();
-        self::_initResult();
     }
 
-    private function _initResult() {
+    protected function _initAjaxServices() {}
+
+    protected function _initRenderServices() {}
+
+    protected function _initRenderData() {
         $this->_result = array(
             'page'        => 'error404',
             'title'       => 'Ошибка 404 - страница не найдена',

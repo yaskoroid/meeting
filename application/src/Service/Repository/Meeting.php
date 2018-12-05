@@ -91,34 +91,53 @@ class Meeting extends Repository
      * @param int[] $limit
      * @param array $permissionsUserFor
      * @return array
+     * @throws \InvalidArgumentException
      */
     public function getUsersBySearch($fieldsToSearchIn, $search, $orderBy, $direction, $limit, $permissionsUserFor) {
         if (!is_array($fieldsToSearchIn) && count($fieldsToSearchIn) > 0) {
-            throw new InvalidArgumentException('Fields to search in must be no empty array');
+            throw new \InvalidArgumentException('Fields to search in must be not empty array');
         }
 
         if (!is_array($permissionsUserFor) && count($permissionsUserFor) > 0) {
-            throw new InvalidArgumentException('Permissions user for must be not empty array');
+            throw new \InvalidArgumentException('Permissions user for must be not empty array');
         }
 
         $select = $this->
             _db
             ->select('SQL_CALC_FOUND_ROWS *')
             ->from('user');
+
         $fieldsToSearchInCount = count($fieldsToSearchIn);
+        $orLikeConditions = array();
         for ($i = 0; $i < $fieldsToSearchInCount; $i++) {
             $firstScope = $i === 0 ? '(' : '';
             $lastScope = $i === $fieldsToSearchInCount - 1 ? ')' : '';
-            $condition = "{$firstScope}{$fieldsToSearchIn[$i]} LIKE '%{$search}%'{$lastScope}";
-            $i == 0 ? $select->where($condition) : $select->or($condition);
+            $orLikeConditions[] = "{$firstScope}{$fieldsToSearchIn[$i]} LIKE '%{$search}%'{$lastScope}";
+        }
+        $select->where(implode(' OR ', $orLikeConditions));
+
+        $permissionSelfCondition = '';
+        $permissionUserTypeCondition = '';
+        $isFirstUserTypeCondition = true;
+        foreach ($permissionsUserFor as $permissionUserFor => $permissionValue) {
+            if ($permissionUserFor === 'self') {
+                $permissionSelfCondition = $permissionValue['permission']
+                    ? "id = {$permissionValue['id']} OR"
+                    : "id != {$permissionValue['id']} AND";
+                continue;
+            }
+
+            $logic = $permissionValue['permission']
+                ? ($isFirstUserTypeCondition ? '' : ' OR ')
+                : ($isFirstUserTypeCondition ? '' : ' AND ');
+            $sign = $permissionValue['permission'] ? '=' : '!=';
+
+            $isFirstUserTypeCondition = false;
+
+            $permissionUserTypeCondition .= $logic . "user_type_id $sign {$permissionValue['id']}";
         }
 
-        foreach ($permissionsUserFor as $permissionUserFor => $permissionValue) {
-            if (!$permissionValue['permission']) {
-                $conditionField = $permissionUserFor === 'self' ? 'id' : 'user_type_id';
-                $select->and("{$conditionField} != {$permissionValue['id']}");
-            }
-        }
+        $select->and("( $permissionSelfCondition ($permissionUserTypeCondition))");
 
         $select->orderBy($orderBy);
 

@@ -6,60 +6,45 @@
  * Time: 16:18
  */
 
-namespace application\vendor\helper;
+namespace Service;
 
-require_once "application/vendor/helper/Helper.php";
-use aService\Basic;
-use application\vendor\helper\Helper;
+use core\Service\ServiceLocator;
+use Service;
 
-/*
- * Класс предназначенный для скачивания файлов из массива $_FILES
- */
-class Downloader extends Basic
-{
+class Downloader extends Basic {
 
-    // Допустимые MIME-типы для изображений
-    const IMG_TYPES = array("image/jpg","image/jpeg","image/gif","image/png");
+    const EXT_IMG        = array('jpg', 'jpeg', 'gif', 'png');
+    const MIME_IMG_TYPES = array('image/jpg', 'image/jpeg', 'image/gif', 'image/png');
 
-    private $path; // Путь к файлу
-    private $types; // Массив типов
-    private $postFieldName; // Имя ключа $_FILES
-    private $newName; // Новое имя файла
-
-    /*
-     * В конструкторе определяем значения типов,
-     * пути, ключа массива $_FILES, нового имени
+    /**
+     * @var Service\Validator
      */
-    function __construct($types, $postFieldName, $newName)
-    {
-        $this->types = $types;
-        $this->postFieldName = $postFieldName;
-        $this->newName = $newName;
-        $this->path = $_SERVER['DOCUMENT_ROOT'] .
-            Downloader::IMG_USERS_FOLDER . "/" . $this->newName;
+    private $_validatorService;
+
+    function __construct() {
+        self::_initServices();
     }
 
-    /*
-     * Функция скачивает
-     */
-    public function download()
-    {
-        // Существует ли данный ключ
-        if (array_key_exists($this->postFieldName, $_FILES)) {
-            // Скачиваем
-            copy($_FILES[$this->postFieldName]['tmp_name'], $this->path);
+    private function _initServices() {
+        $this->_validatorService = ServiceLocator::validatorService();
+    }
 
-            // Проверяем тип файла
-            if (!Helper::checkMime($this->path, $this->types)) {
+    public function downloadImage($postFieldName, $newName) {
+        $path = $_SERVER['DOCUMENT_ROOT'] .
+            Downloader::IMG_USER_FOLDER . '/' . $newName;
 
-                // Удаляем файл
-                unlink($this->path);
-                return array("error" => 1, "content" => "Error! File had bad extention!");
-            } else {
-                return array("error" => null,
-                    "content" => "File successfully download!",
-                    "path" => $this->path);
-            }
+        if (!array_key_exists($postFieldName, $_FILES))
+            throw new \InvalidArgumentException('No file to download');
+
+        copy($_FILES[$postFieldName]['tmp_name'], $path);
+
+        try {
+            $this->_validatorService->check(array('mimeImage' => $path));
+        } catch (\InvalidArgumentException $e) {
+            unlink($this->path);
+            throw new \InvalidArgumentException($e->getMessage());
         }
+
+        return $path;
     }
 }

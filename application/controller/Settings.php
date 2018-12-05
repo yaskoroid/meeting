@@ -19,6 +19,6 @@ class Settings extends Controller\Base {
     }
 
     public function actionIndex() {
-        $this->view->generate('Settings', $this->model->getData());
+        $this->view->render('Settings', $this->model->getData());
     }
 }

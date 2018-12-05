@@ -25,7 +25,7 @@ class Confirm extends Controller\Base {
                 'header' => 'There is no action to confirmation, sorry'
             )
         );
-        $this->view->generate('Confirm', $templateParams);
+        $this->view->render('Confirm', $templateParams);
     }
 
     function actionUsercreationconfirmation() {
@@ -45,7 +45,7 @@ class Confirm extends Controller\Base {
             )
         );
 
-        $this->view->generate('Confirm', $templateParams);
+        $this->view->render('Confirm', $templateParams);
     }
 
     function actionUserdeletionconfirmation() {
@@ -65,7 +65,7 @@ class Confirm extends Controller\Base {
             )
         );
 
-        $this->view->generate('Confirm', $templateParams);
+        $this->view->render('Confirm', $templateParams);
     }
 
     function actionUserpasswordchanging() {
@@ -93,7 +93,7 @@ class Confirm extends Controller\Base {
             )
         );
 
-        $this->view->generate('Confirm', $templateParams);
+        $this->view->render('Confirm', $templateParams);
     }
 
     function actionUserchangeemailrequestconfirmation() {
@@ -113,7 +113,7 @@ class Confirm extends Controller\Base {
             )
         );
 
-        $this->view->generate('Confirm', $templateParams);
+        $this->view->render('Confirm', $templateParams);
     }
 
     function actionUserchangeemailconfirmation() {
@@ -133,6 +133,6 @@ class Confirm extends Controller\Base {
             )
         );
 
-        $this->view->generate('Confirm', $templateParams);
+        $this->view->render('Confirm', $templateParams);
     }
 }

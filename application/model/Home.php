@@ -16,14 +16,6 @@ class Home extends Model
     // Максимальная длинна задачи в симв
     public $taskLenght = 1000;
 
-    // Массив с результатом и метаданными
-    private $result = array(
-        'page'        => 'Home',
-        'title'       => 'Приложение-задачник',
-        'description' => 'Приложение-задачник',
-        'keywords'    => 'Web приложение-задачник'
-    );
-
     // Размеры изображениий задач
     private $imageWidth = 320;
     private $imageHeight = 240;
@@ -72,13 +64,17 @@ class Home extends Model
         $this->initCountOfRowsAndPages();
     }
 
-    /*
-     * Основная функция.
-     * Получаем все необходимые данные для отображения вида
-     */
-    public function getData()
-    {
-        return array_merge($this->result, array());
+    protected function _initAjaxServices() {}
+
+    protected function _initRenderServices() {}
+
+    protected function _initRenderData() {
+        $this->_result = array(
+            'page'        => 'Home',
+            'title'       => 'Приложение-задачник',
+            'description' => 'Приложение-задачник',
+            'keywords'    => 'Web приложение-задачник'
+        );
     }
 
     private function getUsers() {

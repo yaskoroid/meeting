@@ -85,6 +85,16 @@ class Utils extends Basic
     }
 
     /**
+     * @param array $arr
+     * @return bool
+     */
+    public function isAssoc(array $arr) {
+        if (!is_array($arr))
+            throw new \InvalidArgumentException('Argument must be an array');
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
+
+    /**
      * @param string $filePath
      * @param array $arrayPossibleTypes
      * @return bool
@@ -112,19 +122,13 @@ class Utils extends Basic
     }
 
     /**
-     * @param string $fileName
-     * @param array $arrayPossibleTypes
-     * @return bool
-     * @throws \Exception
+     * @param string $filePath
+     * @return string
      */
-    public function checkExtention($fileName, array $arrayPossibleTypes)
-    {
-        // Проверяем расширения
-        if (in_array(pathinfo($fileName, PATHINFO_EXTENSION), $arrayPossibleTypes)) {
-            return true;
-        }
-
-        throw new \Exception('Bad extention');
+    public function getExtention($filePath) {
+        $fileName = substr($filePath, strrpos($filePath, DIRECTORY_SEPARATOR));
+        $fileExt = substr($fileName, strrpos($fileName, '.'));
+        return $fileExt;
     }
 
     /**

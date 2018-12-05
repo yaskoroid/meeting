@@ -28,6 +28,11 @@ class Type extends Basic
      */
     private $_meetingService;
 
+    /**
+     * @var Meeting
+     */
+    private static $_unsecureFields = array('id', 'role', 'description');
+
     function __construct() {
         self::_initServices();
     }
@@ -59,6 +64,24 @@ class Type extends Basic
             $usersTypes = $this->_utilsService->buildIndex($usersTypesNotChecked);
         }
         return $usersTypes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUsersTypesSecure() {
+        /** @var UserType[] */
+        static $usersTypesSecure;
+        if (is_null($usersTypesSecure)) {
+            $usersTypesNotSecure = $this->getUsersTypes();
+            $usersTypesSecure = array();
+            foreach ($usersTypesNotSecure as $userTypeId => $userType)
+                foreach ($userType as $userTypeField => $userTypeValue)
+                    if (in_array($userTypeField, self::$_unsecureFields))
+                        $usersTypesSecure[$userTypeId][$userTypeField] = $userTypeValue;
+
+        }
+        return $usersTypesSecure;
     }
 
     /**

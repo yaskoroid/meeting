@@ -42,6 +42,6 @@ abstract class Base {
 
         unset($_POST);
 
-        $this->view->generateJson($result);
+        $this->view->renderJson($result);
     }
 }

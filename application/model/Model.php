@@ -12,12 +12,17 @@ use core\Model\Base;
 use core\Service\ServiceLocator;
 use Service;
 
-class Model extends Base {
+abstract class Model extends Base {
 
     /**
      * @var array
      */
     protected $_result = array();
+
+    /**
+     * @var array
+     */
+    protected $_frontendConstants = array();
 
     /**
      * @var Service\Utils
@@ -28,6 +33,10 @@ class Model extends Base {
         self::_initServices();
     }
 
+    abstract protected function _initAjaxServices();
+    abstract protected function _initRenderServices();
+    abstract protected function _initRenderData();
+
     private function _initServices() {
         $this->_utilsService = ServiceLocator::utilsService();
     }
@@ -35,7 +44,12 @@ class Model extends Base {
     /**
      * @return array
      */
-    public function getData(){
+    public function getData() {
+        $this->_initRenderServices();
+
+        $this->_initRenderData();
+
+        $this->_result['frontendConstants'] = $this->_frontendConstants;
         return $this->_result;
     }
 
@@ -46,6 +60,8 @@ class Model extends Base {
      * @throws \Exception
      */
     public function handleAjaxJson(array $post) {
+        $this->_initAjaxServices();
+
         $methodName = $this->_utilsService->spacedStringToMethodName($post['intent']);
         $methodName = preg_replace('/_/', '', $methodName);
         $methodName = '_' . $methodName;

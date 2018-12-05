@@ -19,6 +19,6 @@ class Login extends Controller\Base {
     }
 
     public function actionIndex() {
-        $this->view->generate('Login', $this->model->getData());
+        $this->view->render('Login', $this->model->getData());
     }
 }

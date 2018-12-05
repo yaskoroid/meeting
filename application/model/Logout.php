@@ -19,8 +19,18 @@ class Logout extends Model {
 
     function __construct() {
         parent::__construct();
+        self::_initServices();
+    }
+
+    private function _initServices() {
         $this->_authService = ServiceLocator::authService();
     }
+
+    protected function _initAjaxServices() {}
+
+    protected function _initRenderServices() {}
+
+    protected function _initRenderData() {}
 
     public function actionIndex() {
         $this->_authService->deauth();

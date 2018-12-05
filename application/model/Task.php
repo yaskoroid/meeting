@@ -13,22 +13,15 @@ use Service;
 
 class Task extends Model {
 
-    /**
-     * @var Service\Auth
-     */
-    private $_authService;
-
     function __construct() {
         parent::__construct();
-        self::_initServices();
-        self::_initResult();
     }
 
-    private function _initServices() {
-        $this->_authService = ServiceLocator::authService();
-    }
+    protected function _initAjaxServices() {}
 
-    private function _initResult() {
+    protected function _initRenderServices() {}
+
+    protected function _initRenderData() {
         $this->_result = array(
             'page'        => 'Task',
             'title'       => 'Задачи',

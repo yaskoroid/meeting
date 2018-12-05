@@ -25,16 +25,16 @@ class Confirm extends Model
 
     function __construct() {
         parent::__construct();
-        self::_initServices();
-        self::_initResult();
     }
 
-    private function _initServices() {
+    protected function _initAjaxServices() {
         $this->_changeConfirmService = ServiceLocator::changeConfirmService();
         $this->_validatorService     = ServiceLocator::validatorService();
     }
 
-    private function _initResult() {
+    protected function _initRenderServices() {}
+
+    protected function _initRenderData() {
         $this->_result = array(
             'page'        => 'Confirm',
             'title'       => 'Подтверджение действия',
@@ -54,6 +54,8 @@ class Confirm extends Model
             return array('text' => 'Вы успешно отменили создание своего аккаунта');
         }
 
+        $this->_validatorService->check(array('hash128' => $post['hash']));
+
         $this->_changeConfirmService->createAfterConfirmUser($post['hash']);
         return array('text' => 'Вы успешно подтвердили создание аккаунта, Вам отправлено письмо для изменения пароля');
     }
@@ -68,6 +70,8 @@ class Confirm extends Model
                 throw new \LogicException('Could not cancel your account deletion');
             return array('text' => 'Вы успешно отменили удаление своего аккаунта');
         }
+
+        $this->_validatorService->check(array('hash128' => $post['hash']));
 
         $this->_changeConfirmService->changeAfterConfirmUserDelete($post['hash']);
         return array('text' => 'Вы успешно подтвердили удаление аккаунта');
@@ -86,9 +90,11 @@ class Confirm extends Model
 
         $this->_validatorService->check(
             array(
-                'password' => $post['newPassword']
+                'password' => $post['newPassword'],
+                'hash128' => $post['hash']
             )
         );
+
         $this->_changeConfirmService->changeAfterConfirmUserPassword($post['hash'], $post['newPassword']);
         return array('text' => 'Вы успешно изменили пароль');
     }
@@ -103,6 +109,8 @@ class Confirm extends Model
                 throw new \LogicException('Could not cancel request your account email changing');
             return array('text' => 'Вы успешно отменили разрешение на изменение email своего аккаунта');
         }
+
+        $this->_validatorService->check(array('hash128' => $post['hash']));
 
         $this->_changeConfirmService->createAfterConfirmUserEmailRequestChangeUserEmail($post['hash']);
         return array(
@@ -120,6 +128,8 @@ class Confirm extends Model
                 throw new \LogicException('Could not cancel your account email changing');
             return array('text' => 'Вы успешно отменили изменение email своего аккаунта');
         }
+
+        $this->_validatorService->check(array('hash128' => $post['hash']));
 
         $this->_changeConfirmService->changeAfterConfirmUserEmail($post['hash']);
         return array('text' => 'Вы успешно изменили email своего аккаунта');

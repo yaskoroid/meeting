@@ -20,6 +20,6 @@ class Error404 extends Controller\Base {
 
     public function actionIndex() {
         header('HTTP/1.1 404 Not Found');
-        $this->view->generate('Error404', $this->model->getData());
+        $this->view->render('Error404', $this->model->getData());
     }
 }

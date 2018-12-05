@@ -14,6 +14,6 @@ class About extends Controller\Base {
 
     function actionIndex() {
         // TODO: Implement actionIndex() method.
-        $this->view->generate('About');
+        $this->view->render('About');
     }
 }

@@ -253,7 +253,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 --
 
 INSERT INTO `user` (`id`, `name`, `surname`, `email`, `user_type_id`, `login`, `password`, `salt`, `is_ready`, `is_ready_only_for_partnership`, `comment`, `sex`, `ext`, `phone`, `customizable_session_values`, `session_id`) VALUES
-(1, 'Роман', 'Скороид', 'rom-lux@rambler.ru', 2, 'admin', '7971e5c0d8443c128ac86c7af3b9ecd3', '123456789a', 1, 0, 'Глава', 1, 'jpg', '+380951065886', '{"SESSION_PAGE_NUMBER":"1","SESSION_SORTING_DIRECTION":"asc","SESSION_USERS_COUNT_ON_PAGE":"1","SESSION_USERS_SORTING":"surname","SESSION_USERS_SEARCH_TEXT":"g"}', 'dock0f3d2jfisq68s992b6cn10'),
+(1, 'Роман', 'Скороид', 'rom-lux@rambler.ru', 2, 'admin', '7971e5c0d8443c128ac86c7af3b9ecd3', '123456789a', 1, 0, 'Глава', 1, 'jpg', '+380951065886', '{"SESSION_PAGE_NUMBER":"1","SESSION_SORTING_DIRECTION":"asc","SESSION_USER_COUNT_ON_PAGE":"1","SESSION_USER_SORTING":"surname","SESSION_USER_SEARCH_TEXT":"g"}', 'dock0f3d2jfisq68s992b6cn10'),
 (2, 'Виталий', 'Бондаренко', 'vetal@rambler.ru', 1, 'vetal', 'a4856babce82c7c97251a339a2efa0ae', '123456789a', 1, 1, 'Друг с велосипедом', 1, 'jpg', '+380992356897', '', ''),
 (3, 'Вячеслав', 'Рудец', 'rudec@rambler.ru', 1, 'rudec', 'a4856babce82c7c97251a339a2efa0ae', '123456789a', 1, 0, 'Друг с насосной', 1, 'jpg', '+380502224297', '', ''),
 (4, 'Людмила', 'Максимова', 'maksimova@rambler.ru', 1, 'maksimova', 'a4856babce82c7c97251a339a2efa0ae', '123456789a', 1, 0, 'Подруга с детьми', 0, 'png', '+380662354297', '', ''),

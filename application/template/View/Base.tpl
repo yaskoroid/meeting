@@ -6,7 +6,19 @@
     <!-- Defaults -->
     <script type="text/javascript">
         {% for defItemKey in def|keys %}
-        {{defItemKey}} = "{{ def[defItemKey] }}";
+            {% if def[defItemKey] is iterable %}
+                {{defItemKey}} = JSON.parse('{{ def[defItemKey]|json_encode|raw }}');
+            {% else %}
+                {{defItemKey}} = "{{ def[defItemKey] }}";
+            {% endif %}
+        {% endfor %}
+    </script>
+    {% endif %}
+    {% if frontendConstants is not empty %}
+    <!-- Frontend constants -->
+    <script type="text/javascript">
+        {% for frontendConstantsItemKey in frontendConstants|keys %}
+        {{frontendConstantsItemKey}} = "{{ frontendConstants[frontendConstantsItemKey] }}";
         {% endfor %}
     </script>
     {% endif %}

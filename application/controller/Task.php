@@ -19,6 +19,6 @@ class Task extends Controller\Base {
     }
 
     public function actionIndex() {
-        $this->view->generate('Task', $this->model->getData());
+        $this->view->render('Task', $this->model->getData());
     }
 }

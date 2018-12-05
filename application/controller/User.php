@@ -19,7 +19,7 @@ class User extends Controller\Base {
     }
 
     public function actionIndex() {
-        $this->view->generate('User', $this->model->getData());
+        $this->view->render('User', $this->model->getData());
     }
 
     public function actionJson() {
@@ -42,6 +42,6 @@ class User extends Controller\Base {
 
         unset($_POST);
 
-        $this->view->generateJson($result);
+        $this->view->renderJson($result);
     }
 }

@@ -130,6 +130,20 @@ class ChangeConfirm extends Basic
     }
 
     /**
+     * @param $email
+     * @return Entity\ChangeConfirm[]
+     */
+    public function getEmailOfUserCreation($email) {
+        return $this->_findByEntityNameAndFilter('User',
+            array(
+                'type'               => self::CREATE_USER,
+                'newValue'           => $email,
+                'dateTimeExpires >=' => $this->_dateTimeService->formatMySqlUtc() . ' UTC'
+            )
+        );
+    }
+
+    /**
      * @param Service\User $user
      * @throws \Exception
      */

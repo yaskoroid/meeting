@@ -24,18 +24,18 @@ class Home extends Controller\Base {
             if (isset($_POST['addTask'])) {
 
                 $this->model->createTask($_POST);
-                $this->view->generate('Home', $this->model->getData());
+                $this->view->render('Home', $this->model->getData());
             } elseif (isset($_POST['ajax'])) {
                 // Генерируем ответ на AJAX запрос
-                $this->view->generateJson($this->model->handleAjaxJson($_POST));
+                $this->view->renderJson($this->model->handleAjaxJson($_POST));
             } else {
-                $this->view->generate('Home', $this->model->getData());
+                $this->view->render('Home', $this->model->getData());
             }
             return;
         }
 
         unset($_POST);
 
-        $this->view->generate('Home', $this->model->getData());
+        $this->view->render('Home', $this->model->getData());
     }
 }

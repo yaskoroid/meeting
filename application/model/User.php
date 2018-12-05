@@ -64,13 +64,16 @@ class User extends Model
      */
     private $_changeConfirmService;
 
+    /**
+     * @var Service\Downloader
+     */
+    private $_downloaderService;
+
     function __construct() {
         parent::__construct();
-        self::_initServices();
-        self::_initResult();
     }
 
-    private function _initServices() {
+    protected function _initAjaxServices() {
         $this->_contextService           = ServiceLocator::contextService();
         $this->_meetingService           = ServiceLocator::repositoryMeetingService();
         $this->_informationSchemaService = ServiceLocator::repositoryInformationSchemaService();
@@ -81,14 +84,24 @@ class User extends Model
         $this->_authService              = ServiceLocator::authService();
         $this->_emailService             = ServiceLocator::emailService();
         $this->_changeConfirmService     = ServiceLocator::changeConfirmService();
+        $this->_downloaderService        = ServiceLocator::downloaderService();
     }
 
-    private function _initResult() {
+    protected function _initRenderServices() {
+        $this->_contextService = ServiceLocator::contextService();
+    }
+
+    protected function _initRenderData() {
         $this->_result = array(
             'page'        => 'User',
             'title'       => 'Братья и сестры собрания',
             'description' => 'Собрание. Все братья и сестры участвующие в школе',
             'keywords'    => 'Собрание, братья, сестры'
+        );
+
+        $user = $this->_contextService->getUser();
+        $this->_frontendConstants = array(
+            'PERMISSION_USER_SHOW_SEARCH_BLOCK' => ($user !== null && $user->userTypeId > 1) ? 1 : 0,
         );
     }
 
@@ -230,13 +243,16 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
             throw new \Exception('No user columns');
         }
 
-        $filteredUserColumns = array();
+        $renderedUserColumns = array();
         foreach ($userColumns as $userColumn) {
             $columns = array();
             $columns[$userColumn->columnName] = $userColumn->columnComment;
-            array_push($filteredUserColumns, $columns);
+            array_push($renderedUserColumns, $columns);
         }
-        return $filteredUserColumns;
+
+        $this->_userProfileService->filterSecureUserColumns($renderedUserColumns);
+
+        return $renderedUserColumns;
     }
 
     /**
@@ -247,15 +263,14 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
     protected function _getUsersBySearch(array $post) {
 
         $permissionsUserForRead = $this->_permissionService->getPermissionsForUserTypesAndSelf(array('read'));
-        if (count($permissionsUserForRead) !== 3) {
+        if (count($permissionsUserForRead) !== 3)
             throw new \InvalidArgumentException('Not all permissions has been calculated');
-        }
 
         $this->_validatorService->check(
             array(
                 'sortingDirection' => $post['sortingDirection'],
-                'int'              => $post['pageNumber'],
-                'int'              => $post['usersCountOnPage']
+                'intPositive'      => $post['pageNumber'],
+                'intPositive'      => $post['usersCountOnPage']
             )
         );
 
@@ -272,7 +287,7 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
             $foundedUsersCollection['users'],
             array('update', 'delete')
         );
-        $foundedUsersCollection['permissions']['users'] = $permissionsForUsers;
+        $foundedUsersCollection['permissions']['users']  = $permissionsForUsers;
         $foundedUsersCollection['permissions']['create'] = $this->_permissionService->getPermissionsForUsersTypeCreate();
 
         $this->_userProfileService->filterSecureUsersFields($foundedUsersCollection['users']);
@@ -286,19 +301,6 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @throws \InvalidArgumentException
      */
     protected function _getIsLoginPossible(array $post) {
-        $userChangeConfirm = new Entity\ChangeConfirm();
-        $userChangeConfirm->newValue = "asd";
-        $userChangeConfirm->comment = "345";
-        $userChangeConfirm->userId = "1";
-        $userChangeConfirm->field = "password";
-        $userChangeConfirm->value = "e565478";
-        $userChangeConfirm->dateTimeExpires = "2018-11-21 23:12:15";
-        $userChangeConfirm->hash = "sdfuighsth8ygw485yhs8rgn358th3k";
-
-        $this->_userChangeConfirmService->save($userChangeConfirm);
-        if (empty($post['login']))
-            throw new \InvalidArgumentException('No old user newLogin');
-
         try {
             $this->_validatorService->check(array('login' => $post['newLogin']));
             $this->_validatorService->check(array('login' => $post['login']));
@@ -321,10 +323,12 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @throws \InvalidArgumentException
      */
     protected function _storeUser(array $post) {
-
-        is_numeric($post['id'])
-            ? $this->updateUser($post)
-            : $this->createUser($post);
+        try {
+            $this->_validatorService->check(array('intPositive' => $post['id']));
+            $this->updateUser($post);
+        } catch (\InvalidArgumentException $e) {
+            $this->_createUser($post);
+        }
     }
 
     /**
@@ -335,12 +339,13 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
     protected function _createUser(array $post) {
 
         if (!$this->_permissionService->getPermissionForUserCreate($post['userTypeId']))
-            throw new \InvalidArgumentException('No permission to create user');
+            throw new \InvalidArgumentException('No permission to create user with this type');
 
-        $this->__validateStoreData($post);
+        $this->_downloaderService->download($_FILES['image']['name']);
 
-        return $this->_userProfileService->createUser($post);
-        // @TODO notify by email
+        $user = $this->_userProfileService->getUserByArray($post, $_FILES);
+        $this->_changeConfirmService->createChangeUserCreation($user, $files);
+        return array('text' => 'Вы успешно создали аккаунт, для подтверждения перейдите на указанный вами email');
     }
 
     /**
@@ -406,8 +411,11 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      * @return Entity\User
      */
     protected function __getUserCheckPermission(array $post, $field, $permission = null) {
-        if (!is_numeric($post['id']))
+        try {
+            $this->_validatorService->check(array('intPositive' => $post['id']));
+        } catch (\InvalidArgumentException $e) {
             throw new \InvalidArgumentException("User id was not found to {$permission} {$field}");
+        }
 
         $user = $this->_userProfileService->getUserById($post['id']);
         if ($user === null)

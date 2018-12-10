@@ -10,6 +10,7 @@ namespace Service;
 
 use core\Service\ServiceLocator;
 use Service;
+use model\Def;
 
 class Downloader extends Basic {
 
@@ -17,33 +18,35 @@ class Downloader extends Basic {
     const MIME_IMG_TYPES = array('image/jpg', 'image/jpeg', 'image/gif', 'image/png');
 
     /**
-     * @var Service\Validator
+     * Service\Utils
      */
-    private $_validatorService;
+    private $_utilsService;
+
+    /**
+     * Service\Path
+     */
+    private $_pathService;
 
     function __construct() {
-        self::_initServices();
+        $this->_initServices();
     }
 
     private function _initServices() {
-        $this->_validatorService = ServiceLocator::validatorService();
+        $this->_utilsService = ServiceLocator::utilsService();
+        $this->_pathService  = ServiceLocator::pathService();
     }
 
-    public function downloadImage($postFieldName, $newName) {
-        $path = $_SERVER['DOCUMENT_ROOT'] .
-            Downloader::IMG_USER_FOLDER . '/' . $newName;
+    /**
+     * @param string $fileFieldName
+     * @param string $tempName
+     * @return string
+     */
+    public function downloadUserImage($fileFieldName, $tempName) {
 
-        if (!array_key_exists($postFieldName, $_FILES))
-            throw new \InvalidArgumentException('No file to download');
+        $ext  = $this->_utilsService->getExtention($_FILES[$fileFieldName]['name']);
+        $path = $this->_pathService->getTempUserImagePath($tempName, $ext);
 
-        copy($_FILES[$postFieldName]['tmp_name'], $path);
-
-        try {
-            $this->_validatorService->check(array('mimeImage' => $path));
-        } catch (\InvalidArgumentException $e) {
-            unlink($this->path);
-            throw new \InvalidArgumentException($e->getMessage());
-        }
+        copy($_FILES[$fileFieldName]['tmp_name'], $path);
 
         return $path;
     }

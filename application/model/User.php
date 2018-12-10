@@ -11,6 +11,7 @@ namespace model;
 use core\Service\ServiceLocator;
 use Service;
 use Entity;
+use Symfony\Component\Process\Exception\LogicException;
 
 class User extends Model
 {
@@ -69,6 +70,11 @@ class User extends Model
      */
     private $_downloaderService;
 
+    /**
+     * @var Service\Path
+     */
+    private $_pathService;
+
     function __construct() {
         parent::__construct();
     }
@@ -85,6 +91,7 @@ class User extends Model
         $this->_emailService             = ServiceLocator::emailService();
         $this->_changeConfirmService     = ServiceLocator::changeConfirmService();
         $this->_downloaderService        = ServiceLocator::downloaderService();
+        $this->_pathService              = ServiceLocator::pathService();
     }
 
     protected function _initRenderServices() {
@@ -103,127 +110,6 @@ class User extends Model
         $this->_frontendConstants = array(
             'PERMISSION_USER_SHOW_SEARCH_BLOCK' => ($user !== null && $user->userTypeId > 1) ? 1 : 0,
         );
-    }
-
-    /*
-     * Функция записывает в БД новую задачу
-     */
-    public function createUser($post)
-    {
-        // Инициализируем значения пользователя и задачи (для исключения ошибок в IDE)
-        $idUser = '';
-        $task = '';
-
-        // Извлекаем данные из $_POST
-        extract($post);
-
-        // Авторизирован ли пользователь
-        /*
-         * Нужно раскомментировать, если нужно, чтобы только
-         * авторизированные пользователи могли добавлять задачи
-         */
-        if ($_SESSION['unregistered'] == 1) {
-            return;
-        }
-
-        // Существует ли id пользователя, которое прислал юзер
-        if (array_key_exists($idUser, $this->users)) {
-
-            // Инициализируем подключение к БД здесь так как для
-            // "checkInjection" нужно действующее соединение в БД
-            $dbProvider = new DbProvider();
-
-            // Проверяем поле задачи на SQL-инъекцию
-            if ($task = $dbProvider->checkInjection($task)) {
-
-                // Проверка расширения файла пользователя
-                if (Helper::checkExtention($_FILES['image']['name'], array("jpg", "jpeg", "gif", "png"))) {
-                    $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-
-                    // Вставляем данные в БД
-                    $db_result = $dbProvider->queryThis("
-INSERT INTO
-\"user\" (name,surname,email,level,login,password,salt,email,is_ready,is_ready_only_for_partnership,comment,sex,phone)
-VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
-
-                    // Проверяем результат вставки
-                    if (empty($db_result['error'])) {
-
-                        // Получаем id добавленной задачи
-                        $id = $dbProvider->getLastAutoinctement();
-
-                        // Если id не null
-                        if ($id) {
-
-                            // Начинаем загружать файл картинки
-                            $downloader = new
-                            Downloader(Downloader::IMG_TYPES, "image",
-                                "task_" . $id . "." . $ext);
-                            $resultDownload = $downloader->download();
-
-                            // Проверяем результат загрузки и проверки типа
-                            // уже загруженного файла по MIME
-                            if ($resultDownload['error'] == null) {
-
-                                // Изменяем размер
-                                $instImage = new Image($this->imageWidth, $this->imageHeight);
-                                $resultResize = $instImage->
-                                imageResizeProportional($resultDownload['path']);
-
-                                // Проверяем результат
-                                if (empty($resultResize['error'])) {
-                                    // Переопределяем количество страниц и строк в таблице задач
-                                    $this->initCountOfRowsAndPages();
-                                    $this->resultOfAddUser = array(
-                                        "error" => null,
-                                        "response" => "The task successfully added");
-                                } else {
-                                    $this->resultOfAddUser = array(
-                                        "error" => true,
-                                        "response" => $resultResize['content']);
-                                }
-                            } else {
-
-                                // Удаляем запись из БД
-                                $resultDelete = $this->deteteTask($id);
-                                $this->resultOfAddUser = array(
-                                    "error" => true,
-                                    "response" => $resultDownload['content'] . $resultDelete['content']);
-                            }
-                        } else {
-                            $this->resultOfAddUser = array(
-                                "error" => true,
-                                "response" => "There is no last id!");
-                        }
-                    } else {
-                        $this->resultOfAddUser = array(
-                            "error" => true,
-                            "response" => $db_result['content']);
-                    }
-                } else {
-                    $this->resultOfAddUser = array(
-                        "error" => true,
-                        "response" => "Bad file extention! Use jpg, gif, png");
-                }
-            } else {
-                $this->resultOfAddUser = array(
-                    "error" => true,
-                    "response" => "Bad symbols in task or image link!");
-            }
-        } else {
-            $this->resultOfAddUser = array(
-                "error" => true,
-                "response" => "User not found!");
-        }
-    }
-
-
-    public function passwordUpdate(array $post) {
-
-    }
-
-    public function emailUpdate(array $post) {
-
     }
 
     /**
@@ -302,12 +188,20 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
      */
     protected function _getIsLoginPossible(array $post) {
         try {
-            $this->_validatorService->check(array('login' => $post['newLogin']));
             $this->_validatorService->check(array('login' => $post['login']));
+
+            if ($post['oldLogin'] !== '')
+                $this->_validatorService->check(array('login' => $post['oldLogin']));
+
             try {
-                $this->_validatorService->check(array('loginNotExists' => $post['newLogin']));
+                $this->_validatorService->check(
+                    array(
+                        'loginNotExists'         => $post['login'],
+                        'loginUserCreateConfirm' => $post['login'],
+                    )
+                );
             } catch (\InvalidArgumentException $e) {
-                return $post['newLogin'] === $post['login'] ? true : false;
+                return $post['login'] === $post['oldLogin'] ? true : false;
             }
         } catch (\Throwable $t) {
             return false;
@@ -325,10 +219,10 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
     protected function _storeUser(array $post) {
         try {
             $this->_validatorService->check(array('intPositive' => $post['id']));
-            $this->updateUser($post);
         } catch (\InvalidArgumentException $e) {
-            $this->_createUser($post);
+            return $this->_createUser($post);
         }
+        return $this->_updateUser($post);
     }
 
     /**
@@ -341,10 +235,17 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
         if (!$this->_permissionService->getPermissionForUserCreate($post['userTypeId']))
             throw new \InvalidArgumentException('No permission to create user with this type');
 
-        $this->_downloaderService->download($_FILES['image']['name']);
+        $createValidators = $this->__getCreateValidators(
+            $this->__getCommonStoreValidators($post),
+            $post
+        );
 
-        $user = $this->_userProfileService->getUserByArray($post, $_FILES);
-        $this->_changeConfirmService->createChangeUserCreation($user, $files);
+        $this->_validatorService->check($createValidators);
+
+        $this->__handleStoreUserImage($post);
+
+        $user = $this->_setUserByArray($post);
+        $this->_changeConfirmService->createChangeUserCreation($user);
         return array('text' => 'Вы успешно создали аккаунт, для подтверждения перейдите на указанный вами email');
     }
 
@@ -356,52 +257,103 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
     protected function _updateUser(array $post) {
         $user = $this->__getUserCheckPermission($post, 'user', 'update');
 
-        $this->__validateStoreData($post, $user);
+        $updateValidators = $this->__getUpdateValidators(
+            $this->__getCommonStoreValidators($post),
+            $post,
+            $user
+        );
 
-        return $this->_userProfileService->saveUser($post);
-        // @TODO notify by email
+        $this->_validatorService->check($updateValidators);
+
+        $this->__handleStoreUserImage($post, function($imageExt) use ($user) {
+            $tempUserImagePath = $this->_pathService->getTempUserImagePath($user->login, $imageExt);
+            $userOldImagePath  = $this->_pathService->getUserImagePath($user->image, $user->imageExt);
+
+            $newImageName     = $this->_utilsService->createRandomHash32();
+            $userNewImagePath = $this->_pathService->getUserImagePath($newImageName, $imageExt);
+            $isCopied = false;
+            if (file_exists($tempUserImagePath)) {
+                if (file_exists($userOldImagePath))
+                    unlink($userOldImagePath);
+
+                $isCopied = copy($tempUserImagePath, $userNewImagePath);
+                unlink($tempUserImagePath);
+            }
+
+            if (!$isCopied)
+                throw new \RuntimeException('Could not copy user image file');
+            return $newImageName;
+        });
+
+        $this->_setUserByArray($post, $user);
+        $this->_userProfileService->saveUser($user);
+        return array('text' => 'Вы успешно изменили данные аккаунта');
     }
 
     /**
      * @param array $post
-     * @return string
-     * @throws \InvalidArgumentException
+     * @return array
      */
-    protected function _deteteUser($post) {
+    protected function _deleteUser($post) {
         $user = $this->__getUserCheckPermission($post, 'user', 'delete');
 
-        return $this->_userProfileService->deleteUser($user);
-        // @TODO notify by email
+        $this->_changeConfirmService->createChangeUserDelete($user);
+
+        return array('text' => 'Вы успешно запросили удаление аккаунта, на email отправлено письмо для подтверждения');
     }
 
-    protected function _passwordUpdate(array $post) {
+    /**
+     * @param array $post
+     * @return array
+     * @throws \LogicException
+     */
+    protected function _updateUserType(array $post) {
+        $newUserTypeId = $post['userTypeId'];
+        $this->_validatorService->check(array('userTypeId' => $newUserTypeId));
+
+        $user = $this->__getUserCheckPermission($post, 'user type', 'update');
+        if ($user->userTypeId === $newUserTypeId)
+            throw new \LogicException('User type for this account is the same');
+
+        if (!$this->_permissionService->getPermissionForUserCreate($newUserTypeId))
+            throw new \LogicException('No permission to create user with this type');
+
+        $this->_changeConfirmService->createChangeUserType($user, $newUserTypeId);
+
+        return array('text' => 'Вы успешно изменили тип аккаунта, на email отправлено письмо для подтверждения');
+    }
+
+    /**
+     * @param array $post
+     * @return array
+     */
+    protected function _updateUserPassword(array $post) {
         $user = $this->__getUserCheckPermission($post, 'password', 'update');
 
-        // @TODO create userModifiedField
-        // @TODO send to email letter with change password instructions
+        $this->_changeConfirmService->createChangeUserPassword($user);
+
+        return array('text' => 'Вы успешно запросили новый пароль, на email отправлено письмо');
     }
 
-    protected function _emailUpdate(array $post) {
+    /**
+     * @param array $post
+     * @return array
+     */
+    protected function _updateUserEmail(array $post) {
         $user = $this->__getUserCheckPermission($post, 'email', 'update');
+        $newEmail = $post['email'];
 
         $this->_validatorService->check(
             array(
-                'email'          => $post['email'],
-                'emailNotExists' => $post['email'],
+                'email'                  => $newEmail,
+                'emailNotExists'         => $newEmail,
+                'emailUserCreateConfirm' => $newEmail,
             )
         );
 
-        // @TODO create userModifiedField
-        // @TODO send to email letter with change email instructions
-    }
+        $this->_changeConfirmService->createChangeUserEmailRequest($user, $newEmail);
 
-    protected function _userTypeUpdate(array $post) {
-        $user = $this->__getUserCheckPermission($post, 'userTypeId');
-
-
-
-        // @TODO create userModifiedField
-        // @TODO send to email letter with change password instructions
+        return array('text' => 'Вы успешно запросили изменение email, на текущий email отправлено письмо');
     }
 
     /**
@@ -427,58 +379,136 @@ VALUES ('$idUser','" . htmlspecialchars($task) . "','" . $ext . "',0)");
 
         return $user;
     }
+
     /**
-     * @param array $data
-     * @param Entity\User|null $user
+     * @param array $postChecked
+     * @param Entity\User &$user
+     * @return Entity\User &$user|void
      */
-    protected function __validateStoreData(array $data, $user = null) {
-        if (!is_array($data))
-            throw new \InvalidArgumentException('Data must be an array');
+    private function _setUserByArray(array $postChecked, &$user = null) {
+        $isCreate = $user === null;
 
-        $isNeedCheckLogin = true;
-        $isUpdate = $user !== null;
-        if ($isUpdate)
-            if ($data['login'] === $user->login)
-                $isNeedCheckLogin = false;
+        if ($isCreate) {
+            $user = new Entity\User();
+            $user->email      = $postChecked['email'];
+            $user->userTypeId = $postChecked['userTypeId'];
+        }
 
-        if ($isNeedCheckLogin)
-            $this->_validatorService->check(
-                array(
-                    'login'          => $data['login'],
-                    'loginNotExists' => $data['login']
-                )
-            );
+        $user->login    = $user->login === $postChecked['login'] ? $user->login : $postChecked['login'];
+        $user->name     = $postChecked['name'];
+        $user->surname  = $postChecked['surname'];
+        $user->phone    = $user->phone === $postChecked['phone'] ? $user->phone : $postChecked['phone'];
+        $user->sex      = intval($postChecked['sex']);
+        $user->isReady  = intval($postChecked['isReady']);
+        $user->isReadyOnlyForPartnership = intval($postChecked['isReadyOnlyForPartnership']);
+        $user->image    = $postChecked['image'] === null ? $user->image : $postChecked['image'];
+        $user->imageExt = $postChecked['imageExt'] === null ? $user->imageExt : $postChecked['imageExt'];
+        $user->comment  = $postChecked['comment'];
 
-        if (!$isUpdate)
-            $this->_validatorService->check(
-                array(
-                    'email'          => $data['email'],
-                    'emailNotExists' => $data['email'],
-                    'userTypeId'     => $data['userTypeId'],
-                )
-            );
-
-        $this->__validateUserCommonData($data, $user);
+        if ($isCreate)
+            return $user;
     }
 
     /**
-     * @param array $data
+     * @param array $post
+     * @return array
      */
-    protected function __validateUserCommonData(array $data) {
-
-        $this->_validatorService->check(
-            array(
-                'userName'    => $data['name'],
-                'userSurname' => $data['surname'],
-                'bool'        => array(
-                    $data['isReady'],
-                    $data['isReadyOnlyForPartnership'],
-                    $data['sex'],
+    private function __getCommonStoreValidators(array $post) {
+        return array(
+            'strlen'  => array(
+                array($post['name'],    array(1, 50)),
+                array($post['surname'], array(1, 50)),
+                array($post['comment'], array(1, 500)),
+            ),
+            'zeroone' =>
+                array (
+                    $post['sex'],
+                    $post['isReady'],
+                    $post['isReadyOnlyForPartnership']
                 ),
-                'comment'     => $data['comment'],
-                'ext'         => $data['ext'],
-                'phone'       => $data['phone'],
+        );
+    }
+
+    /**
+     * @param array $commonValidators
+     * @param array $post
+     * @param Entity\User|null $user
+     * @return array
+     */
+    private function __getUpdateValidators(array $commonValidators, array $post, $user = null) {
+        $updateValidators = $commonValidators;
+        if ($user->login !== $post['login'])
+            $updateValidators = array_merge(
+                $updateValidators,
+                array(
+                    'login'                  => $post['login'],
+                    'loginNotExists'         => $post['login'],
+                    'loginUserCreateConfirm' => $post['login'],
+                )
+            );
+
+        if ($user->phone !== $post['phone'])
+            $updateValidators = array_merge(
+                $updateValidators,
+                array(
+                    'phone'                  => $post['phone'],
+                    'phoneNotExists'         => $post['phone'],
+                    'phoneUserCreateConfirm' => $post['phone'],
+                )
+            );
+        return $updateValidators;
+    }
+
+    /**
+     * @param array $commonValidators
+     * @param array $post
+     * @return array
+     */
+    private function __getCreateValidators(array $commonValidators, array $post) {
+        return array_merge(
+            $commonValidators,
+            array(
+                'login'                  => $post['login'],
+                'loginNotExists'         => $post['login'],
+                'loginUserCreateConfirm' => $post['login'],
+                'email'                  => $post['email'],
+                'emailNotExists'         => $post['email'],
+                'emailUserCreateConfirm' => $post['email'],
+                'userTypeId'             => $post['userTypeId'],
+                'phone'                  => $post['phone'],
+                'phoneNotExists'         => $post['phone'],
+                'phoneUserCreateConfirm' => $post['phone'],
             )
         );
+    }
+
+    /**
+     * @param array $post
+     * @param callable|null $updateCallback
+     */
+    private function __handleStoreUserImage(array &$post, callable $updateCallback = null) {
+        if (array_key_exists('image', $_FILES)) {
+            try {
+                $path = $this->_downloaderService->downloadUserImage('image', $post['login']);
+
+                $this->_validatorService->check(
+                    array(
+                        'extImage'  => $path,
+                        'mimeImage' => $path
+                    )
+                );
+
+                $imageFileName = null;
+                $imageExt = $this->_utilsService->getExtention($path);
+                if ($updateCallback !== null && is_callable($updateCallback))
+                    $imageFileName = $updateCallback($imageExt);
+
+                $post['image']    = $imageFileName;
+                $post['imageExt'] = $imageExt;
+            } catch (\InvalidArgumentException $e) {
+                unlink($path);
+                throw new \InvalidArgumentException($e->getMessage());
+            }
+        }
     }
 }

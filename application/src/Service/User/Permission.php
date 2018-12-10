@@ -202,10 +202,11 @@ class Permission extends Basic
     public function getPermissionForUserCreate($userTypeId) {
         $permissionUserForCreate = $this->getPermissionsForUserTypesAndSelf(array('create'), true);
 
-        foreach ($permissionUserForCreate as $userType => $permissionDetails)
+        foreach ($permissionUserForCreate as $userType => $permissionDetails) {
             if ($userType === 'self') continue;
             if ($userTypeId === $permissionDetails['id'])
                 return $permissionDetails['permission'];
+        }
         return false;
     }
 

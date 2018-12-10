@@ -184,6 +184,14 @@ class Profile extends Basic
     }
 
     /**
+     * @param string $phone
+     * @return Entity\User
+     */
+    public function getUserByPhone($phone) {
+        return $this->_meetingService->getUserByPhone($phone);
+    }
+
+    /**
      * @param int $id
      * @return Entity\User
      */
@@ -219,42 +227,5 @@ class Profile extends Basic
                     unset($columns[$key]);
             }
         }
-    }
-
-    /**
-     * @param array $valuesForGettingUser
-     * @return Entity\User
-     */
-    public function getUserByArray(array $valuesForGettingUser) {
-        $this->_validateUserArray($valuesForGettingUser);
-
-        return new Entity\User();
-    }
-
-    /**
-     * @param array $valuesForCheckingUser
-     */
-    private function _validateUserArray(array $valuesForCheckingUser, array $files) {
-
-        $checkValidators = array(
-            'strlen' => array(
-                array($valuesForCheckingUser['name'],    array(1, 50)),
-                array($valuesForCheckingUser['surname'], array(1, 50)),
-                array($valuesForCheckingUser['comment'], array(1, 500)),
-            ),
-            'login'                  => $valuesForCheckingUser['login'],
-            'email'                  => $valuesForCheckingUser['email'],
-            'emailNotExists'         => $valuesForCheckingUser['email'],
-            'emailUserCreateConfirm' => $valuesForCheckingUser['email'],
-            'userTypeId'             => $valuesForCheckingUser['userTypeId'],
-            'phone'                  => $valuesForCheckingUser['phone'],
-            'zeroone'                =>
-                array (
-                    $valuesForCheckingUser['sex'],
-                    $valuesForCheckingUser['isReady'],
-                    $valuesForCheckingUser['isReadyOnlyForPartnership']
-                ),
-            'extImage'               => $files['image']['name'],
-        );
     }
 }

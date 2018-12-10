@@ -68,6 +68,26 @@ class Confirm extends Controller\Base {
         $this->view->render('Confirm', $templateParams);
     }
 
+    function actionUsertypechanging() {
+        $templateParams = array_merge(
+            $this->model->getData(),
+            array(
+                'header' => 'Изменение типа аккаунта пользователя',
+                'intent' => 'User type changing',
+                'cancel' => array (
+                    'text' => 'Отменить изменение типа аккаунта',
+                    'name' => 'cancelChangeType',
+                ),
+                'submit' => array (
+                    'text' => 'Изменить тип аккаунта',
+                    'name' => 'changeType',
+                )
+            )
+        );
+
+        $this->view->render('Confirm', $templateParams);
+    }
+
     function actionUserpasswordchanging() {
         $templateParams = array_merge(
             $this->model->getData(),

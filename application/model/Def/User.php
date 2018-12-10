@@ -17,12 +17,15 @@ use core\Service\ServiceLocator;
  * Если значение начинается с const - то оно не попадет в куки,
  * а значит будет всегда вибираться только это значение
  */
-class User extends Def
-{
+class User extends Def {
+
     /**
      * @var Service\User\Type
      */
     private $_userTypeService;
+
+    public static $constImageUserPath          = '/images/user';
+    public static $constImageUserTempPath      = '/images/user/temp';
 
     public $usersCountOnPage           = 3;
     public $constUserCountOnPageValues = '1,3,5,10,20,50,100,500';
@@ -30,7 +33,6 @@ class User extends Def
     public $sortingDirection           = 'asc';
     public $userSearchText             = '';
     public $pageNumber                 = 1;
-    public $constImageUserPath         = '/images/user/user_';
     public $constUserCommentLength     = 500;
     public $constUserImageWidth        = 320;
     public $constUserImageHeight       = 240;
@@ -38,10 +40,10 @@ class User extends Def
 
     function __construct() {
         $this->_userTypeService = ServiceLocator::userTypeService();
-        $this->constUsersTypes   = $this->_userTypeService->getUsersTypesSecure();
+        $this->constUsersTypes  = $this->_userTypeService->getUsersTypesSecure();
     }
 
     public function get() {
-        return parent::getRun();
+        return parent::_getRun();
     }
 }

@@ -15,7 +15,7 @@
         {% if inputs is not empty %}
             {%for input in inputs%}
             <div class="form-group">
-                <label class="control-label col-sm-3">{{input.text}}</label>
+                <label class="control-label col-sm-12">{{input.text}}</label>
                 <div class="col-sm-9">
                     <input type="text" name="{{input.name}}" class="form-control" placeholder="{{input.placeholder}}" required{{ input.autofocus ? ' autofocus' : '' }}">
                 </div>

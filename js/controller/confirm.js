@@ -3,7 +3,7 @@
  */
 
 $(document).ready(function() {
-    $('form div > button').on('click', function(e){
+    $('form div > button').on('click', function(e) {
         e.preventDefault();
         $('form div > button').attr('disabled', 'disabled');
         var isCancel = $(e.target).attr('type') === 'cancel';
@@ -18,6 +18,12 @@ function prepareData(cancel = false) {
         intent:      window['ACTION_INTENT'],
         hash:        $.urlParam('hash')
     };
+
+    if ($.urlParam('login'))
+        data['login'] = $.urlParam('login');
+
+    if ($.urlParam('imageExt'))
+        data['imageExt'] = $.urlParam('imageExt');
 
     $.each($('form input'), function() {
         data[$(this).attr('name')] = $(this).val();
@@ -40,8 +46,7 @@ function userCreationConfirmaionAjax(data, error) {
         },
         error,
         '.js-response',
-        '.js-response',
-        true
+        '.js-response'
     );
 }
 

@@ -12,6 +12,7 @@ $(document).ready(function() {
             this.userSearchText             = this.getDefaultOrSessionCookie('DEF_USER_SEARCH_TEXT');
             this.pageNumber                 = this.getDefaultOrSessionCookie('DEF_PAGE_NUMBER');
             this.constImageUserPath         = this.getDefaultOrSessionCookie('DEF_CONST_IMAGE_USER_PATH');
+            this.isNeedResearch     = true;
             this.usersCount         = 0;
             this.foundedUsersData   = undefined;
             this.storeUserData      = {};
@@ -294,7 +295,7 @@ $(document).ready(function() {
                     '<div class="media">' +
                         '<div style="width: 250px;">' +
                             '<div class="media js-image">' +
-                                 '<img onerror="this.onerror=null;this.src=\'' + this.constImageUserPath + '0.jpg\';" class="img-thumbnail rounded float-left" src="">' +
+                                 '<img onerror="this.onerror=null;this.src=\'' + this.constImageUserPath + '/0.jpg\';" class="img-thumbnail rounded float-left" src="">' +
                             '</div>' +
                         '</div>' +
                         '<div class="media-body ml-3">' +
@@ -327,71 +328,78 @@ $(document).ready(function() {
             if (this.permissions.users[user.id]['update'] === true) {
                 var self = this;
                 $tab.hover(function(){
-                    // User type update
-                    var $userType = $tab.find('.js-user-type');
-                    $userType.prepend(
-                        '<div class="js-user-type-store-container" style="position:relative;">' +
-                            '<button class="btn btn-xs btn-success fas fa-user-alt js-user-type-store" style="position:absolute; z-index:1300;"></button>' +
-                        '</div>')
-                    .find('.js-user-type-store')
-                    .on('click', function(e) {
-                        e.preventDefault();
-                        $('.js-user-store-container').remove();
-                        $('.js-user-type-store-container').remove();
-                        $('.js-user-password-store-container').remove();
-                        $('.js-user-email-store-container').remove();
-                        var className = 'js-user-type-store-modal-' + user['id'];
-                        self.createModal(
-                            className,
-                            'Изменить тип аккаунта',
-                            'Изменить',
-                            function(e) {
-                                $(e.target).attr('disabled', 'disabled');
-                                self.simpleAjax(
-                                    {
-                                        intent:     'Update user type',
-                                        id:         user.id,
-                                        userTypeId: $userTypeSelect.find('option:selected').val(),
-                                    },
-                                    undefined,
-                                    function() {
-                                        $(e.target).attr('disabled', false);
-                                    },
-                                    'Ошибка изменения типа аккаунта',
-                                    '.' + className + ' .js-response-modal');
-                            }
-                        );
-                        var $userTypeModalBody =
-                        $(
-                            '<div>' +
-                                '<label class="control-label col-sm-3">Тип аккаунта</label>' +
-                                '<div class="js-user-type">' +
-                                    '<select class="form-control js-user-type"></select>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div>' +
-                                '<div class="col-sm-12 text-center js-response-modal"></div>' +
-                            '</div>'
-                        );
-                        var $userTypeSelect = $userTypeModalBody.find('.js-user-type select');
-                        var $usersTypes = window['DEF_CONST_USERS_TYPES'];
-                        $.each($usersTypes, function(field, value) {
-                            if (self.permissions.create[field] !== undefined)
-                                self.createSelectOptions(
-                                    $userTypeSelect,
-                                    field,
-                                    value['description'],
-                                    user['userTypeId']
-                                )
-                        });
-                        $('.' + className + ' .modal-body').append($userTypeModalBody);
+
+                    var isCanUserTypeUpdate = false;
+                    var $usersTypes = window['DEF_CONST_USERS_TYPES'];
+                    $.each($usersTypes, function(field, value) {
+                        if (self.permissions.create[field] !== undefined && field !== user['userTypeId'])
+                            isCanUserTypeUpdate = true;
                     });
+
+                    // User type update
+                    if (isCanUserTypeUpdate) {
+                        var $userType = $tab.find('.js-user-type');
+                        $tab.prepend(
+                            '<div class="js-user-type-store-container" style="position:relative;">' +
+                                '<button class="btn btn-xs btn-success fas fa-user-alt js-user-type-store" style="position:absolute; top: 12px; left: 12px; z-index:1300;"></button>' +
+                            '</div>')
+                            .find('.js-user-type-store')
+                            .on('click', function (e) {
+                                e.preventDefault();
+                                $('.js-user-store-container').remove();
+                                $('.js-user-type-store-container').remove();
+                                $('.js-user-password-store-container').remove();
+                                $('.js-user-email-store-container').remove();
+                                var className = 'js-user-type-store-modal-' + user['id'];
+                                self.createModal(
+                                    className,
+                                    'Изменить тип аккаунта',
+                                    'Изменить',
+                                    function (e) {
+                                        $(e.target).attr('disabled', 'disabled');
+                                        self.simpleAjax(
+                                            {
+                                                intent: 'Update user type',
+                                                id: user.id,
+                                                userTypeId: $userTypeSelect.find('option:selected').val(),
+                                            },
+                                            undefined,
+                                            function () {
+                                                $(e.target).attr('disabled', false);
+                                            },
+                                            'Ошибка изменения типа аккаунта',
+                                            '.' + className + ' .js-response');
+                                    }
+                                );
+                                var $userTypeModalBody =
+                                    $(
+                                        '<div>' +
+                                            '<label class="control-label col-sm-4">Тип аккаунта</label>' +
+                                            '<div class="js-user-type">' +
+                                                '<select class="form-control js-user-type"></select>' +
+                                            '</div>' +
+                                        '</div>'
+                                    );
+                                var $userTypeSelect = $userTypeModalBody.find('.js-user-type select');
+                                var $usersTypes = window['DEF_CONST_USERS_TYPES'];
+                                $.each($usersTypes, function (field, value) {
+                                    if (self.permissions.create[field] !== undefined)
+                                        self.createSelectOptions(
+                                            $userTypeSelect,
+                                            field,
+                                            value['description'],
+                                            user['userTypeId']
+                                        )
+                                });
+                                $('.' + className + ' .modal-body').append($userTypeModalBody);
+                            });
+                    }
 
                     // User password update
                     var $userPassword = $tab.find('.js-phone');
                     $userPassword.prepend(
                         '<div class="js-user-password-store-container" style="position:relative;">' +
-                            '<button class="btn btn-xs btn-success fas fa-lock js-user-password-store" style="position:absolute; z-index:1300;"></button>' +
+                            '<button class="btn btn-xs btn-success fas fa-lock js-user-password-store" style="position:absolute; top: -5px; left: -9px; z-index:1300;"></button>' +
                         '</div>')
                         .find('.js-user-password-store')
                         .on('click', function(e) {
@@ -417,15 +425,13 @@ $(document).ready(function() {
                                             $(e.target).attr('disabled', false);
                                         },
                                         'Ошибка запроса пароля',
-                                        '.' + className + ' .js-response-modal');
+                                        '.' + className + ' .js-response');
                                 }
                             );
                             var $userPasswordModalBody =
                                 $(
                                     '<div>' +
-                                    '<label class="control-label col-sm-3">На Вашу почту будет отправлено письмо</label>' +
-                                    '</div>' +
-                                    '<div class="col-sm-12 text-center js-response-modal"></div>' +
+                                        '<label class="control-label col-sm-12">На Вашу почту будет отправлено письмо</label>' +
                                     '</div>'
                                 );
                             $('.' + className + ' .modal-body').append($userPasswordModalBody);
@@ -435,7 +441,7 @@ $(document).ready(function() {
                     var $userEmail = $tab.find('.js-email');
                     $userEmail.prepend(
                         '<div class="js-user-email-store-container" style="position:relative;">' +
-                            '<button class="btn btn-xs btn-success fas fa-at js-user-email-store" style="position:absolute; right: 1px; z-index:1300;"></button>' +
+                            '<button class="btn btn-xs btn-success fas fa-at js-user-email-store" style="position:absolute; top: -5px; right: -9px; z-index:1300;"></button>' +
                         '</div>')
                         .find('.js-user-email-store')
                         .on('click', function(e) {
@@ -454,7 +460,7 @@ $(document).ready(function() {
                                     self.simpleAjax(
                                         {
                                             intent: 'Update user email',
-                                            email:  $('.js-user-email-store input').val(),
+                                            email:  $userPasswordModalBody.find('input').val(),
                                             id:     user.id,
                                         },
                                         undefined,
@@ -462,16 +468,14 @@ $(document).ready(function() {
                                             $(e.target).attr('disabled', false);
                                         },
                                         'Ошибка запроса email',
-                                        '.' + className + ' .js-response-modal');
+                                        '.' + className + ' .js-response');
                                 }
                             );
                             var $userPasswordModalBody =
                                 $(
                                     '<div>' +
-                                        '<label class="control-label col-sm-3">Введите адрес Вашего нового email</label>' +
+                                        '<label class="control-label col-sm-12">Введите адрес Вашего нового email</label>' +
                                         '<input class="form-control" type="text" placeholder="Email">' +
-                                    '</div>' +
-                                    '<div class="col-sm-12 text-center js-response-modal"></div>' +
                                     '</div>'
                                 );
                             $('.' + className + ' .modal-body').append($userPasswordModalBody);
@@ -491,8 +495,51 @@ $(document).ready(function() {
                         $('.js-user-password-store-container').remove();
                         $('.js-user-email-store-container').remove();
                         var className = 'js-user-store-modal-' + user['id'];
-                        var secondAction = self.permissions.users[user.id]['delete'] === true ? 'Удалить' : null;
-                        self.createStoreModal(className, 'Редактировать', 'Изменить', secondAction);
+                        var secondAction, secondActionCallback = undefined;
+                        if (self.permissions.users[user.id]['delete'] === true) {
+                            secondAction = 'Удалить';
+                            secondActionCallback = function(e) {
+                                // User account delete request
+                                e.preventDefault();
+                                /*$('.js-user-store-container').remove();
+                                $('.js-user-type-store-container').remove();
+                                $('.js-user-password-store-container').remove();
+                                $('.js-user-email-store-container').remove();*/
+                                var className = 'js-user-delete-modal-' + user['id'];
+                                self.createModal(
+                                    className,
+                                    'Запрос удаления аккаунта',
+                                    'Да',
+                                    function(e) {
+                                        $(e.target).attr('disabled', 'disabled');
+                                        self.simpleAjax(
+                                            {
+                                                intent: 'Delete user',
+                                                id:     user.id,
+                                            },
+                                            undefined,
+                                            function() {
+                                                $(e.target).attr('disabled', false);
+                                            },
+                                            'Ошибка запроса на уделение',
+                                            '.' + className + ' .js-response');
+                                    },
+                                    'Нет',
+                                    function(e) {
+                                        $('.modal.fade.show.' + className).next().remove();
+                                        $('.modal.fade.show.' + className).remove();
+                                    }
+                                );
+                                var $userPasswordModalBody =
+                                    $(
+                                        '<div>' +
+                                            '<label class="control-label col-sm-12">Вы действительно хотите удалить аккаунт?</label>' +
+                                        '</div>'
+                                    );
+                                $('.' + className + ' .modal-body').append($userPasswordModalBody);
+                            }
+                        }
+                        self.createStoreModal(className, 'Редактировать', 'Изменить', secondAction, secondActionCallback);
                         self.fillStoreModal(className);
                         self.fillUserTabStoreFields(className);
                         self.fillUserTabStoreRealValues(className, user);
@@ -506,7 +553,7 @@ $(document).ready(function() {
                 });
             }
 
-            $tab.find('.js-image img').attr('src', this.constImageUserPath + user['id'] + '.' + user['ext']);
+            $tab.find('.js-image img').attr('src', this.constImageUserPath + '/' + user['image'] + '.' + user['imageExt']);
             $tab.find('.js-name').text(user['name']);
             $tab.find('.js-surname').text(user['surname']);
             $tab.find('.js-email').text(user['email']);
@@ -610,7 +657,8 @@ $(document).ready(function() {
         }
         fillUserTabStoreRealValues(className, user) {
             var $tab = $('div.modal.fade.show.' + className + ' > div > div > div.modal-body > div');
-            $tab.find('.js-image img').attr('src','/images/user/user_' + user['id'] + '.' + user['ext']);
+            $tab.find('.js-image img').attr('src', this.constImageUserPath + '/' + user['image'] +
+                '.' + user['imageExt']);
             $tab.find('.js-login input').val(user['login']);
             $tab.find('.js-login input').data('startValue', user['login']);
             if (user['sex'] == false) {
@@ -677,6 +725,9 @@ $(document).ready(function() {
                             '</div>' +
                             '<div class="modal-body">' +
                             '</div>' +
+                            '<div class="modal-response form-group">' +
+                                '<div class="col-sm-12 text-center js-response"></div>' +
+                            '</div>' +
                             '<div class="modal-footer">' +
                                 '<button type="button" class="btn btn-primary js-modal-action">' + action + '</button>' +
                             '</div>' +
@@ -688,20 +739,21 @@ $(document).ready(function() {
             $modal.find('.modal-footer button.js-modal-action').on('click', function(e){
                 actionCallback(e);
             });
-            if (typeof secondAction === 'string' && Boolean(secondAction)) {
+            if (typeof secondAction === 'string' && Boolean(secondAction))
                 $modal.find('.modal-footer')
                     .prepend('<button type="button" class="btn btn-danger js-modal-action-second">' +
                     secondAction + '</button>');
+            if (typeof secondActionCallback === 'function' && Boolean(secondActionCallback))
                 $modal.find('.modal-footer button.js-modal-action-second').on('click', function(e){
                     secondActionCallback(e);
                 });
-            }
-            $modal.find('.modal-header button').on('click', function(){
+
+            $modal.find('.modal-header button').on('click', function() {
                 $modal.remove();
             });
             $('body').append($modal);
         }
-        createStoreModal(className, title, action, secondAction){
+        createStoreModal(className, title, action, secondAction = undefined, secondActionCallback = undefined){
             var $modal = $(
                 '<div class="modal fade show ' + className + '" tabindex="-1" role="dialog"' +
                     'aria-labelledby="exampleModalLongTitle" aria-hidden="true" style="display: block; padding-right: 17px;">' +
@@ -715,6 +767,9 @@ $(document).ready(function() {
                             '</div>' +
                             '<div class="modal-body">' +
                             '</div>' +
+                            '<div class="modal-response form-group">' +
+                                '<div class="col-sm-12 text-center js-response"></div>' +
+                            '</div>' +
                             '<div class="modal-footer">' +
                                 '<button type="button" class="btn btn-primary js-modal-action">' + action + '</button>' +
                             '</div>' +
@@ -723,13 +778,19 @@ $(document).ready(function() {
                 '</div>' +
                 '<div class="modal-backdrop fade show"></div>'
             );
-            if (typeof secondAction === 'string' && Boolean(secondAction)) {
+            if (typeof secondAction === 'string' && Boolean(secondAction))
                 $modal.find('.modal-footer')
                     .prepend('<button type="button" class="btn btn-danger js-modal-action-second">' +
                         secondAction + '</button>');
-            }
+            if (typeof secondActionCallback === 'function' && Boolean(secondActionCallback))
+                $modal.find('button.js-modal-action-second').on('click', function(e) {
+                    secondActionCallback(e);
+                });
+            var self = this;
             $modal.find('.modal-header button').on('click', function(){
                 $modal.remove();
+                if (self.isNeedResearch)
+                    self.reloadSearch();
             });
             $('body').append($modal);
         }
@@ -834,10 +895,11 @@ $(document).ready(function() {
                     self.createUsers();
                     self.createCreateBlock();
                     self.createPagesBlock();
+                    this.isNeedResearch = false;
                 }
             });
         }
-        checkIsLoginPossible(className, login, newLogin) {
+        checkIsLoginPossible(className, oldLogin, login) {
             var errorMessage = 'Ошибка проверки корректности логина: ';
             var self = this;
             var $indicator = $('div.modal.fade.show.' + className +' .modal-body .card-header div span');
@@ -847,8 +909,8 @@ $(document).ready(function() {
                 method: 'post',
                 data: {
                     intent: 'Get is login possible',
+                    oldLogin: oldLogin,
                     login: login,
-                    newLogin: newLogin,
                 },
                 dataType: 'json',
                 async: false,
@@ -872,10 +934,12 @@ $(document).ready(function() {
             });
         }
         storeUser(className, id) {
-            var errorMessage = 'Ошибка обновления пользователя: ';
             var self = this;
 
             self.setUserData(className, id);
+            var errorMessage = self.storeUserData['id'] === 'null'
+                ? 'Ошибка создания пользователя'
+                : 'Ошибка обновления пользователя';
 
             var $tab = $('div.modal.fade.show.' + className + ' .modal-body .card');
 
@@ -883,8 +947,40 @@ $(document).ready(function() {
             $.each(self.storeUserData, function(prop, value) {
                 data.append(prop, value);
             });
-
-            $.ajax({
+            $('div.modal.fade.show.' + className + ' .modal-footer button').attr('disabled', 'disabled');
+            self.simpleAjax(
+                data,
+                function() {
+                    if (self.storeUserData['id'] !== 'null')
+                        self.isNeedResearch = true;
+                    return false;
+                },
+                function() {
+                    var $indicator = $('div.modal.fade.show.' + className + ' .modal-body .card-header div span');
+                    $indicator.removeClass('fa-exclamation-triangle');
+                    $('div.modal.fade.show.' + className + ' .modal-footer button').attr('disabled', false);
+                },
+                errorMessage,
+                '.js-response',
+                true
+            )
+            /*window.ajax.run(
+                '/user/json',
+                data,
+                undefined,
+                function() {
+                    var $indicator = $('div.modal.fade.show.' + className + ' .modal-body .card-header div span');
+                    $indicator.removeClass('fa-exclamation-triangle');
+                    $('div.modal.fade.show.' + className + ' .modal-footer button').attr('disabled', false);
+                },
+                errorMessage,
+                '.js-response',
+                '.js-response',
+                true,
+                true,
+                true
+            );*/
+           /* $.ajax({
                 url: document.location.origin + '/user/json',
                 method: 'post',
                 data: data,
@@ -892,8 +988,7 @@ $(document).ready(function() {
                 processData: false,
                 contentType: false,
                 complete: function () {
-                    /*$('div.modal.fade.show.' + className +' .modal-body .card-header div span')
-                        .removeClass('fa-spinner').removeClass('fa-spin');*/
+
                 },
                 error: function (xhr, status, error) {
                     $.fn.iNotify(errorMessage + status, 'warning');
@@ -909,26 +1004,27 @@ $(document).ready(function() {
                         return;
                     }
                 }
-            });
+            });*/
         }
         setUserData(className, id) {
             if (!Boolean(id)) id = 'null';
 
             this.storeUserData['intent'] = 'Store user';
-            this.storeUserData['id'] = id;
+            this.storeUserData['id']     = id;
 
             var $tab = $('div.modal.fade.show.' + className + ' .modal-body .card');
-            this.storeUserData['name'] = $tab.find('.js-name input').val();
-            this.storeUserData['surname'] = $tab.find('.js-surname input').val();
-            this.storeUserData['email'] = $tab.find('.js-email input').val();
-            this.storeUserData['login'] = $tab.find('.js-login input').data('startValue');
-            this.storeUserData['newLogin'] = $tab.find('.js-login input').val();
-            this.storeUserData['isReady'] = window.helper.isBadge($tab.find('.js-is_ready')).toString();
+            this.storeUserData['oldLogin']   = $tab.find('.js-login input').data('startValue');
+            this.storeUserData['login']      = $tab.find('.js-login input').val();
+            this.storeUserData['email']      = $tab.find('.js-email input').val();
+            this.storeUserData['userTypeId'] = $tab.find('.js-user-type select option:selected').val();
+            this.storeUserData['name']       = $tab.find('.js-name input').val();
+            this.storeUserData['surname']    = $tab.find('.js-surname input').val();
+            this.storeUserData['phone']      = $tab.find('.js-phone input').val();
+            this.storeUserData['sex']        = +window.helper.isBadge($tab.find('.js-sex div'));
+            this.storeUserData['isReady']    = +window.helper.isBadge($tab.find('.js-is_ready'));
             this.storeUserData['isReadyOnlyForPartnership'] =
-                window.helper.isBadge($tab.find('.js-is_ready_only_for_partnership')).toString();
-            this.storeUserData['comment'] = $tab.find('.js-login textarea').text();
-            this.storeUserData['sex'] = window.helper.isBadge($tab.find('.js-sex div')).toString();
-            this.storeUserData['phone'] = $tab.find('.js-phone input').val();
+               +window.helper.isBadge($tab.find('.js-is_ready_only_for_partnership'));
+            this.storeUserData['comment']    = $tab.find('.js-comment textarea').val();
         }
         createSelectOptions($select, value, text, selectedField) {
             var option = document.createElement('option');
@@ -939,8 +1035,7 @@ $(document).ready(function() {
             option.innerText = text;
             $select.append(option);
         }
-        simpleAjax(data, successFunction, completeFunction, error, responseTextAndSpinnerSelector) {
-            this.prepareAnswerContainer();
+        simpleAjax(data, successFunction, completeFunction, error, responseTextAndSpinnerSelector, isFormData = false) {
             window.ajax.run(
                 '/user/json',
                 data,
@@ -948,17 +1043,11 @@ $(document).ready(function() {
                 completeFunction,
                 error,
                 responseTextAndSpinnerSelector,
-                responseTextAndSpinnerSelector
+                responseTextAndSpinnerSelector,
+                isFormData,
+                true,
+                true
             );
-        }
-        prepareAnswerContainer() {
-            var $buttonSubmit = $('form > div:nth-last-child(1)');
-            if ($('.js-response')[0] === undefined)
-                $buttonSubmit.before(
-                    '<div class="form-group">' +
-                    '<div class="col-sm-12 text-center js-response"></div>' +
-                    '</div>'
-                );
         }
         create() {
             if (Boolean(parseInt(window['PERMISSION_USER_SHOW_SEARCH_BLOCK']))) {

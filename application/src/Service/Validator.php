@@ -9,9 +9,9 @@
 namespace Service;
 
 use core\Service\ServiceLocator;
-use Service\Basic;
 use Service;
 use \InvalidArgumentException;
+use model\Def;
 
 class Validator extends Basic
 {
@@ -240,14 +240,24 @@ class Validator extends Basic
     /**
      * @param string $email
      */
+    private function _loginUserCreateConfirm($email) {
+        $loginsOfUserCreation = $this->_changeConfirmService->getLoginOfUserCreation($email);
+
+        if (is_array($loginsOfUserCreation) && count($loginsOfUserCreation) > 0)
+            throw new \InvalidArgumentException('This login used in account creation request');
+    }
+
+    /**
+     * @param string $email
+     */
     private function _email($email) {
         $this->_strlen($email, array(1, 80));
 
-        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            if (!checkdnsrr(substr($email, strpos($email, "@") + 1, strlen($email)), 'MX')) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+            throw new \InvalidArgumentException('Bad email value');
+
+        if (!checkdnsrr(substr($email, strpos($email, "@") + 1, strlen($email)), 'MX'))
                 throw new \InvalidArgumentException('Bad email');
-            }
-        }
     }
 
     /**
@@ -268,7 +278,7 @@ class Validator extends Basic
         $emailsOfUserCreation = $this->_changeConfirmService->getEmailOfUserCreation($email);
 
         if (is_array($emailsOfUserCreation) && count($emailsOfUserCreation) > 0)
-            throw new \InvalidArgumentException('This email used in account creation request');
+            throw new \InvalidArgumentException('This email used in account creation or email changing request');
     }
 
     /**
@@ -278,11 +288,10 @@ class Validator extends Basic
         $this->_intPositive($userTypeId);
 
         $userTypes = $this->_userTypeService->getUsersTypes();
-        if (empty($userTypes) || !in_array($userTypes))
+        if (empty($userTypes) || !is_array($userTypes))
             throw new \InvalidArgumentException('Users types ids is empty or not array');
 
-        $userTypesIds = array_keys($userTypes);
-        if (!in_array($userTypesIds))
+        if (!array_key_exists(intval($userTypeId), $userTypes))
             throw new \InvalidArgumentException('User type id is not valid');
     }
 
@@ -290,7 +299,36 @@ class Validator extends Basic
      * @param string $phone
      */
     private function _phone($phone) {
+        if (strlen($phone) !== Def\Def::$constPhoneNumberLength + 1)
+            throw new \InvalidArgumentException('Phone must have ' . (Def\Def::$constPhoneNumberLength + 1) . ' chars');
 
+        if (substr($phone, 0, 1) !== '+')
+            throw new \InvalidArgumentException("Phone first char must be a '+'");
+
+        if (!preg_match('/[0-9]/', substr($phone, 1)))
+            throw new \InvalidArgumentException("Phone  be a '+' and " . Def\Def::$constPhoneNumberLength .
+                ' digits');
+    }
+
+    /**
+     * @param string $phone
+     */
+    private function _phoneNotExists($phone) {
+        $user = $this->_userProfileService->getUserByPhone($phone);
+
+        if ($user === null)
+            return;
+        throw new \InvalidArgumentException('User with this phone has been already exists');
+    }
+
+    /**
+     * @param string $phone
+     */
+    private function _phoneUserCreateConfirm($phone) {
+        $phonesOfUserCreation = $this->_changeConfirmService->getPhoneOfUserCreation($phone);
+
+        if (is_array($phonesOfUserCreation) && count($phonesOfUserCreation) > 0)
+            throw new \InvalidArgumentException('This phone used in account creation');
     }
 
     /**
@@ -301,7 +339,7 @@ class Validator extends Basic
 
         $intZeroOne = intval($zeroone);
 
-        if ($intZeroOne !== 0 || $intZeroOne !== 1)
+        if ($intZeroOne < 0 || $intZeroOne > 1)
             throw new \InvalidArgumentException("Value must be '0' or '1'");
     }
 

@@ -23,6 +23,11 @@ class Confirm extends Model
      */
     private $_validatorService;
 
+    /**
+     * @var Service\Path
+     */
+    private $_pathService;
+
     function __construct() {
         parent::__construct();
     }
@@ -30,6 +35,7 @@ class Confirm extends Model
     protected function _initAjaxServices() {
         $this->_changeConfirmService = ServiceLocator::changeConfirmService();
         $this->_validatorService     = ServiceLocator::validatorService();
+        $this->_pathService          = ServiceLocator::pathService();
     }
 
     protected function _initRenderServices() {}
@@ -48,7 +54,14 @@ class Confirm extends Model
      * @return string
      */
     protected function _userCreationConfirmation($post) {
+        $userImageTempPath = isset($post['login']) && isset($post['imageExt'])
+            ? $this->_pathService->getTempUserImagePath($post['login'], $post['imageExt'])
+            : '';
+
         if ($post['cancel'] === 'true') {
+            if (file_exists($userImageTempPath))
+                unlink($userImageTempPath);
+
             if (!$this->_changeConfirmService->cancelUserChangeConfirm(Service\ChangeConfirm::CREATE_USER, $post['hash']))
                 throw new \LogicException('Could not cancel your account creation');
             return array('text' => 'Вы успешно отменили создание своего аккаунта');
@@ -75,6 +88,23 @@ class Confirm extends Model
 
         $this->_changeConfirmService->changeAfterConfirmUserDelete($post['hash']);
         return array('text' => 'Вы успешно подтвердили удаление аккаунта');
+    }
+
+    /**
+     * @param array $post
+     * @return string
+     */
+    protected function _userTypeChanging($post) {
+        if ($post['cancel'] === 'true') {
+            if (!$this->_changeConfirmService->cancelUserChangeConfirm(Service\ChangeConfirm::CHANGE_USER_TYPE, $post['hash']))
+                throw new \LogicException('Could not cancel your account type changing');
+            return array('text' => 'Вы успешно отменили изменение типа своего аккаунта');
+        }
+
+        $this->_validatorService->check(array('hash128' => $post['hash']));
+
+        $this->_changeConfirmService->changeAfterConfirmUserType($post['hash']);
+        return array('text' => 'Вы успешно изменили типа вашего аккаунта');
     }
 
     /**

@@ -11,15 +11,16 @@ namespace Service;
 use core\Service\ServiceLocator;
 use Entity;
 use Entity\Factory;
-use Service\Basic;
 use Service\Repository\Meeting;
 use Service;
 use Symfony\Component\Process\Exception\LogicException;
+use model\Def;
 
 class ChangeConfirm extends Basic
 {
     const CREATE_USER               = 'create_user';
     const DELETE_USER               = 'delete_user';
+    const CHANGE_USER_TYPE          = 'change_user_type';
     const CHANGE_USER_PASSWORD      = 'change_user_password';
     const CHANGE_USER_EMAIL_REQUEST = 'change_user_email_request';
     const CHANGE_USER_EMAIL         = 'change_user_email';
@@ -84,7 +85,10 @@ class ChangeConfirm extends Basic
         $email = $this->_emailService->create(
             $newUser->email,
             Service\Email::USER_CREATE_CONFIRM,
-            null,
+            array(
+                'login'    => $newUser->login,
+                'imageExt' => $newUser->imageExt,
+            ),
             $hash
         );
 
@@ -103,6 +107,7 @@ class ChangeConfirm extends Basic
      * @param string $hash
      * @throws \LogicException
      * @throws \Exception
+     * @throws \RuntimeException
      */
     public function createAfterConfirmUser($hash) {
         $this->_removeOld('User');
@@ -122,25 +127,22 @@ class ChangeConfirm extends Basic
 
         $this->_userProfileService->saveUser($user);
 
+        $tempUserImagePath = $this->_pathService->getTempUserImagePath($user->login, $user->imageExt);
+        $userImagePath     = $this->_pathService->getUserImagePath($user->image, $user->imageExt);
+        $isCopied = true;
+        if (file_exists($tempUserImagePath)) {
+            $isCopied = copy($tempUserImagePath, $userImagePath);
+            unlink($tempUserImagePath);
+        }
+
         $this->_removeAllEntitiesByNewValueWithSameHash('User', 'email', $user->email);
 
         $this->_contextService->executeInUserContext(function() use ($user, $hash){
             $this->createChangeUserPassword($user, $hash);
         }, $user);
-    }
 
-    /**
-     * @param $email
-     * @return Entity\ChangeConfirm[]
-     */
-    public function getEmailOfUserCreation($email) {
-        return $this->_findByEntityNameAndFilter('User',
-            array(
-                'type'               => self::CREATE_USER,
-                'newValue'           => $email,
-                'dateTimeExpires >=' => $this->_dateTimeService->formatMySqlUtc() . ' UTC'
-            )
-        );
+        if (!$isCopied)
+            throw new \RuntimeException('Could not copy user image file. Login and try again');
     }
 
     /**
@@ -181,6 +183,7 @@ class ChangeConfirm extends Basic
      * @param string $hash
      * @throws \InvalidArgumentException
      * @throws \LogicException
+     * @throws \RuntimeException
      */
     public function changeAfterConfirmUserDelete($hash) {
         $this->_removeOld('User');
@@ -204,7 +207,82 @@ class ChangeConfirm extends Basic
 
         $this->_userProfileService->deleteUser($user);
 
+        $userImagePath = $this->_pathService->getUserImagePath($user->id, $user->imageExt);
+        $isDeletedFile = true;
+        if (file_exists($userImagePath))
+            $isDeletedFile = unlink($userImagePath);
+
         $this->_removeAllEntitiesByEntityIdAndType('User', self::DELETE_USER, $user->id);
+
+        if (!$isDeletedFile)
+            throw new \RuntimeException('Account was deleted, but could not delete user image file');
+    }
+
+    /**
+     * @param Service\User $user
+     * @param string $userTypeId
+     * @throws \Exception
+     */
+    public function createChangeUserType($user, $userTypeId) {
+        $hash = $this->_utilsService->createRandomHash128();
+
+        $email = $this->_emailService->create(
+            $user->email,
+            Service\Email::USER_CHANGE_TYPE_CONFIRM,
+            null,
+            $hash
+        );
+
+        if (!$this->_emailService->send($email, $user->name, $user->surname))
+            throw new \Exception('Email not sent');
+
+        $this->_removeOld('User');
+        $this->_removeAllEntitiesByEntityIdAndType('User', self::CHANGE_USER_TYPE, $user->id);
+
+        $typeChangeConfirm = $this->_createChangeConfirm(
+            $user->id,
+            $user->userTypeId,
+            'User',
+            self::CHANGE_USER_TYPE,
+            'user_type_id',
+            intval($userTypeId),
+            $hash,
+            'Confirmation of user type changing',
+            $this->_dateTimeService->formatMySqlNextHourUtc());
+
+        $this->_saveChangesConfirms(array($typeChangeConfirm));
+    }
+
+    /**
+     * @param string $hash
+     * @throws \InvalidArgumentException
+     * @throws \LogicException
+     */
+    public function changeAfterConfirmUserType($hash) {
+        $this->_removeOld('User');
+
+        $userPasswordChangesConfirms = $this->_findByEntityNameAndFilter('User',
+            array(
+                'type'               => self::CHANGE_USER_TYPE,
+                'hash'               => $hash,
+                'dateTimeExpires >=' => $this->_dateTimeService->formatMySqlUtc() . ' UTC'
+            )
+        );
+
+        if (empty($userPasswordChangesConfirms))
+            throw new \LogicException('Confirmation user type changing already expired or removed');
+
+        $userPasswordChangeConfirm = $userPasswordChangesConfirms[0];
+
+        $user = $this->_userProfileService->getUserById($userPasswordChangeConfirm->entityId);
+        if ($user === null)
+            throw new \InvalidArgumentException('No user found for this action');
+
+        $user->userTypeId = $userPasswordChangeConfirm->newValue;
+
+        $this->_userProfileService->saveUser($user);
+
+        $this->_removeAllEntitiesByEntityIdAndType('User', self::CHANGE_USER_TYPE, $user->id);
     }
 
     /**
@@ -421,14 +499,65 @@ class ChangeConfirm extends Basic
      * @param string $type
      * @param string $hash
      * @return bool
+     * @throws \LogicException
      */
     private function _cancelChangeConfirm($entityName, $type, $hash) {
-        return $this->_removeByEntityNameAndFilter(
+        $resultOfDeletion = $this->_removeByEntityNameAndFilter(
             $entityName,
             array(
                 'type' => $type,
                 'hash' => $hash
             )
+        );
+
+        if (!$resultOfDeletion)
+            throw new \LogicException('No such confirmation was found');
+
+        return $resultOfDeletion;
+    }
+
+    /**
+     * @param $email
+     * @return Entity\ChangeConfirm[]
+     */
+    public function getEmailOfUserCreation($email) {
+
+        return $this->_findActualChangesConfirmsByTypeAndNewValue(
+            'User',
+            array(
+                self::CREATE_USER,
+                self::CHANGE_USER_EMAIL_REQUEST,
+                self::CHANGE_USER_EMAIL
+            ),
+            $email
+        );
+    }
+
+    /**
+     * @param $phone
+     * @return Entity\ChangeConfirm[]
+     */
+    public function getPhoneOfUserCreation($phone) {
+        return $this->_findActualChangesConfirmsByTypeAndNewValue(
+            'User',
+            array(
+                self::CREATE_USER
+            ),
+            $phone
+        );
+    }
+
+    /**
+     * @param $login
+     * @return Entity\ChangeConfirm[]
+     */
+    public function getLoginOfUserCreation($login) {
+        return $this->_findActualChangesConfirmsByTypeAndNewValue(
+            'User',
+            array(
+                self::CREATE_USER
+            ),
+            $login
         );
     }
 
@@ -447,27 +576,34 @@ class ChangeConfirm extends Basic
 
     /**
      * @param string $entityName
+     * @param array $types
+     * @param string $newValue
+     * @return Entity\ChangeConfirm[]
+     */
+    private function _findActualChangesConfirmsByTypeAndNewValue($entityName, array $types, $newValue) {
+        return $this->_meetingService->getActualChangesConfirmsByTypeAndNewValue(
+            $entityName,
+            $types,
+            $newValue
+        );
+    }
+
+    /**
+     * @param string $entityName
      * @param array $filter
      * @return Entity\ChangeConfirm[]
      */
     private function _findByEntityNameAndFilter($entityName, $filter) {
-        $changesConfirms = $this->_meetingService->getChangeConfirmByEntityNameAndFilter($entityName, $filter);
-        array_map(function($changeConfirm) {
-            $changeConfirm->entityName = $this->_meetingService->styledProperty($changeConfirm->entityName);
-            return $changeConfirm;
-        }, $changesConfirms);
-        return $changesConfirms;
+        return $this->_styleProperties(
+            $this->_meetingService->getChangeConfirmByEntityNameAndFilter($entityName, $filter)
+        );
     }
 
     /**
      * @param Entity\ChangeConfirm[] $changesConfirms
      */
     private function _saveChangesConfirms($changesConfirms) {
-       array_map(function($changeConfirm) {
-           $changeConfirm->entityName = $this->_meetingService->realProperty($changeConfirm->entityName);
-           return $changeConfirm;
-       }, $changesConfirms);
-        $this->_meetingService->saveChangesConfirms($changesConfirms);
+        $this->_meetingService->saveChangesConfirms($this->_realProperties($changesConfirms));
     }
 
     /**
@@ -624,6 +760,7 @@ class ChangeConfirm extends Basic
             $this->_utilsService->createRandomString(100),
             $newUser->salt
         );
+        $newUser->image = $this->_utilsService->createRandomHash32();
 
         $result = array();
         foreach ($newUser as $field => $newValue) {
@@ -641,5 +778,21 @@ class ChangeConfirm extends Basic
             );
         }
         return $result;
+    }
+
+    private function _styleProperties($changesConfirms) {
+        array_map(function($changeConfirm) {
+            $changeConfirm->entityName = $this->_meetingService->styledProperty($changeConfirm->entityName);
+            return $changeConfirm;
+        }, $changesConfirms);
+        return $changesConfirms;
+    }
+
+    private function _realProperties($changesConfirms) {
+        array_map(function($changeConfirm) {
+            $changeConfirm->entityName = $this->_meetingService->realProperty($changeConfirm->entityName);
+            return $changeConfirm;
+        }, $changesConfirms);
+        return $changesConfirms;
     }
 }

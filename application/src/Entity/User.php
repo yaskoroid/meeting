@@ -20,7 +20,8 @@ class User extends Mapper
     public $sex;
     public $isReady;
     public $isReadyOnlyForPartnership;
-    public $ext;
+    public $image;
+    public $imageExt;
     public $comment;
     public $salt;
     public $password;

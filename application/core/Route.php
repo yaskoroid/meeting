@@ -64,8 +64,7 @@ class Route {
         Route::_errorPage404();
     }
 
-    private function _errorPage404()
-    {
+    private function _errorPage404() {
         $host = 'http://' . $_SERVER['HTTP_HOST'] . '/';
         header('Location:' . $host . 'error404');
     }

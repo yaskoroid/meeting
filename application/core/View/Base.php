@@ -46,22 +46,10 @@ class Base {
      */
     function render($derivedView, array $data = array())
     {
-        //@TODO test som code
+        //@TODO test same code
         $this->changeConfirmService = ServiceLocator::changeConfirmService();
         //create user
         //var_dump($this->changeConfirmService->createChangeUserCreation($this->_userProfileService->getRandomUser()));
-
-        // change email
-        //var_dump($this->changeConfirmService->createChangeUserEmailRequest($this->_userProfileService->getUserByEmail($this->_userProfileService->getRandomUser()->email), 'iskoroid@gmail.com'));
-        //var_dump($this->changeConfirmService->createChangeUserEmailRequest($this->_userProfileService->getUserById(16), 'skoroid12345@gmail.com'));
-
-        // delete user
-        //var_dump($this->changeConfirmService->createChangeUserDelete($this->_userProfileService->getUserById(17)));
-
-        //var_dump($this->changeConfirmService->createAfterConfirmUser('2436ff971f7d2c0c3077da88b8deec7c81ae1c804485b7ef41f208402a932b65e9549171c8adc51f9f28e0fa1f25e088a222e19dceb3aee7ea92879e484ce9e7'));
-        //var_dump($this->changeConfirmService->changeAfterConfirmUserPassword('fd3404e6253f4a66ae2569d7d421682bd0cb8563141cac6f3c722c5cdcbf73793fc5d30144639003c88a460bea9450b357e3cd031be561fdf81dd1dbe15778c3', 'asdfsdf'));
-
-
 
         $data['def']  = $this->_getDef($derivedView);
 

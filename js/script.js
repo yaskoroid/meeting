@@ -154,8 +154,9 @@ window.ajax = {
         errorMessage = undefined,
         responseTextSelector = undefined,
         spinnerSelector = undefined,
-        async = true,
-        debug = false,
+        isFormData = false,
+        isAsync = true,
+        isDebug = false,
         errorJsonCallback = undefined,
         errorCallback = undefined
     ) {
@@ -167,12 +168,12 @@ window.ajax = {
         }
 
         errorMessage = errorMessage ? errorMessage += ': ' : '';
-        $.ajax({
+        var ajaxObject = {
             url: document.location.origin + path,
             method: 'post',
             data: data,
             dataType: 'json',
-            async: async,
+            async: isAsync,
             complete: function () {
                 completeCallback()
             },
@@ -182,7 +183,7 @@ window.ajax = {
                 typeof errorCallback === 'function'
                     ? errorCallback(xhr, status, error)
                     : $.fn.iNotify(errorMessage + status, 'warning');
-                if (debug) $('body').append(errorMessage + status);
+                if (isDebug) $('body').append(errorMessage + status + xhr.responseText);
             },
             success: function (json) {
                 if ($spinner) $spinner.remove();
@@ -192,19 +193,28 @@ window.ajax = {
                         ? errorJsonCallback(json)
                         : $.fn.iNotify(errorMessage + json.response, 'warning');
 
-                    if (debug) $('body').append(errorMessage + json.response);
+                    if (isDebug) $('body').append(errorMessage + json.response);
                     return;
                 }
 
                 if (typeof successCallback === 'function') {
-                    successCallback(json);
-                    return;
+                    var isReturn = successCallback(json);
+                    if (isReturn) return;
                 }
 
                 if (responseTextSelector)
-                    $(responseTextSelector).text(json.response.text).addClass('text-success');
+                    json.response === undefined
+                        ? $.fn.iNotify(errorMessage + 'No response', 'warning')
+                        : (json.response.text === undefined
+                            ? $.fn.iNotify(errorMessage + 'No text field is response', 'warning')
+                            : $(responseTextSelector).text(json.response.text).addClass('text-success'));
             }
-        });
+        }
+        if (isFormData) {
+            ajaxObject.processData = !isFormData;
+            ajaxObject.contentType = !isFormData;
+        }
+        $.ajax(ajaxObject);
     }
 }
 

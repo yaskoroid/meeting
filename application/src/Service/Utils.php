@@ -36,8 +36,23 @@ class Utils extends Basic
      * @param string $data
      * @return string
      */
+    public function createHash32($data) {
+        return hash('md5', $data, false);
+    }
+
+    /**
+     * @param string $data
+     * @return string
+     */
     public function createHash128($data) {
         return hash('sha512', $data, false);
+    }
+
+    /**
+     * @return string
+     */
+    public function createRandomHash32() {
+        return $this->createHash32($this->createRandomString(30));
     }
 
     /**
@@ -126,8 +141,13 @@ class Utils extends Basic
      * @return string
      */
     public function getExtention($filePath) {
-        $fileName = substr($filePath, strrpos($filePath, DIRECTORY_SEPARATOR));
-        $fileExt = substr($fileName, strrpos($fileName, '.'));
+        $fileName = substr($filePath, strrpos($filePath, DIRECTORY_SEPARATOR) + 1);
+        $pointPosition = strrpos($fileName, '.');
+
+        if ($pointPosition === false)
+            return '';
+
+        $fileExt = substr($fileName, $pointPosition + 1);
         return $fileExt;
     }
 

@@ -40,6 +40,7 @@ $(document).ready(function() {
                         document.location = document.location.origin;
                     }, 1000)
                 }, 1000)
+                return true;
             },
             function() {
                 $(e.target).attr('disabled', false);

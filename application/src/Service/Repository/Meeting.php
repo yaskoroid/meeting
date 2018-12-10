@@ -8,6 +8,8 @@
 
 namespace Service\Repository;
 
+use core\Service\ServiceLocator;
+use Service;
 use Entity;
 use Respect;
 use Entity\Factory\Factory;
@@ -15,6 +17,11 @@ use Symfony\Component\Process\Exception\InvalidArgumentException;
 
 class Meeting extends Repository
 {
+
+    /**
+     * @var Service\DateTime
+     */
+    private $_dateTimeService;
 
     function __construct() {
         parent::__construct();
@@ -27,6 +34,11 @@ class Meeting extends Repository
         $this->_mapper->entityNamespace = "\\Entity\\";
         $this->_mapper->setStyle(new Respect\Data\Styles\Meeting());
         $this->_db = new Respect\Relational\Db($this->_connection);
+        $this->_initServices();
+    }
+
+    protected function _initServices() {
+        $this->_dateTimeService = ServiceLocator::dateTimeService();
     }
 
     /**
@@ -72,6 +84,15 @@ class Meeting extends Repository
     public function getUserByEmail($email) {
         /** @var Entity\User */
         return $this->_loadObjectByFilter(array('email' => $email), 'user');
+    }
+
+    /**
+     * @param string $phone
+     * @return Entity\User
+     */
+    public function getUserByPhone($phone) {
+        /** @var Entity\User */
+        return $this->_loadObjectByFilter(array('phone' => $phone), 'user');
     }
 
     /**
@@ -205,6 +226,33 @@ class Meeting extends Repository
             $this->_mapper->{$this->realProperty('changeConfirm')}->persist($changeConfirm);
         }
         $this->_mapper->flush();
+    }
+
+    /**
+     * @param string $entityName
+     * @param array $types
+     * @param string $newValue
+     * @return Entity\ChangeConfirm[]
+     */
+    public function getActualChangesConfirmsByTypeAndNewValue($entityName, array $types, $newValue) {
+
+        /** @var Entity\ChangeConfirm[] $result */
+        $changesConfirms =
+            $this->_db
+                ->select('*')
+                ->from('change_confirm')
+                ->where(
+                    array(
+                        'entity_name'        => $this->realProperty($entityName),
+                        'new_value'          => $newValue,
+                        'date_time_expires >=' => $this->_dateTimeService->formatMySqlUtc() . ' UTC'
+                    )
+                )
+                ->and("type IN ('" . implode("','", $types) . "')")
+                ->fetchAll(function($obj) {
+                    return Factory::createEntity((array) $obj, 'Entity\\ChangeConfirm');
+                });
+        return $changesConfirms;
     }
 
     /**

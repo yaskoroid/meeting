@@ -16,7 +16,7 @@ use Service;
 class Template extends Basic {
 
     public function __construct() {
-        require_once $GLOBALS['config']['autoload']['Twig-2.5.0'];
+        require_once $GLOBALS['config']['path']['autoload']['Twig-2.5.0'];
     }
 
     /**
@@ -30,9 +30,9 @@ class Template extends Basic {
      * @return String HTML or JSON or some else
      */
     public function render($templateName, $variables = array(), $templateType = 'view' /*, $controller = null*/) {
-        $loader = new Twig_Loader_Filesystem($GLOBALS['config']['paths']['templates'][$templateType]);
+        $loader = new Twig_Loader_Filesystem($GLOBALS['config']['path']['templates'][$templateType]);
         $twig   = new Twig_Environment($loader, array(
-            'cache'         => 'twig_compilation_cache',
+            'cache'         => $GLOBALS['config']['path']['cache']['twig'],
             'auto_reload'   => true,
             'debug'         => true,
         ));

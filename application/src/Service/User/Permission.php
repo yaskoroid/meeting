@@ -14,6 +14,7 @@ use Service\Repository\Database\Meeting;
 use Service\User;
 use Service\Utils;
 use Service\Context;
+use Service;
 use Entity;
 
 class Permission extends Basic
@@ -36,65 +37,158 @@ class Permission extends Basic
     /**
      * @var array
      */
-    private $_forUserPermissionsCrud = array('create', 'update', 'read', 'delete');
+    private $_permissionsCrud = array('create', 'update', 'read', 'delete');
 
     /**
      * @var array
      */
-    private $_forUserPermissionsCreate = array('create');
+    private $_permissionsUser = array();
+
+    /**
+     * @var array
+     */
+    private $_permissionsSettings = array();
+
+    /**
+     * @var array
+     */
+    private $_permissionsTask = array();
 
     function __construct() {
         self::_initServices();
+        self::_initFields();
     }
 
     private function _initServices() {
-        $this->_userTypeService    = ServiceLocator::userTypeService();
-        $this->_contextService     = ServiceLocator::contextService();
-        $this->_utilsService       = ServiceLocator::utilsService();
+        $this->_userTypeService = ServiceLocator::userTypeService();
+        $this->_contextService  = ServiceLocator::contextService();
+        $this->_utilsService    = ServiceLocator::utilsService();
+    }
+
+    private function _initFields() {
+        $this->_permissionsUser     = Service\User\Profile::$entities;
+        $this->_permissionsSettings = Service\Settings::$entities;
+        $this->_permissionsTask     = Service\Task::$entities;
     }
 
     /**
-     * @param array $localPermissions
-     * @param bool|false $isCreate
+     * @param array $permissions
      * @return array
      * @throws \Exception
      */
-    public function getPermissionsForUserTypesAndSelf(array $localPermissions, $isCreate = false) {
-        if (!is_array($localPermissions))
-            throw new \InvalidArgumentException('For user permissions must be an array');
+    public function getPermissions(array $permissions) {
+        if (!is_array($permissions))
+            throw new \InvalidArgumentException('Permissions must be an array');
 
-        foreach ($localPermissions as $localPermission) {
-            $forUserPermissions = $isCreate ? $this->_forUserPermissionsCreate : $this->_forUserPermissionsCrud;
-            if (!in_array($localPermission, $forUserPermissions))
-                throw new \InvalidArgumentException('For user permissions must be CRUD');
+        foreach ($permissions as $permission) {
+            if (!in_array($permission, $this->_permissionsCrud))
+                throw new \InvalidArgumentException('Permissions must be CRUD');
         }
 
-        $user = $this->_contextService->getUser();
+        $user       = $this->_contextService->getUser();
         $usersTypes = $this->_userTypeService->getUsersTypes();
         if (!is_array($usersTypes))
             throw new \InvalidArgumentException('No users types');
-
-        $forUserPermissionsTypes = $this->_utilsService->extractFields(array('id', 'role'), $usersTypes);
-        array_push($forUserPermissionsTypes, array('id' => $user->id, 'role' => 'self'));
 
         $userType = $this->_utilsService->arrayGetRecursive($usersTypes, array($user->userTypeId));
         if ($userType === null)
             throw new \InvalidArgumentException('User type not found');
 
         $result = array();
-        foreach ($forUserPermissionsTypes as $forUserPermissionType) {
-            foreach ($localPermissions as $localPermission) {
-                $permissionName = 'permissionForUser' . ucfirst($localPermission) . ucfirst($forUserPermissionType['role']);
+        foreach ($userType as $permission=>$permissionValue) {
+            $permissionSubNames = explode('_', $this->_utilsService->camelCaseToUnderline($permission, false));
+            if ($permissionSubNames[0] !== 'permission')
+                continue;
 
-                $permissionDetails = array();
-                $permissionDetails['id'] = $forUserPermissionType['id'];
+            if (count($permissionSubNames) < 3)
+                throw new \InvalidArgumentException('Bad permission name');
 
-                $userType->{$permissionName}
-                    ? $permissionDetails['permission'] = true
-                    : $permissionDetails['permission'] = false;
+            if (!in_array($permissionSubNames[1], $this->_permissionsCrud))
+                continue;
 
-                $result[$forUserPermissionType['role']] = $permissionDetails;
+            $firstSubNameValue = $this->_utilsService->arrayGetRecursive($result, array($permissionSubNames[1]));
+            if (!is_array($firstSubNameValue))
+                $result[$permissionSubNames[1]] = array();
+
+            $permissionName = $permissionSubNames[2] === 'self'
+                ? implode('_', array_slice($permissionSubNames, 3))
+                : implode('_', array_slice($permissionSubNames, 2));
+
+            $secondSubNameValue = $this->_utilsService->arrayGetRecursive(
+                $result,
+                array(
+                    $permissionSubNames[1],
+                    $permissionSubNames[2]
+                )
+            );
+            if ($permissionSubNames[2] === 'self') {
+                if (!is_array($secondSubNameValue)) {
+                    $result[$permissionSubNames[1]][$permissionSubNames[2]] = array();
+                }
+                $result[$permissionSubNames[1]][$permissionSubNames[2]][$permissionName] = $permissionValue
+                    ? true
+                    : false;
+                continue;
             }
+
+            $result[$permissionSubNames[1]][$permissionName] = $permissionValue
+                ? true
+                : false;
+        }
+        return $result;
+    }
+
+    /**
+     * @param string $permission
+     * @param array $allPermissions
+     * @return array
+     * @throws \Exception
+     */
+    public function getUserPermissions($permission, array $allPermissions = array()) {
+        if (!is_array($allPermissions))
+            throw new \InvalidArgumentException('All user type permissions must be an array');
+
+        if (count($allPermissions) === 0)
+            $allPermissions = $this->getPermissions(array($permission));
+
+        $user       = $this->_contextService->getUser();
+        $usersTypes = $this->_userTypeService->getUsersTypes();
+        if (!is_array($usersTypes))
+            throw new \InvalidArgumentException('No users types');
+
+        $permissionsTypes = $this->_utilsService->extractFields(array('id', 'role'), $usersTypes);
+        array_push($permissionsTypes, array('id' => $user->id, 'role' => 'self'));
+
+        $userType = $this->_utilsService->arrayGetRecursive($usersTypes, array($user->userTypeId));
+        if ($userType === null)
+            throw new \InvalidArgumentException('User type not found');
+
+        $result = array();
+        foreach ($permissionsTypes as $permissionType) {
+            $permissionDetails = array();
+
+            $permissionDetails['permission'] = $permissionType['role'] === 'self'
+                ? $this->_utilsService->arrayGetRecursive(
+                    $allPermissions,
+                    array(
+                        $permission,
+                        'self',
+                        'user'
+                    )
+                )
+                : $this->_utilsService->arrayGetRecursive(
+                    $allPermissions,
+                    array(
+                        $permission,
+                        $permissionType['role']
+                    )
+                );
+
+            if ($permissionDetails['permission'] === null)
+                throw new \InvalidArgumentException('Bad user type all permissions, permission was not found');
+
+            $permissionDetails['id'] = $permissionType['id'];
+            $result[$permissionType['role']] = $permissionDetails;
         }
         return $result;
     }
@@ -103,16 +197,18 @@ class Permission extends Basic
      * @param array $permissions
      * @return array
      */
-    public function getPermissionsForUserTypesAndSelfByPermissions(array $permissions) {
+    public function getUserPermissionsByPermissions(array $permissions) {
         if (!is_array($permissions)) {
-            throw new \InvalidArgumentException('Permissions must be an non empty erray');
+            throw new \InvalidArgumentException('Permissions must be an non empty array');
         }
+        $allPermissions = $this->getPermissions($permissions);
+
         foreach ($permissions as $permission) {
-            $permissionsForUser = $this->getPermissionsForUserTypesAndSelf(array($permission));
-            if (count($permissionsForUser) !== 3) {
+            $userPermissionsForUser = $this->getUserPermissions($permission, $allPermissions);
+            if (count($userPermissionsForUser) !== 3) {
                 throw new \InvalidArgumentException('Not all permissions has been calculated');
             }
-            $result[$permission] = $permissionsForUser;
+            $result[$permission] = $userPermissionsForUser;
         }
         return $result;
     }
@@ -123,7 +219,7 @@ class Permission extends Basic
      * @return bool
      * @throws \InvalidArgumentException
      */
-    public function getPermissionForUser($permission, $user) {
+    public function getUserPermissionForUser($permission, $user) {
         if (empty($permission)) {
             throw new \InvalidArgumentException('No permission has been sent');
         }
@@ -131,20 +227,20 @@ class Permission extends Basic
         if (empty($user)) {
             throw new \InvalidArgumentException('No user has been sent');
         }
-        $permissionsUsersFor = $this->getPermissionsForUserTypesAndSelf(array($permission));
-        return $this->isHavePermissionForUser($permissionsUsersFor, $user);
+        $userPermissionsForUsers = $this->getUserPermissions($permission);
+        return $this->isHaveUserPermissionForUser($userPermissionsForUsers, $user);
     }
 
     /**
-     * @param array $permissionsForUsers
+     * @param array $userPermissions
      * @param Entity\User $user
      * @return bool
      */
-    public function isHavePermissionForUser($permissionsForUsers, $user) {
-        if ($user->id === $permissionsForUsers['self']['id'])
-            return $permissionsForUsers['self']['permission'];
+    public function isHaveUserPermissionForUser($userPermissions, $user) {
+        if ($user->id === $userPermissions['self']['id'])
+            return $userPermissions['self']['permission'];
 
-        foreach ($permissionsForUsers as $userType => $permissionDetails)
+        foreach ($userPermissions as $userType => $permissionDetails)
             if ($user->userTypeId === $permissionDetails['id'])
                 return $permissionDetails['permission'];
 
@@ -156,14 +252,14 @@ class Permission extends Basic
      * @param array $permissions
      * @return array
      */
-    public function getPermissionsForUsers($users, $permissions) {
-        $permissionsForUsersByPermission = $this->getPermissionsForUserTypesAndSelfByPermissions($permissions);
+    public function getUserPermissionsForUsers($users, $permissions) {
+        $userPermissionsForUsersByPermission = $this->getUserPermissionsByPermissions($permissions);
 
         $result = array();
         foreach ($users as $user) {
-            foreach ($permissionsForUsersByPermission as $permissionForUser => $permissionsForUsersValue) {
-                $result[$user->id][$permissionForUser] =
-                    $this->isHavePermissionForUser($permissionsForUsersValue, $user);
+            foreach ($userPermissionsForUsersByPermission as $userPermissionsForUser => $userPermissionsForUserValue) {
+                $result[$user->id][$userPermissionsForUser] =
+                    $this->isHaveUserPermissionForUser($userPermissionsForUserValue, $user);
             }
         }
         return $result;
@@ -172,16 +268,17 @@ class Permission extends Basic
     /**
      * @return array
      */
-    public function getPermissionsForUsersTypeCreate() {
+    public function getUserPermissionsCreateForUsersTypes() {
 
-        $permissionsForUserCreate = $this->getPermissionsForUserTypesAndSelf(array('create'));
-        if (count($permissionsForUserCreate) !== 3) {
+        $userPermissionsCreateForUsersTypes = $this->getUserPermissions('create');
+        if (count($userPermissionsCreateForUsersTypes) !== 3) {
             throw new \InvalidArgumentException('Not all permissions has been calculated');
         }
 
         $result = array();
-        foreach ($permissionsForUserCreate as $forUser => $permissionDetails) {
-            if ($permissionDetails['permission'] && $forUser !== 'self') {
+        foreach ($userPermissionsCreateForUsersTypes as $userType => $permissionDetails) {
+            if ($userType === 'self') continue;
+            if ($permissionDetails['permission']) {
                 $userTypeDescription = $this->_utilsService->arrayGetRecursive(
                     $this->_userTypeService->getUsersTypes()[$permissionDetails['id']],
                     array('description')
@@ -199,10 +296,10 @@ class Permission extends Basic
      * @param int $userTypeId
      * @return bool
      */
-    public function getPermissionForUserCreate($userTypeId) {
-        $permissionUserForCreate = $this->getPermissionsForUserTypesAndSelf(array('create'), true);
+    public function getUserPermissionCreate($userTypeId) {
+        $userPermissionCreateForUser = $this->getUserPermissions('create');
 
-        foreach ($permissionUserForCreate as $userType => $permissionDetails) {
+        foreach ($userPermissionCreateForUser as $userType => $permissionDetails) {
             if ($userType === 'self') continue;
             if ($userTypeId === $permissionDetails['id'])
                 return $permissionDetails['permission'];
@@ -211,32 +308,58 @@ class Permission extends Basic
     }
 
     /**
-     * @param Entity\User[] $usersRequiringPermission
-     * @param Entity\User[] $usersToWorkOn
-     * @param array $permissionsCrud
-     * @throws \Exception
+     * @param string $permissionCrud
+     * @param string $permission
+     * @return mixed
+     * @throws \InvalidArgumentException
      */
-    public function checkUsersForUsersPermissions(array $usersRequiringPermission, array $usersToWorkOn, array $permissionsCrud) {
+    public function getPermission($permissionCrud, $permission) {
+        $permissions = $this->getPermissions(array($permissionCrud));
 
-        if (!is_array($usersRequiringPermission)) {
-            throw new \Exception('Users requiring permission must be array');
+        $result = $this->_utilsService->arrayGetRecursive(
+            $permissions,
+            array(
+                $permissionCrud,
+                'self',
+                $permission
+            )
+        );
+        if ($result !== null)
+            return $result;
+
+        $result = $this->_utilsService->arrayGetRecursive(
+            $permissions,
+            array(
+                $permissionCrud,
+                $permission
+            )
+        );
+        if ($result === null)
+            throw new \InvalidArgumentException('Permission was not found, maybe bad user type all permissions');
+
+        return $result;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSettingsPermissions() {
+        $allCrudPermissions = $this->getPermissions($this->_permissionsCrud);
+        foreach($allCrudPermissions as $crudAction=>&$allPermissions) {
+            foreach($allPermissions as $action=>&$permission) {
+                if ($action !== 'self') {
+                    if (!in_array($this->_utilsService->underlineToCamelCase($action), $this->_permissionsSettings))
+                        unset($allPermissions[$action]);
+                    continue;
+                }
+                foreach($permission as $actionSelf=>$permissionSelf) {
+                    if (!in_array($this->_utilsService->underlineToCamelCase($actionSelf), $this->_permissionsSettings))
+                        unset($permission[$actionSelf]);
+                }
+            }
+            if (isset($allPermissions['self']) && count($allPermissions['self']) === 0)
+                unset($allPermissions['self']);
         }
-
-        if (!is_array($usersToWorkOn)) {
-            throw new \Exception('Users to work on must be array');
-        }
-
-        if (!is_array($permissionsCrud)) {
-            throw new \Exception('Permissions must be array');
-        }
-
-        if (!$this->_utilsService->isArrayValuesInAnotherArray($permissionsCrud, self::$_etalonPermissionCrud)) {
-            throw new \Exception('Wrong array of permissions to check users to work on');
-        }
-
-        $usersTypes = $this->_userTypeService->getUsersTypes();
-
-
-        $isSelf = $authUser->id === $forUser->id;
+        return $allCrudPermissions;
     }
 }

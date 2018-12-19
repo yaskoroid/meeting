@@ -55,7 +55,7 @@ class Confirm extends Model
      */
     protected function _userCreationConfirmation($post) {
         $userImageTempPath = isset($post['login']) && isset($post['imageExt'])
-            ? $this->_pathService->getTempUserImagePath($post['login'], $post['imageExt'])
+            ? $this->_pathService->getTempUserImageFilePath($post['login'], $post['imageExt'])
             : '';
 
         if ($post['cancel'] === 'true') {

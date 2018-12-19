@@ -11,8 +11,7 @@ namespace Entity;
 use application\core\Service\ServiceLocator;
 use Service;
 
-class Mapper
-{
+class Mapper {
 
     /**
      * @var Service\Utils;

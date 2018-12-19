@@ -10,8 +10,7 @@ namespace Entity\InformationSchema;
 
 use Entity\Mapper;
 
-class Columns extends Mapper
-{
+class Columns extends Mapper {
     public $tableCatalog;
     public $tableSchema;
     public $tableName;

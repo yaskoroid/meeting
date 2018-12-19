@@ -9,8 +9,7 @@
 namespace Entity;
 
 
-class TaskTargetDate extends Mapper
-{
+class TaskTargetDate extends Mapper {
     public $id;
     public $startDate;
     public $endDate;

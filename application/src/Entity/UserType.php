@@ -8,21 +8,73 @@
 
 namespace Entity;
 
-class UserType extends Mapper
-{
+class UserType extends Mapper {
     public $id;
     public $role;
     public $description;
-    public $permissionForUserCreateSelf;
-    public $permissionForUserUpdateSelf;
-    public $permissionForUserDeleteSelf;
-    public $permissionForUserReadSelf;
-    public $permissionForUserCreateCustomer;
-    public $permissionForUserUpdateCustomer;
-    public $permissionForUserDeleteCustomer;
-    public $permissionForUserReadCustomer;
-    public $permissionForUserCreateAdministrator;
-    public $permissionForUserUpdateAdministrator;
-    public $permissionForUserDeleteAdministrator;
-    public $permissionForUserReadAdministrator;
+
+    public $permissionCreateSelfUser;
+    public $permissionUpdateSelfUser;
+    public $permissionDeleteSelfUser;
+    public $permissionReadSelfUser;
+
+    public $permissionCreateCustomer;
+    public $permissionUpdateCustomer;
+    public $permissionDeleteCustomer;
+    public $permissionReadCustomer;
+
+    public $permissionCreateAdministrator;
+    public $permissionUpdateAdministrator;
+    public $permissionDeleteAdministrator;
+    public $permissionReadAdministrator;
+
+    public $permissionCreateMeeting;
+    public $permissionUpdateMeeting;
+    public $permissionDeleteMeeting;
+    public $permissionReadMeeting;
+
+    public $permissionCreateSelfTask;
+    public $permissionUpdateSelfTask;
+    public $permissionDeleteSelfTask;
+    public $permissionReadSelfTask;
+
+    public $permissionCreateTask;
+    public $permissionUpdateTask;
+    public $permissionDeleteTask;
+    public $permissionReadTask;
+
+    public $permissionCreateTaskPartner;
+    public $permissionUpdateTaskPartner;
+    public $permissionDeleteTaskPartner;
+    public $permissionReadTaskPartner;
+
+    public $permissionCreateTaskSource;
+    public $permissionUpdateTaskSource;
+    public $permissionDeleteTaskSource;
+    public $permissionReadTaskSource;
+
+    public $permissionCreateTaskTargetDate;
+    public $permissionUpdateTaskTargetDate;
+    public $permissionDeleteTaskTargetDate;
+    public $permissionReadTaskTargetDate;
+
+    public $permissionCreateTaskType;
+    public $permissionUpdateTaskType;
+    public $permissionDeleteTaskType;
+    public $permissionReadTaskType;
+
+    public $permissionCreateTaskTypeDateComment;
+    public $permissionUpdateTaskTypeDateComment;
+    public $permissionDeleteTaskTypeDateComment;
+    public $permissionReadTaskTypeDateComment;
+
+    public $permissionCreateTextbook;
+    public $permissionUpdateTextbook;
+    public $permissionDeleteTextbook;
+    public $permissionReadTextbook;
+
+    public $permissionCreateLesson;
+    public $permissionUpdateLesson;
+    public $permissionDeleteLesson;
+    public $permissionReadLesson;
 }

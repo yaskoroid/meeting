@@ -10,7 +10,7 @@
     </h2>
 
     <div class="col-md-12">
-        <img class="center-block img-responsive" src="/images/etc/404.jpg">
+        <img class="center-block img-responsive" src="{{image404FilePath}}">
     </div>
 </div>
 {% endblock %}

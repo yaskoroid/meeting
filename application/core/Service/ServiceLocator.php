@@ -145,4 +145,11 @@ class ServiceLocator extends core\Service\BaseServiceLocator {
     public static function pathService() {
         return self::_factory()->get("Service\\Path");
     }
+
+    /**
+     * @return Service\Settings
+     */
+    public static function settingsService() {
+        return self::_factory()->get("Service\\Settings");
+    }
 }

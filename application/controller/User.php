@@ -21,27 +21,4 @@ class User extends Controller\Base {
     public function actionIndex() {
         $this->view->render('User', $this->model->getData());
     }
-
-    public function actionJson() {
-        try {
-            $result = array(
-                'error'    => null,
-                'response' => $this->model->handleAjaxJson($_POST)
-            );
-        } catch(\Throwable $t) {
-            $result = array(
-                'error'    => true,
-                'response' => $t->getMessage()
-            );
-        } catch (\Exception $e) {
-            $result = array(
-                'error'    => true,
-                'response' => $e->getMessage()
-            );
-        }
-
-        unset($_POST);
-
-        $this->view->renderJson($result);
-    }
 }

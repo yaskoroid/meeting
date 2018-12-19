@@ -36,6 +36,11 @@ class Validator extends Basic
      */
     private $_changeConfirmService;
 
+    /**
+     * @var Service\Settings
+     */
+    private $_settingsService;
+
     function __construct() {
         self::_initServices();
     }
@@ -45,6 +50,7 @@ class Validator extends Basic
         $this->_utilsService         = ServiceLocator::utilsService();
         $this->_userTypeService      = ServiceLocator::userTypeService();
         $this->_changeConfirmService = ServiceLocator::changeConfirmService();
+        $this->_settingsService   = ServiceLocator::settingsService();
     }
 
     /**
@@ -167,7 +173,7 @@ class Validator extends Basic
      * @param array $valueToCheckValidatorParams
      */
     private function _validate($validator, $value, array $valueToCheckValidatorParams = array()) {
-        if (!method_exists($this, '_'.$validator))
+        if (!method_exists($this, '_' . $validator))
             throw new \BadMethodCallException("Validator's method does not exists");
 
         if (!$this->_isValueToCheck($value))
@@ -177,11 +183,11 @@ class Validator extends Basic
             throw new \InvalidArgumentException('Validator params bust be an array');
 
         if (!empty($valueToCheckValidatorParams)) {
-            $this->{'_'.$validator}($value, $valueToCheckValidatorParams);
+            $this->{'_' . $validator}($value, $valueToCheckValidatorParams);
             return;
         }
 
-        $this->{'_'.$validator}($value);
+        $this->{'_' . $validator}($value);
     }
 
     /**
@@ -392,6 +398,11 @@ class Validator extends Basic
      * @param string $var
      */
     private function _int($var) {
+        if (strlen($var) < 1 || strlen($var) > 11)
+            throw new \InvalidArgumentException('Integer must have from 1 to 11 chars');
+
+        if (substr($var, 0, 1) === '-' && (strlen($var) < 2 || strlen($var) > 11))
+            throw new \InvalidArgumentException('Negative integer must have a value');
 
         if (!(is_string($var) || is_int($var)) ||
             preg_match('/[^-0-9]/', strval($var)) ||
@@ -410,11 +421,69 @@ class Validator extends Basic
     }
 
     /**
+     * @param string $var
+     */
+    private function _intPositiveCommaSeparated($var) {
+        if (!is_string($var))
+            throw new \InvalidArgumentException('Values is not string');
+
+        if (empty($var))
+            throw new \InvalidArgumentException('Values is empty string');
+
+        $values = explode(',', $var);
+
+        if (count($values) === 0)
+            throw new \InvalidArgumentException('Values count is zero');
+
+        foreach($values as $value) {
+            $this->_intPositive($value);
+        }
+    }
+
+    /**
      * @param string$var
      */
     private function _sortingDirection($var) {
         $var = strtoupper($var);
         if (!($var === 'DESC' || $var === 'ASC'))
             throw new \InvalidArgumentException('Bad sorting direction');
+    }
+
+    /**
+     * @param string $settingId
+     * @param array $settingOneParameter
+     * @throws \InvalidArgumentException
+     */
+    private function _settingExists($settingId, array $settingOneParameter) {
+        $this->_intPositive($settingId);
+
+        if (count($settingOneParameter) !== 1)
+            throw new \InvalidArgumentException('Parameter to check setting must be single');
+
+        if (!is_string($settingOneParameter[0]))
+            throw new \InvalidArgumentException('Setting must be string');
+
+        $settingEntity = $this->_settingsService->getById($settingOneParameter[0], $settingId);
+
+        if ($settingEntity === null)
+            throw new \InvalidArgumentException(ucfirst($settingOneParameter[0]) . ' with this id not found');
+    }
+
+    /**
+     * @param string $date
+     * @throws \InvalidArgumentException
+     */
+    private function _date($date) {
+        $this->_strlen($date, array(10, 10));
+
+        if (substr_count($date, '-') !== 2)
+            throw new \InvalidArgumentException("Date must have two '-' symbols");
+
+        $dateParams = explode('-', $date);
+
+        if (!checkdate($dateParams[1], $dateParams[2], $dateParams[0]))
+            throw new \InvalidArgumentException(
+                "Date with year $dateParams[0], month $dateParams[1], and day $dateParams[2] is not valid"
+            );
     }
 }

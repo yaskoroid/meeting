@@ -29,6 +29,12 @@ abstract class Model extends Base {
      */
     protected $_utilsService;
 
+    private static $_privateMethods = array(
+        '_initAjaxServices',
+        '_initRenderServices',
+        '_initRenderData',
+    );
+
     function __construct() {
         self::_initServices();
     }
@@ -62,14 +68,28 @@ abstract class Model extends Base {
     public function handleAjaxJson(array $post) {
         $this->_initAjaxServices();
 
+        $shortMethodName       = '_' . strtolower(substr($post['intent'], 0, strpos($post['intent'], ' ')));
+        $shortMethodNameAction = strtolower(substr($post['intent'], strpos($post['intent'], ' ') + 1));
+
         $methodName = $this->_utilsService->spacedStringToMethodName($post['intent']);
         $methodName = preg_replace('/_/', '', $methodName);
         $methodName = '_' . $methodName;
+
+        if (!empty($shortMethodName) &&
+            !empty($methodName) &&
+            !method_exists($this, $methodName) &&
+            method_exists($this, $shortMethodName) &&
+            !in_array($shortMethodName, self::$_privateMethods))
+            return $this->{$shortMethodName}($shortMethodNameAction, $post);
+
         if (empty($methodName))
             throw new \InvalidArgumentException('Bad intent');
 
         if (!method_exists($this, $methodName))
             throw new \InvalidArgumentException('No such method for this intent');
+
+        if (in_array($methodName, self::$_privateMethods))
+            throw new \InvalidArgumentException('Requested method is private');
 
         return $this->{$methodName}($post);
     }

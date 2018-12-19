@@ -148,8 +148,8 @@ class User extends Model
      */
     protected function _getUsersBySearch(array $post) {
 
-        $permissionsUserForRead = $this->_permissionService->getPermissionsForUserTypesAndSelf(array('read'));
-        if (count($permissionsUserForRead) !== 3)
+        $userPermissionsForUserRead = $this->_permissionService->getUserPermissions('read');
+        if (count($userPermissionsForUserRead) !== 3)
             throw new \InvalidArgumentException('Not all permissions has been calculated');
 
         $this->_validatorService->check(
@@ -166,15 +166,15 @@ class User extends Model
             $post['sortingDirection'],
             $post['pageNumber'],
             $post['usersCountOnPage'],
-            $permissionsUserForRead
+            $userPermissionsForUserRead
         );
 
-        $permissionsForUsers = $this->_permissionService->getPermissionsForUsers(
+        $permissionsForUsers = $this->_permissionService->getUserPermissionsForUsers(
             $foundedUsersCollection['users'],
             array('update', 'delete')
         );
         $foundedUsersCollection['permissions']['users']  = $permissionsForUsers;
-        $foundedUsersCollection['permissions']['create'] = $this->_permissionService->getPermissionsForUsersTypeCreate();
+        $foundedUsersCollection['permissions']['create'] = $this->_permissionService->getUserPermissionsCreateForUsersTypes();
 
         $this->_userProfileService->filterSecureUsersFields($foundedUsersCollection['users']);
 
@@ -232,7 +232,7 @@ class User extends Model
      */
     protected function _createUser(array $post) {
 
-        if (!$this->_permissionService->getPermissionForUserCreate($post['userTypeId']))
+        if (!$this->_permissionService->getUserPermissionCreate($post['userTypeId']))
             throw new \InvalidArgumentException('No permission to create user with this type');
 
         $createValidators = $this->__getCreateValidators(
@@ -266,11 +266,11 @@ class User extends Model
         $this->_validatorService->check($updateValidators);
 
         $this->__handleStoreUserImage($post, function($imageExt) use ($user) {
-            $tempUserImagePath = $this->_pathService->getTempUserImagePath($user->login, $imageExt);
-            $userOldImagePath  = $this->_pathService->getUserImagePath($user->image, $user->imageExt);
+            $tempUserImagePath = $this->_pathService->getTempUserImageFilePath($user->login, $imageExt);
+            $userOldImagePath  = $this->_pathService->getUserImageFilePath($user->image, $user->imageExt);
 
             $newImageName     = $this->_utilsService->createRandomHash32();
-            $userNewImagePath = $this->_pathService->getUserImagePath($newImageName, $imageExt);
+            $userNewImagePath = $this->_pathService->getUserImageFilePath($newImageName, $imageExt);
             $isCopied = false;
             if (file_exists($tempUserImagePath)) {
                 if (file_exists($userOldImagePath))
@@ -315,7 +315,7 @@ class User extends Model
         if ($user->userTypeId === $newUserTypeId)
             throw new \LogicException('User type for this account is the same');
 
-        if (!$this->_permissionService->getPermissionForUserCreate($newUserTypeId))
+        if (!$this->_permissionService->getUserPermissionCreate($newUserTypeId))
             throw new \LogicException('No permission to create user with this type');
 
         $this->_changeConfirmService->createChangeUserType($user, $newUserTypeId);
@@ -374,7 +374,7 @@ class User extends Model
             throw new \InvalidArgumentException("User was not found to {$permission} {$field}");
 
         if ($permission !== null)
-            if (!$this->_permissionService->getPermissionForUser($permission, $user))
+            if (!$this->_permissionService->getUserPermissionForUser($permission, $user))
                 throw new \InvalidArgumentException("No permission to {$permission} {$field}");
 
         return $user;

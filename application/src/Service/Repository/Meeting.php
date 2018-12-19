@@ -110,16 +110,16 @@ class Meeting extends Repository
      * @param string $orderBy
      * @param bool $direction
      * @param int[] $limit
-     * @param array $permissionsUserFor
+     * @param array $userPermissionsForUserRead
      * @return array
      * @throws \InvalidArgumentException
      */
-    public function getUsersBySearch($fieldsToSearchIn, $search, $orderBy, $direction, $limit, $permissionsUserFor) {
+    public function getUsersBySearch($fieldsToSearchIn, $search, $orderBy, $direction, $limit, $userPermissionsForUserRead) {
         if (!is_array($fieldsToSearchIn) && count($fieldsToSearchIn) > 0) {
             throw new \InvalidArgumentException('Fields to search in must be not empty array');
         }
 
-        if (!is_array($permissionsUserFor) && count($permissionsUserFor) > 0) {
+        if (!is_array($userPermissionsForUserRead) && count($userPermissionsForUserRead) > 0) {
             throw new \InvalidArgumentException('Permissions user for must be not empty array');
         }
 
@@ -140,22 +140,22 @@ class Meeting extends Repository
         $permissionSelfCondition = '';
         $permissionUserTypeCondition = '';
         $isFirstUserTypeCondition = true;
-        foreach ($permissionsUserFor as $permissionUserFor => $permissionValue) {
-            if ($permissionUserFor === 'self') {
-                $permissionSelfCondition = $permissionValue['permission']
-                    ? "id = {$permissionValue['id']} OR"
-                    : "id != {$permissionValue['id']} AND";
+        foreach ($userPermissionsForUserRead as $userPermissionForUserRead => $userPermissionValue) {
+            if ($userPermissionForUserRead === 'self') {
+                $permissionSelfCondition = $userPermissionValue['permission']
+                    ? "id = {$userPermissionValue['id']} OR"
+                    : "id != {$userPermissionValue['id']} AND";
                 continue;
             }
 
-            $logic = $permissionValue['permission']
+            $logic = $userPermissionValue['permission']
                 ? ($isFirstUserTypeCondition ? '' : ' OR ')
                 : ($isFirstUserTypeCondition ? '' : ' AND ');
-            $sign = $permissionValue['permission'] ? '=' : '!=';
+            $sign = $userPermissionValue['permission'] ? '=' : '!=';
 
             $isFirstUserTypeCondition = false;
 
-            $permissionUserTypeCondition .= $logic . "user_type_id $sign {$permissionValue['id']}";
+            $permissionUserTypeCondition .= $logic . "user_type_id $sign {$userPermissionValue['id']}";
         }
 
         $select->and("( $permissionSelfCondition ($permissionUserTypeCondition))");
@@ -301,5 +301,61 @@ class Meeting extends Repository
 
         if (count($changesConfirms) > 0)
             $this->removeChangesConfirms($changesConfirms);
+    }
+
+    /**
+     * @param string $setting
+     * @return mixed
+     */
+    public function getSettings($setting) {
+        return $this->_mapper->{$this->realProperty($setting)}->fetchAll();
+    }
+
+    /**
+     * @param string $setting
+     * @param int $id
+     * @return mixed
+     */
+    public function getSettingById($setting, $id) {
+        return $this->_loadObjectByFilter(array('id' => $id), $this->realProperty($setting));
+    }
+
+    /**
+     * @param string $setting
+     * @param mixed $entity
+     */
+    public function saveSetting($setting, $entity) {
+        $this->_mapper->{$this->realProperty($setting)}->persist($entity);
+        $this->_mapper->flush();
+    }
+
+    /**
+     * @param string $setting
+     * @param array $ids
+     */
+    public function deleteSettingsByIds($setting, array $ids) {
+
+        $settingEntitiesToDelete =
+            $this->_db
+                ->select('*')
+                ->from($this->realProperty($setting))
+                ->where("id IN ('" . implode("','", $ids) . "')")
+                ->fetchAll(function($obj) use ($setting) {
+                    return Factory::createEntity((array) $obj, 'Entity\\' . ucfirst($setting));
+                });
+
+        if (count($settingEntitiesToDelete) > 0)
+            $this->deleteSettings($setting, $settingEntitiesToDelete);
+    }
+
+    /**
+     * @param string $settingName
+     * @param array $settings
+     */
+    public function deleteSettings($settingName, array $settings) {
+        foreach ($settings as $setting) {
+            $this->_mapper->{$this->realProperty($settingName)}->remove($setting);
+        }
+        $this->_mapper->flush();
     }
 }

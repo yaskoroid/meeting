@@ -6,13 +6,13 @@
  * Time: 12:29
  */
 
-namespace application\src\Entity;
+namespace Entity;
 
 
-class TaskTypeComment extends Mapper
-{
+class TaskDateTypeSourceComment extends Mapper {
     public $id;
-    public $taskTypeId;
     public $taskTargetDateId;
+    public $taskTypeId;
+    public $taskSourceId;
     public $comment;
 }

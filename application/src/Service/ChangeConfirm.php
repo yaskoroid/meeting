@@ -60,6 +60,11 @@ class ChangeConfirm extends Basic
      */
     private $_userProfileService;
 
+    /**
+     * @var Service\Path
+     */
+    private $_pathService;
+
     function __construct() {
         self::_initServices();
     }
@@ -72,6 +77,7 @@ class ChangeConfirm extends Basic
         $this->_dateTimeService    = ServiceLocator::dateTimeService();
         $this->_emailService       = ServiceLocator::emailService();
         $this->_userProfileService = ServiceLocator::userProfileService();
+        $this->_pathService        = ServiceLocator::pathService();
     }
 
     /**
@@ -127,8 +133,8 @@ class ChangeConfirm extends Basic
 
         $this->_userProfileService->saveUser($user);
 
-        $tempUserImagePath = $this->_pathService->getTempUserImagePath($user->login, $user->imageExt);
-        $userImagePath     = $this->_pathService->getUserImagePath($user->image, $user->imageExt);
+        $tempUserImagePath = $this->_pathService->getTempUserImageFilePath($user->login, $user->imageExt);
+        $userImagePath     = $this->_pathService->getUserImageFilePath($user->image, $user->imageExt);
         $isCopied = true;
         if (file_exists($tempUserImagePath)) {
             $isCopied = copy($tempUserImagePath, $userImagePath);
@@ -207,7 +213,7 @@ class ChangeConfirm extends Basic
 
         $this->_userProfileService->deleteUser($user);
 
-        $userImagePath = $this->_pathService->getUserImagePath($user->id, $user->imageExt);
+        $userImagePath = $this->_pathService->getUserImageFilePath($user->id, $user->imageExt);
         $isDeletedFile = true;
         if (file_exists($userImagePath))
             $isDeletedFile = unlink($userImagePath);

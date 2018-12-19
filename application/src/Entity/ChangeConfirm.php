@@ -9,8 +9,7 @@
 namespace Entity;
 
 
-class ChangeConfirm extends Mapper
-{
+class ChangeConfirm extends Mapper {
     public $id;
     public $entityName;
     public $entityId;

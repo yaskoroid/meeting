@@ -9,13 +9,11 @@
 namespace Entity;
 
 
-class Task extends Mapper
-{
+class Task extends Mapper {
     public $id;
     public $meetingId;
     public $taskNumber;
     public $taskTypeId;
-    public $taskSourceId;
     public $lessonId;
     public $userId;
     public $isDone;

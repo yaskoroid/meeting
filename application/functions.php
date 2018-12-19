@@ -10,7 +10,7 @@ require_once "config.php";
 
 function logThrowable(\Throwable $t) {
     $date = new DateTime();
-    $dir = __DIR__ . DIRECTORY_SEPARATOR . $GLOBALS['config']['file']['log']['path'];
+    $dir = $GLOBALS['config']['path']['log'];
     createDirIfNotExists($dir);
     $file = fopen($dir . '/logThrowable.txt', 'a+');
     fwrite($file, $date->format('c') . ' '. $t->getMessage() . PHP_EOL);
@@ -18,7 +18,7 @@ function logThrowable(\Throwable $t) {
 
 function logException(\Exception $e) {
     $date = new DateTime();
-    $dir = __DIR__ . DIRECTORY_SEPARATOR . $GLOBALS['config']['file']['log']['path'];
+    $dir = $GLOBALS['config']['path']['log'];
     createDirIfNotExists($dir);
     $file = fopen($dir . '/logException.txt', 'a+');
     fwrite($file, $date->format('c') . ' '. $e->getMessage() . PHP_EOL);

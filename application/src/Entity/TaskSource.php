@@ -9,8 +9,7 @@
 namespace Entity;
 
 
-class TaskSource extends Mapper
-{
+class TaskSource extends Mapper {
     public $id;
     public $name;
     public $shortName;

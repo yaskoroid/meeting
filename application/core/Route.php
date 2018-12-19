@@ -51,7 +51,6 @@ class Route {
         // Check action in controller
         if (method_exists($controller, $action)) {
 
-
             /** @var Service\Core\Auth $authService*/
             $authService = core\Service\ServiceLocator::authService();
             $authService->authBySession();

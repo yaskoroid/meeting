@@ -9,8 +9,7 @@
 namespace Entity;
 
 
-class TaskType extends Mapper
-{
+class TaskType extends Mapper {
     public $id;
     public $name;
 }

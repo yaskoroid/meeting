@@ -6,26 +6,31 @@ define(DB_USER_PASSWORD,"user_skoroid");
 define(DB_NAME,"iskoroid");*/
 namespace application;
 
-$projectPath = substr(dirname(__FILE__), 0, strrpos(dirname(__FILE__), DIRECTORY_SEPARATOR));
-
 // Administrator
 $GLOBALS['config']['admin'] = array(
     'name'    => 'Vasya',
     'surname' => 'Pupkin',
     'email'   => 'skoroid12345@gmail.com',
 );
+
 // Database
 $GLOBALS['config']['database']['meeting'] = array(
-    'host' => 'localhost',
-    'name' => 'meeting',
-    'user' => 'skoroid_123',
+    'host'     => 'localhost',
+    'name'     => 'meeting',
+    'user'     => 'skoroid_123',
     'password' => '123',
 );
 $GLOBALS['config']['database']['information_schema'] = array(
-    'host' => 'localhost',
-    'name' => 'INFORMATION_SCHEMA',
-    'user' => 'skoroid_123',
+    'host'     => 'localhost',
+    'name'     => 'INFORMATION_SCHEMA',
+    'user'     => 'skoroid_123',
     'password' => '123',
+);
+
+// Site
+$GLOBALS['site'] = array(
+    'http'   => 'http',
+    'domain' => 'roman.com',
 );
 
 // Email
@@ -39,27 +44,31 @@ $GLOBALS['config']['email']['imap_port'] = '993';
 $GLOBALS['config']['email']['imap_host'] = 'imap.gmail.com';
 $GLOBALS['config']['email']['skoroid12345@gmail.com'] = '19A@ne63';
 
-// Site
-$GLOBALS['site'] = array(
-    'http' => 'http',
-    'domain' => 'roman.com',
-);
-
 // Files
-$GLOBALS['config']['file']['log'] = array(
-    'path' => 'log',
-);
+$projectPath       = substr(dirname(__FILE__), 0, strrpos(dirname(__FILE__), DIRECTORY_SEPARATOR));
+$projectFolderName = substr($projectPath, strrpos($projectPath, DIRECTORY_SEPARATOR) + 1);
 
-$GLOBALS['config']['paths']['vendor'] = $projectPath . DIRECTORY_SEPARATOR . 'vendor';
-$GLOBALS['config']['composer']['autoload'] = $GLOBALS['config']['paths']['vendor'] . DIRECTORY_SEPARATOR . 'autoload.php';
-$GLOBALS['config']['autoload']['Twig-2.5.0'] = $GLOBALS['config']['composer']['autoload'];
-$GLOBALS['config']['autoload']['PhpMailer-6.0.6'] = $GLOBALS['config']['composer']['autoload'];
+$GLOBALS['config']['path']['projectPath']       = $projectPath;
+$GLOBALS['config']['path']['projectFolderName'] = $projectFolderName;
+$GLOBALS['config']['path']['log'] = $projectPath . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'log';
 
-$templatePath = DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'template';
-$GLOBALS['config']['paths']['templates'] = array(
-    'view'  => $projectPath . $templatePath . DIRECTORY_SEPARATOR . 'View',
-    'email' => $projectPath . $templatePath . DIRECTORY_SEPARATOR . 'Email',
+$GLOBALS['config']['path']['vendor']                      = $projectPath . DIRECTORY_SEPARATOR . 'vendor';
+$GLOBALS['config']['path']['composer']['autoload']        = $GLOBALS['config']['path']['vendor'] .
+    DIRECTORY_SEPARATOR . 'autoload.php';
+$GLOBALS['config']['path']['autoload']['Twig-2.5.0']      = $GLOBALS['config']['path']['composer']['autoload'];
+$GLOBALS['config']['path']['autoload']['PhpMailer-6.0.6'] = $GLOBALS['config']['path']['composer']['autoload'];
+
+$relativeTemplatePath = 'application' . DIRECTORY_SEPARATOR . 'template';
+$GLOBALS['config']['path']['templates'] = array(
+    'view'  => $projectPath . DIRECTORY_SEPARATOR . $relativeTemplatePath . DIRECTORY_SEPARATOR . 'View',
+    'email' => $projectPath . DIRECTORY_SEPARATOR . $relativeTemplatePath . DIRECTORY_SEPARATOR . 'Email',
 );
-$GLOBALS['config']['paths']['templates']['css'] = array(
-    'email' => $GLOBALS['config']['paths']['templates']['email'] . DIRECTORY_SEPARATOR . 'css',
+$GLOBALS['config']['path']['templates']['css'] = array(
+    'email' => $GLOBALS['config']['path']['templates']['email'] . DIRECTORY_SEPARATOR . 'css',
 );
+$cachePath = $projectPath . DIRECTORY_SEPARATOR . 'cache';
+$GLOBALS['config']['path']['cache'] = array(
+    'twig' => $cachePath . DIRECTORY_SEPARATOR . 'twig_compilation_cache',
+);
+$filePath = $projectPath . DIRECTORY_SEPARATOR . 'file';
+$GLOBALS['config']['path']['file'] = $filePath;

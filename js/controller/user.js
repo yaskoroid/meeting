@@ -4,7 +4,7 @@
 $(document).ready(function() {
 
     class User {
-        constructor(firstName, lastName) {
+        constructor() {
             this.usersCountOnPage           = this.getDefaultOrSessionCookie('DEF_USERS_COUNT_ON_PAGE');
             this.constUserCountOnPageValues = this.getDefaultOrSessionCookie('DEF_CONST_USER_COUNT_ON_PAGE_VALUES');
             this.userSorting                = this.getDefaultOrSessionCookie('DEF_USER_SORTING');
@@ -748,7 +748,7 @@ $(document).ready(function() {
                     secondActionCallback(e);
                 });
 
-            $modal.find('.modal-header button').on('click', function() {
+            $modal.find('.modal-header button').on('click', function(e) {
                 $modal.remove();
             });
             $('body').append($modal);
@@ -795,27 +795,11 @@ $(document).ready(function() {
             $('body').append($modal);
         }
         getSortingFields() {
-            var errorMessage = 'Ошибка получения полей для фильтрации: ';
+            var errorMessage = 'Ошибка получения полей для фильтрации';
             var self = this;
-            $.ajax({
-                url: document.location.origin + '/user/json',
-                method: 'post',
-                data: {intent:'Get sorting fields'},
-                dataType: 'json',
-                complete: function () {
-                },
-                error: function (xhr, status, error) {
-                    $.fn.iNotify(errorMessage + status, 'warning');
-                    $('.js-search-block-spinner').remove();
-                    $('body').append(xhr.responseText);
-                },
-                success: function (json) {
-                    if (json['error']) {
-                        $.fn.iNotify(errorMessage + json['response'], 'warning');
-                        $('body').append(errorMessage + json['response']);
-                        return;
-                    }
-
+            self.simpleAjax(
+                {intent:'Get sorting fields'},
+                function(json) {
                     var fields = json['response'];
                     var $select = $('.js-user-sorting-select');
 
@@ -840,19 +824,20 @@ $(document).ready(function() {
                         self.reloadSearch();
                     });
                     self.createUsersBlock();
-                    $('.js-search-block-spinner').remove();
-                }
-            });
+                    return true;
+                },
+                undefined,
+                errorMessage,
+                '.js-search-block-spinner'
+            );
         }
         getUsersBySearch() {
-            var errorMessage = 'Ошибка получения пользователей: ';
+            var errorMessage = 'Ошибка получения пользователей';
             var self = this;
             if (self.userSearchText === undefined)
                 self.setUsersObjectProperyAndSessionCookieByCookie('USER_SEARCH_TEXT', '');
-            $.ajax({
-                url: document.location.origin + '/user/json',
-                method: 'post',
-                data: {
+            self.simpleAjax(
+                {
                     intent:           'Get users by search',
                     sortingDirection: this.sortingDirection,
                     sortingField:     this.userSorting,
@@ -860,30 +845,15 @@ $(document).ready(function() {
                     pageNumber:       this.pageNumber,
                     usersCountOnPage: this.usersCountOnPage,
                 },
-                dataType: 'json',
-                async: false,
-                complete: function () {
-                },
-                error: function (xhr, status, error) {
-                    $.fn.iNotify(errorMessage + status, 'warning');
-                    $('body').append(xhr.responseText);
-                },
-                success: function (json) {
-
-                    if (json.error) {
-                        if (json.response === 'Error! Row count is zero!') {
-                            $('.js-users-block-spinner').remove();
-                            $('.js-users-block table tbody tr').remove();
-                            $('.js-users-block table tbody').append(
-                                '<tr>' +
+                function(json) {
+                    if (json.response.users.length === 0) {
+                        $('.js-users-block-spinner').remove();
+                        $('.js-users-block table tbody tr').remove();
+                        $('.js-users-block table tbody').append(
+                            '<tr>' +
                                 '<td class="text-secondary">Пользователей не найдено</td>' +
-                                '</tr>'
-                            );
-                            return;
-                        }
-                        $.fn.iNotify(errorMessage + json.response, 'warning');
-                        $('body').append(errorMessage + json.response);
-                        return;
+                            '</tr>'
+                        );
                     }
 
                     var response = json.response;
@@ -895,43 +865,39 @@ $(document).ready(function() {
                     self.createUsers();
                     self.createCreateBlock();
                     self.createPagesBlock();
-                    this.isNeedResearch = false;
-                }
-            });
+                    self.isNeedResearch = false;
+
+                    return false;
+                },
+                undefined,
+                errorMessage,
+                undefined
+            );
         }
         checkIsLoginPossible(className, oldLogin, login) {
             var errorMessage = 'Ошибка проверки корректности логина: ';
             var self = this;
-            var $indicator = $('div.modal.fade.show.' + className +' .modal-body .card-header div span');
-            $indicator.addClass('fa-spinner').addClass('fa-spin');
-            $.ajax({
-                url: document.location.origin + '/user/json',
-                method: 'post',
-                data: {
-                    intent: 'Get is login possible',
+            var indicatorSelector = 'div.modal.fade.show.' + className +' .modal-body .card-header div span';
+            $(indicatorSelector).addClass('fa-spinner').addClass('fa-spin');
+            self.simpleAjax(
+                {
+                    intent:   'Get is login possible',
                     oldLogin: oldLogin,
-                    login: login,
+                    login:    login,
                 },
-                dataType: 'json',
-                async: false,
-                complete: function () {
-                    $indicator.removeClass('fa-spinner').removeClass('fa-spin');
+                function(json) {
+                    $(indicatorSelector).removeClass('fa-exclamation-triangle');
+                    if (json['response'] === false)
+                        $(indicatorSelector).addClass('fa-exclamation-triangle');
+
+                    return false;
                 },
-                error: function (xhr, status, error) {
-                    $.fn.iNotify(errorMessage + status, 'warning');
+                function() {
+                    $(indicatorSelector).removeClass('fa-spinner').removeClass('fa-spin');
                 },
-                success: function (json) {
-                    if (json['error']) {
-                        $.fn.iNotify(errorMessage + json['response'], 'warning');
-                    }
-                    var $indicator = $('div.modal.fade.show.' + className +' .modal-body .card-header div span');
-                    $indicator.removeClass('fa-exclamation-triangle');
-                    if (json['response'] === false) {
-                        $indicator.addClass('fa-exclamation-triangle');
-                        return;
-                    }
-                }
-            });
+                errorMessage,
+                undefined
+            );
         }
         storeUser(className, id) {
             var self = this;
@@ -963,48 +929,7 @@ $(document).ready(function() {
                 errorMessage,
                 '.js-response',
                 true
-            )
-            /*window.ajax.run(
-                '/user/json',
-                data,
-                undefined,
-                function() {
-                    var $indicator = $('div.modal.fade.show.' + className + ' .modal-body .card-header div span');
-                    $indicator.removeClass('fa-exclamation-triangle');
-                    $('div.modal.fade.show.' + className + ' .modal-footer button').attr('disabled', false);
-                },
-                errorMessage,
-                '.js-response',
-                '.js-response',
-                true,
-                true,
-                true
-            );*/
-           /* $.ajax({
-                url: document.location.origin + '/user/json',
-                method: 'post',
-                data: data,
-                dataType: 'json',
-                processData: false,
-                contentType: false,
-                complete: function () {
-
-                },
-                error: function (xhr, status, error) {
-                    $.fn.iNotify(errorMessage + status, 'warning');
-                },
-                success: function (json) {
-                    if (json['error']) {
-                        $.fn.iNotify(errorMessage + json['response'], 'warning');
-                    }
-                    var $indicator = $('div.modal.fade.show.' + className +' .modal-body .card-header div span');
-                    $indicator.removeClass('fa-exclamation-triangle');
-                    if (json['response'] === false) {
-                        $indicator.addClass('fa-exclamation-triangle');
-                        return;
-                    }
-                }
-            });*/
+            );
         }
         setUserData(className, id) {
             if (!Boolean(id)) id = 'null';
@@ -1035,7 +960,14 @@ $(document).ready(function() {
             option.innerText = text;
             $select.append(option);
         }
-        simpleAjax(data, successFunction, completeFunction, error, responseTextAndSpinnerSelector, isFormData = false) {
+        simpleAjax(
+            data,
+            successFunction,
+            completeFunction,
+            error,
+            responseTextAndSpinnerSelector,
+            isFormData = false
+        ) {
             window.ajax.run(
                 '/user/json',
                 data,

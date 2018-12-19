@@ -10,8 +10,7 @@ namespace Entity\Factory;
 
 use core\Service\ServiceLocator;
 use Service\Utils;
-class Factory
-{
+class Factory {
     /**
      * @var Utils;
      */

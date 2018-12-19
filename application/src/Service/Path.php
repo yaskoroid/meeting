@@ -20,13 +20,53 @@ class Path extends Basic {
     }
 
     /**
+     * @param string $path
+     * @param bool|false $isRelative
+     * @return string
+     */
+    public function adapterFromHttpAccess($path, $isRelative = false) {
+        if (strpos($path, DIRECTORY_SEPARATOR) === false)
+            throw new \InvalidArgumentException('No directories in path');
+
+        $path = str_replace(DIRECTORY_SEPARATOR, '/', $path);
+
+        if (strpos($path, $GLOBALS['config']['path']['projectFolderName']) === false)
+            throw new \InvalidArgumentException('No folder of project');
+
+        $path = substr($path, strpos($path, $GLOBALS['config']['path']['projectFolderName']));
+        return $isRelative
+            ? $GLOBALS['site']['http'] . '://' . $path
+            : substr($path, strpos($path, '/') + 1);
+    }
+
+    /**
+     * @return string
+     */
+    public function getEtcPath() {
+        return $GLOBALS['config']['path']['file'] . DIRECTORY_SEPARATOR . 'image/etc';
+    }
+
+    /**
+     * @return string
+     */
+    public function getTempUserImagePath() {
+        return $GLOBALS['config']['path']['file'] . DIRECTORY_SEPARATOR . 'image/user/temp';
+    }
+
+    /**
      * @param string $tempName
      * @param string $extension
      * @return string
      */
-    public function getTempUserImagePath($tempName, $extension) {
-        return $_SERVER['DOCUMENT_ROOT'] . Def\User::$constImageUserTempPath . DIRECTORY_SEPARATOR .
-            $tempName . '.' . $extension;
+    public function getTempUserImageFilePath($tempName, $extension) {
+        return $this->getTempUserImagePath() . DIRECTORY_SEPARATOR . $tempName . '.' . $extension;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserImagePath() {
+        return $GLOBALS['config']['path']['file'] . DIRECTORY_SEPARATOR . 'image/user';
     }
 
     /**
@@ -34,8 +74,7 @@ class Path extends Basic {
      * @param string $extension
      * @return string
      */
-    public function getUserImagePath($userId, $extension) {
-        return $_SERVER['DOCUMENT_ROOT'] . Def\User::$constImageUserPath . DIRECTORY_SEPARATOR .
-            $userId . '.' . $extension;
+    public function getUserImageFilePath($userId, $extension) {
+        return $this->getUserImagePath() . DIRECTORY_SEPARATOR . $userId . '.' . $extension;
     }
 }

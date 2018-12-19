@@ -21,8 +21,7 @@ class Image extends Basic
      * В конструкторе инициализируем значения ширины,
      * высоты и соотношения сторон
      */
-    function __construct($iWidth, $iheight)
-    {
+    function __construct($iWidth, $iheight) {
         $this->imageWidth = (int) $iWidth;
         $this->imageHeight = (int) $iheight;
         $this->r = $this->imageWidth / $this->imageHeight;
@@ -32,8 +31,7 @@ class Image extends Basic
      * Функция пропорционального изменения размеров
      * изображения не более заданных
      */
-    public function imageResizeProportional($path)
-    {
+    public function imageResizeProportional($path) {
         try {
             // Получаем значения ширины, высоты и соотношения
             // сторон исходного изображения

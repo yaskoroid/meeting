@@ -44,7 +44,7 @@ class Downloader extends Basic {
     public function downloadUserImage($fileFieldName, $tempName) {
 
         $ext  = $this->_utilsService->getExtention($_FILES[$fileFieldName]['name']);
-        $path = $this->_pathService->getTempUserImagePath($tempName, $ext);
+        $path = $this->_pathService->getTempUserImageFilePath($tempName, $ext);
 
         copy($_FILES[$fileFieldName]['tmp_name'], $path);
 

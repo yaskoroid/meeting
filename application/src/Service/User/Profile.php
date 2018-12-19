@@ -14,8 +14,17 @@ use Service\Basic;
 use Service\Repository\Meeting;
 use Service;
 
-class Profile extends Basic
-{
+class Profile extends Basic {
+
+    /**
+     * @var array
+     */
+    public static $entities = array(
+        'user',
+        'customer',
+        'administrator'
+    );
+
     /**
      * @var Service\Utils
      */
@@ -26,15 +35,10 @@ class Profile extends Basic
      */
     private $_meetingService;
 
-    /**
-     * @var Meeting
-     */
-    private $_permissionService;
-
-    /**
-     * @var Service\ChangeConfirm
-     */
-    private $_changeConfirmService;
+    private $_notShowingUserFields = array(
+        'image',
+        'imageExt',
+    );
 
     private $_secureUserFields = array(
         'password',
@@ -50,11 +54,13 @@ class Profile extends Basic
     private function _initServices() {
         $this->_utilsService         = ServiceLocator::utilsService();
         $this->_meetingService       = ServiceLocator::repositoryMeetingService();
-        $this->_permissionService    = ServiceLocator::permissionService();
     }
 
-    public function getUserBySessionId($sessionId)
-    {
+    /**
+     * @param int $sessionId
+     * @return Entity\User|null
+     */
+    public function getUserBySessionId($sessionId) {
         try {
             return $this->_meetingService->getUserBySessionId($sessionId);
         } catch(\Exception $e) {
@@ -83,10 +89,6 @@ class Profile extends Basic
         $result->customizableSessionValues = '';
         $result->sessionId = '';
         return $result;
-    }
-
-    public function createUser() {
-
     }
 
     /**
@@ -142,7 +144,7 @@ class Profile extends Basic
         $sortingDirection,
         $pageNumber,
         $usersCountOnPage,
-        $permissionsUserFor)
+        $userPermissionsForUserRead)
     {
 
         $fieldsToSearchIn = array('name', 'surname', 'email', 'login', 'comment', 'phone');
@@ -160,7 +162,7 @@ class Profile extends Basic
             $orderBy,
             $direction,
             $limit,
-            $permissionsUserFor
+            $userPermissionsForUserRead
         );
         $result['usersCount'] = $this->_meetingService->getAllUsersOfLastSearch();
 
@@ -221,9 +223,13 @@ class Profile extends Basic
      * @param array $columns
      */
     public function filterSecureUserColumns(&$columns) {
-        foreach ($this->_secureUserFields as $secureUserField) {
-            foreach ($columns as $key=>$column) {
+        foreach ($columns as $key=>$column) {
+            foreach ($this->_secureUserFields as $secureUserField) {
                 if (isset($column[$this->_utilsService->camelCaseToUnderline($secureUserField, false)]))
+                    unset($columns[$key]);
+            }
+            foreach ($this->_notShowingUserFields as $notShowingUserField) {
+                if (isset($column[$this->_utilsService->camelCaseToUnderline($notShowingUserField, false)]))
                     unset($columns[$key]);
             }
         }

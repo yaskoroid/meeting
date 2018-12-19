@@ -8,8 +8,7 @@
 
 namespace Entity;
 
-class User extends Mapper
-{
+class User extends Mapper {
     public $id;
     public $login;
     public $email;

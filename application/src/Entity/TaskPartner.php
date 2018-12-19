@@ -9,8 +9,7 @@
 namespace Entity;
 
 
-class TaskPartner extends Mapper
-{
+class TaskPartner extends Mapper {
     public $id;
     public $taskId;
     public $userId;

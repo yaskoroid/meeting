@@ -8,9 +8,9 @@
 
 namespace Entity;
 
-class Lesson extends Mapper
-{
+class Lesson extends Mapper {
     public $id;
+    public $textbookId;
     public $number;
     public $name;
     public $isDialog;

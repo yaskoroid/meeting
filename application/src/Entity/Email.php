@@ -9,8 +9,7 @@
 namespace Entity;
 
 
-class Email
-{
+class Email {
     public $id;
     public $userEmailFrom;
     public $userEmailTo;

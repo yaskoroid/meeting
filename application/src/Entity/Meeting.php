@@ -9,8 +9,7 @@
 namespace Entity;
 
 
-class Meeting extends Mapper
-{
+class Meeting extends Mapper {
     public $id;
-    public $dateMeeting;
+    public $date;
 }

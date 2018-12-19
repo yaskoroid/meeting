@@ -89,4 +89,8 @@ nav ul > li#label {
     font-size:24px;
     color:#4f9ee2
 }
+.my-pre-scrollable {
+    max-height: 240px;
+    overflow-y: auto;
+}
 /*--*/

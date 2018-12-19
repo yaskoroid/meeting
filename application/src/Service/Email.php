@@ -60,7 +60,7 @@ class Email extends Basic
     private $_contextService;
 
     function __construct() {
-        require_once $GLOBALS['config']['autoload']['PhpMailer-6.0.6'];
+        require_once $GLOBALS['config']['path']['autoload']['PhpMailer-6.0.6'];
         self::_initServices();
     }
 
@@ -182,7 +182,7 @@ class Email extends Basic
             $cssFile = $css . '.css';
             array_push($cssFiles, $cssFile);
             $style .= file_get_contents(
-                $GLOBALS['config']['paths']['templates']['css']['email'] . DIRECTORY_SEPARATOR . $cssFile
+                $GLOBALS['config']['path']['templates']['css']['email'] . DIRECTORY_SEPARATOR . $cssFile
             );
         }
         $email->title = $templateParams['title'];

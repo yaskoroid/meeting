@@ -24,8 +24,13 @@ class User extends Def {
      */
     private $_userTypeService;
 
-    public static $constImageUserPath          = '/images/user';
-    public static $constImageUserTempPath      = '/images/user/temp';
+    /**
+     * @var Service\Path
+     */
+    private $_pathService;
+
+    public $constImageUserPath     = '';
+    public $constImageUserTempPath = '';
 
     public $usersCountOnPage           = 3;
     public $constUserCountOnPageValues = '1,3,5,10,20,50,100,500';
@@ -40,10 +45,21 @@ class User extends Def {
 
     function __construct() {
         $this->_userTypeService = ServiceLocator::userTypeService();
+        $this->_pathService     = ServiceLocator::pathService();
         $this->constUsersTypes  = $this->_userTypeService->getUsersTypesSecure();
+        $this->_init();
     }
 
     public function get() {
         return parent::_getRun();
+    }
+
+    private function _init() {
+        $this->constImageUserPath = $this->_pathService->adapterFromHttpAccess(
+            $this->_pathService->getUserImagePath()
+        );
+        $this->constImageUserTempPath = $this->_pathService->adapterFromHttpAccess(
+            $this->_pathService->getTempUserImagePath()
+        );
     }
 }

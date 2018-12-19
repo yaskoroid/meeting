@@ -6,6 +6,14 @@ String.prototype.isEmpty = function() {
     return (this.length === 0 || !this.trim());
 };
 
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
 window.cookies = {
     getNameFromDefaultVariableName : function(defaultCookie) {
         return defaultCookie.slice(defaultCookie.indexOf('DEF_') + 'DEF_'.length);
@@ -58,6 +66,9 @@ window.helper = {
         });
         return result;
     },
+    getVariableUnderlineNameFromCamelCase : function(variableName, separator = '_') {
+        return variableName.replace(/([A-Z])/g, separator + '$1').toLowerCase();
+    },
     getObjectVariableNameBySessionCookie : function(cookieVariableName) {
         return window.helper.getVariableCamelCaseNameFromUpperCaseAndUnderline(cookieVariableName, null);
     },
@@ -93,8 +104,59 @@ window.helper = {
     },
     buildIdAssociateObjectFromIndexByIds : function() {
         // TODO
+    },
+    checkNotEmptyObject(object, objectName = undefined) {
+        if (typeof object === 'object' && Object.size(object) > 0)
+            return true;
+
+        if (objectName !== undefined)
+            console.log(objectName + ' is empty object');
+        return false;
+    },
+    checkNotEmptyArray(array, arrayText = undefined) {
+        if (typeof array === 'object' && Array.isArray(array) && array.length > 0)
+            return true;
+
+        if (arrayText !== undefined)
+            console.log(arrayText + ' is empty array');
+        return false;
+    },
+    checkNotEmptyValue(value, valueText = undefined) {
+        if (value === undefined || value === null || value === '') {
+            if (valueText !== undefined)
+                console.log(valueText + ' value is empty');
+            return false;
+        }
+        return true;
+    },
+    checkPermissionCrud(permissionCrud) {
+        if (window.helper.permissionsCrud.indexOf(permissionCrud) !== -1)
+            return true;
+
+        console.log('Permission CRUD is wrong');
+        return false;
+    },
+    checkNotEmptyString(str) {
+        if (typeof str === 'string' && !str.isEmpty())
+            return true;
+        return false;
+    },
+    checkDomElementTextContent(element) {
+        if (this.checkNotEmptyString($(element).text()) && $(element).text() === $(element).html())
+            return true;
+        return false;
+    },
+    checkIntPositiveString(str) {
+        var n = Math.floor(Number(str));
+        return n !== Infinity && String(n) === str && n >= 0;
+    },
+    ucfirst(str) {
+        var f = str.charAt(0).toUpperCase();
+        return f + str.substr(1, str.length-1);
     }
 };
+
+window.helper.permissionsCrud = ['create', 'read', 'update', 'delete'];
 
 window.pageBuilder = {
     getPagesArray : function(pagesCount, pageCurrent, paginationCountOfPagesNearCurrent) {
@@ -142,6 +204,30 @@ window.pageBuilder = {
         }
         window.helper.ksort(pagesArray);
         return pagesArray;
+    },
+    getSpinner : function() {
+        return $(
+            '<div class="text-center js-spinner">' +
+                '<i class="fas fa-spinner fa-spin my-spinner">' +
+                '</i>' +
+            '</div>'
+        );
+    },
+    handleCheckboxCheckedByParentClick($mainCheckboxSelector, $dependentCheckboxesSelector) {
+        var changeDependentCheckboxesCallback = function($mainCheckbox, isSelfChecked, isChecked) {
+            $mainCheckbox.checked = isSelfChecked;
+            if ($dependentCheckboxesSelector !== undefined)
+                $($dependentCheckboxesSelector).each(function(id, element) {
+                    element.checked = isChecked;
+                });
+        };
+        $mainCheckboxSelector.on('click', function() {
+            this.checked = !this.checked;
+        });
+        $mainCheckboxSelector.parent().on('click', function() {
+            var $mainCheckbox = $mainCheckboxSelector[0];
+            changeDependentCheckboxesCallback($mainCheckbox, !$mainCheckbox.checked, !$mainCheckbox.checked);
+        });
     }
 };
 
@@ -163,37 +249,41 @@ window.ajax = {
 
         if (responseTextSelector) $(responseTextSelector).text('');
         if (spinnerSelector) {
-            $(spinnerSelector).append('<div class="fas fa-spinner fa-spin my-spinner js-block-spinner"></div>');
-            var $spinner = $(spinnerSelector).find('.js-block-spinner');
+            $(spinnerSelector).append(window.pageBuilder.getSpinner());
+            var $spinner = $(spinnerSelector).find('.js-spinner');
         }
 
         errorMessage = errorMessage ? errorMessage += ': ' : '';
         var ajaxObject = {
-            url: document.location.origin + path,
-            method: 'post',
-            data: data,
+            url:      document.location.origin + path,
+            method:   'post',
+            data:     data,
             dataType: 'json',
-            async: isAsync,
+            async:    isAsync,
             complete: function () {
-                completeCallback()
+                if (typeof completeCallback === 'function')
+                    completeCallback();
             },
             error: function (xhr, status, error) {
                 if ($spinner) $spinner.remove();
 
+                if (isDebug) $('body').append(errorMessage + status + xhr.responseText);
+
                 typeof errorCallback === 'function'
                     ? errorCallback(xhr, status, error)
                     : $.fn.iNotify(errorMessage + status, 'warning');
-                if (isDebug) $('body').append(errorMessage + status + xhr.responseText);
             },
             success: function (json) {
                 if ($spinner) $spinner.remove();
 
                 if (json.error) {
-                    typeof errorJsonCallback === 'function'
-                        ? errorJsonCallback(json)
-                        : $.fn.iNotify(errorMessage + json.response, 'warning');
-
                     if (isDebug) $('body').append(errorMessage + json.response);
+
+                    if (typeof errorJsonCallback === 'function') {
+                        var isReturn = errorJsonCallback(json);
+                        if (isReturn) return;
+                    }
+                    $.fn.iNotify(errorMessage + json.response, 'warning');
                     return;
                 }
 
@@ -206,7 +296,7 @@ window.ajax = {
                     json.response === undefined
                         ? $.fn.iNotify(errorMessage + 'No response', 'warning')
                         : (json.response.text === undefined
-                            ? $.fn.iNotify(errorMessage + 'No text field is response', 'warning')
+                            ? $.fn.iNotify(errorMessage + 'No text field in response', 'warning')
                             : $(responseTextSelector).text(json.response.text).addClass('text-success'));
             }
         }
@@ -215,6 +305,15 @@ window.ajax = {
             ajaxObject.contentType = !isFormData;
         }
         $.ajax(ajaxObject);
+    },
+    checkJson(json) {
+        if (!window.helper.checkNotEmptyObject(json, 'Json'))
+            return false;
+
+        if (!window.helper.checkNotEmptyValue(json.response, 'Json'))
+            return false;
+
+        return true;
     }
 }
 

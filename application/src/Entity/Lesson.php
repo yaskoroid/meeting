@@ -13,7 +13,8 @@ class Lesson extends Mapper {
     public $textbookId;
     public $number;
     public $name;
+    public $filesIds;
     public $isDialog;
     public $isRead;
-    public $isSpeach;
+    public $isSpeech;
 }

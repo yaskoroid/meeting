@@ -15,8 +15,7 @@ use Respect;
 use Entity\Factory\Factory;
 use Symfony\Component\Process\Exception\InvalidArgumentException;
 
-class Meeting extends Repository
-{
+class Meeting extends Repository {
 
     /**
      * @var Service\DateTime
@@ -357,5 +356,92 @@ class Meeting extends Repository
             $this->_mapper->{$this->realProperty($settingName)}->remove($setting);
         }
         $this->_mapper->flush();
+    }
+
+    /**
+     * @param string $entityName
+     * @return array
+     */
+    public function getEntities($entityName) {
+        return $this->_mapper->{$this->realProperty($entityName)}->fetchAll();
+    }
+
+    /**
+     * @param string $entityName
+     * @param int $id
+     * @return mixed
+     */
+    public function getEntityById($entityName, $id) {
+        return $this->_loadObjectByFilter(array('id' => $id), $this->realProperty($entityName));
+    }
+
+    /**
+     * @param string $entityName
+     * @param array $ids
+     * @return Entity\File[]
+     */
+    public function getEntitiesByIds($entityName, array $ids) {
+
+        return
+            $this->_db
+                ->select('*')
+                ->from($this->realProperty($entityName))
+                ->where("id IN ('" . implode("','", $ids) . "')")
+                ->fetchAll(function($obj) use ($entityName) {
+                    return Factory::createEntity((array) $obj, 'Entity\\'
+                        . ucfirst($this->styledProperty($entityName)));
+                });
+    }
+
+    /**
+     * @param string $entityName
+     * @param mixed $entity
+     */
+    public function saveEntity($entityName, $entity) {
+        $this->_mapper->{$this->realProperty($entityName)}->persist($entity);
+        $this->_mapper->flush();
+    }
+
+    /**
+     * @param string $entityName
+     * @param array $entities
+     */
+    public function saveEntities($entityName, array $entities) {
+        if (!is_array($entities))
+            throw new \InvalidArgumentException('Entities to save must be array');
+
+        foreach ($entities as $entity)
+            $this->_mapper->{$this->realProperty($entityName)}->persist($entity);
+
+        if (count($entities) > 0)
+            $this->_mapper->flush();
+    }
+
+    /**
+     * @param string $entityName
+     * @param array $ids
+     */
+    public function deleteEntitiesByIds($entityName, array $ids) {
+
+        $entitiesToDelete = $this->getEntitiesByIds($entityName, $ids);
+
+        if (count($entitiesToDelete) > 0)
+            $this->deleteEntities($entityName, $entitiesToDelete);
+    }
+
+    /**
+     * @param string $entityName
+     * @param array $entities
+     */
+    public function deleteEntities($entityName, array $entities) {
+        if (!is_array($entities))
+            throw new \InvalidArgumentException('Entities to remove must be array');
+
+        foreach ($entities as $entity) {
+            $this->_mapper->{$this->realProperty($entityName)}->remove($entity);
+        }
+
+        if (count($entities) > 0)
+            $this->_mapper->flush();
     }
 }

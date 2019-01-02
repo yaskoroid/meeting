@@ -7,9 +7,11 @@ use Service;
 
 class Route {
 
-    /**
-     * Example site.ru/main/index
-     */
+    public static function errorPage404() {
+        $host = 'http://' . $_SERVER['HTTP_HOST'] . '/';
+        header('Location:' . $host . 'error404');
+    }
+
     static function start() {
 
         // Defaults
@@ -43,7 +45,7 @@ class Route {
         $controllerClassName = 'controller\\' . $controllerName;
         $controllerClassPath = \Autoloader::getClassPath($controllerClassName);
 
-        file_exists($controllerClassPath) ? require $controllerClassPath : Route::_errorPage404();
+        file_exists($controllerClassPath) ? require $controllerClassPath : Route::errorPage404();
 
         $controller = new $controllerClassName;
         $action = $actionName;
@@ -60,11 +62,6 @@ class Route {
             return;
         }
 
-        Route::_errorPage404();
-    }
-
-    private function _errorPage404() {
-        $host = 'http://' . $_SERVER['HTTP_HOST'] . '/';
-        header('Location:' . $host . 'error404');
+        Route::errorPage404();
     }
 }

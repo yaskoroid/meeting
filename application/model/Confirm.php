@@ -14,7 +14,7 @@ use Service;
 class Confirm extends Model
 {
     /**
-     * @var Service\ChangeConfirm
+     * @var Service\Entity\ChangeConfirm
      */
     private $_changeConfirmService;
 
@@ -28,6 +28,11 @@ class Confirm extends Model
      */
     private $_pathService;
 
+    /**
+     * @var Service\Entity\File
+     */
+    private $_fileService;
+
     function __construct() {
         parent::__construct();
     }
@@ -36,6 +41,7 @@ class Confirm extends Model
         $this->_changeConfirmService = ServiceLocator::changeConfirmService();
         $this->_validatorService     = ServiceLocator::validatorService();
         $this->_pathService          = ServiceLocator::pathService();
+        $this->_fileService          = ServiceLocator::fileService();
     }
 
     protected function _initRenderServices() {}
@@ -54,15 +60,20 @@ class Confirm extends Model
      * @return string
      */
     protected function _userCreationConfirmation($post) {
-        $userImageTempPath = isset($post['login']) && isset($post['imageExt'])
-            ? $this->_pathService->getTempUserImageFilePath($post['login'], $post['imageExt'])
-            : '';
+
 
         if ($post['cancel'] === 'true') {
-            if (file_exists($userImageTempPath))
-                unlink($userImageTempPath);
+            $userImageTempFileId = $this->_changeConfirmService->getImageFileIdOfUserCreation($post['hash']);
+            if ($userImageTempFileId !== null && $this->_validatorService->check(
+                    array('intPositive' => $userImageTempFileId))
+            )
+                $this->_fileService->deleteByIdsAndStorage(array($userImageTempFileId));
 
-            if (!$this->_changeConfirmService->cancelUserChangeConfirm(Service\ChangeConfirm::CREATE_USER, $post['hash']))
+            if (
+                !$this->_changeConfirmService->cancelUserChangeConfirm(
+                    Service\Entity\ChangeConfirm::CREATE_USER, $post['hash']
+                )
+            )
                 throw new \LogicException('Could not cancel your account creation');
             return array('text' => 'Вы успешно отменили создание своего аккаунта');
         }
@@ -79,7 +90,11 @@ class Confirm extends Model
      */
     protected function _userDeletionConfirmation($post) {
         if ($post['cancel'] === 'true') {
-            if (!$this->_changeConfirmService->cancelUserChangeConfirm(Service\ChangeConfirm::DELETE_USER, $post['hash']))
+            if (
+                !$this->_changeConfirmService->cancelUserChangeConfirm(
+                    Service\Entity\ChangeConfirm::DELETE_USER, $post['hash']
+                )
+            )
                 throw new \LogicException('Could not cancel your account deletion');
             return array('text' => 'Вы успешно отменили удаление своего аккаунта');
         }
@@ -96,7 +111,11 @@ class Confirm extends Model
      */
     protected function _userTypeChanging($post) {
         if ($post['cancel'] === 'true') {
-            if (!$this->_changeConfirmService->cancelUserChangeConfirm(Service\ChangeConfirm::CHANGE_USER_TYPE, $post['hash']))
+            if (
+                !$this->_changeConfirmService->cancelUserChangeConfirm(
+                    Service\Entity\ChangeConfirm::CHANGE_USER_TYPE, $post['hash']
+                )
+            )
                 throw new \LogicException('Could not cancel your account type changing');
             return array('text' => 'Вы успешно отменили изменение типа своего аккаунта');
         }
@@ -113,7 +132,11 @@ class Confirm extends Model
      */
     protected function _userPasswordChanging($post) {
         if ($post['cancel'] === 'true') {
-            if (!$this->_changeConfirmService->cancelUserChangeConfirm(Service\ChangeConfirm::CHANGE_USER_PASSWORD, $post['hash']))
+            if (
+                !$this->_changeConfirmService->cancelUserChangeConfirm(
+                    Service\Entity\ChangeConfirm::CHANGE_USER_PASSWORD, $post['hash']
+                )
+            )
                 throw new \LogicException('Could not cancel your account password changing');
             return array('text' => 'Вы успешно отменили изменение пароля своего аккаунта');
         }
@@ -121,7 +144,7 @@ class Confirm extends Model
         $this->_validatorService->check(
             array(
                 'password' => $post['newPassword'],
-                'hash128' => $post['hash']
+                'hash128'  => $post['hash']
             )
         );
 
@@ -135,7 +158,11 @@ class Confirm extends Model
      */
     protected function _userChangeEmailRequestConfirmation($post) {
         if ($post['cancel'] === 'true') {
-            if (!$this->_changeConfirmService->cancelUserChangeConfirm(Service\ChangeConfirm::CHANGE_USER_EMAIL_REQUEST, $post['hash']))
+            if (
+                !$this->_changeConfirmService->cancelUserChangeConfirm(
+                    Service\Entity\ChangeConfirm::CHANGE_USER_EMAIL_REQUEST, $post['hash']
+                )
+            )
                 throw new \LogicException('Could not cancel request your account email changing');
             return array('text' => 'Вы успешно отменили разрешение на изменение email своего аккаунта');
         }
@@ -154,7 +181,11 @@ class Confirm extends Model
      */
     protected function _userChangeEmailConfirmation($post) {
         if ($post['cancel'] === 'true') {
-            if (!$this->_changeConfirmService->cancelUserChangeConfirm(Service\ChangeConfirm::CHANGE_USER_EMAIL, $post['hash']))
+            if (
+                !$this->_changeConfirmService->cancelUserChangeConfirm(
+                    Service\Entity\ChangeConfirm::CHANGE_USER_EMAIL, $post['hash']
+                )
+            )
                 throw new \LogicException('Could not cancel your account email changing');
             return array('text' => 'Вы успешно отменили изменение email своего аккаунта');
         }

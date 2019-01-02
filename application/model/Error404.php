@@ -34,7 +34,7 @@ class Error404 extends Model {
             'title'            => 'Ошибка 404 - страница не найдена',
             'description'      => 'Страница на найдена',
             'keywords'         => 'Страница на найдена, ошибка',
-            'image404FilePath' => $this->_pathService->adapterFromHttpAccess($this->_pathService->getEtcPath()) .
+            'image404FilePath' => $this->_pathService->adapterFromHttpAccess($this->_pathService->getFileTypePath('etc')) .
                 '/404.jpg'
         );
     }

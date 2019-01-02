@@ -29,8 +29,7 @@ class User extends Def {
      */
     private $_pathService;
 
-    public $constImageUserPath     = '';
-    public $constImageUserTempPath = '';
+    public $constImagePath = '';
 
     public $usersCountOnPage           = 3;
     public $constUserCountOnPageValues = '1,3,5,10,20,50,100,500';
@@ -55,11 +54,8 @@ class User extends Def {
     }
 
     private function _init() {
-        $this->constImageUserPath = $this->_pathService->adapterFromHttpAccess(
-            $this->_pathService->getUserImagePath()
-        );
-        $this->constImageUserTempPath = $this->_pathService->adapterFromHttpAccess(
-            $this->_pathService->getTempUserImagePath()
+        $this->constImagePath = $this->_pathService->adapterFromHttpAccess(
+            $this->_pathService->getFileTypePath('image')
         );
     }
 }

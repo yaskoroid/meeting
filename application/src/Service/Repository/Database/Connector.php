@@ -8,25 +8,20 @@
 
 namespace Service\Repository\Database;
 
-/*
- * Класс обслуживает операции с базой данных создавая объект MySQLi
- */
-class Connector extends  Basic
-{
+class Connector extends Basic {
 
     /**
      * @var \mysql
      */
     private $_mysqli;
 
-    function __construct()
-    {
+    function __construct() {
 
     }
 
     public function connect()
     {
-        // Подключаемся к БД
+
         $this->_mysqli = new \mysqli(
             $config['database']['meeting']['host'],
             $config['database']['meeting']['user'],
@@ -34,7 +29,7 @@ class Connector extends  Basic
             $config['database']['meeting']['name']
         ) or die(mysql_error());
 
-        // Ставим кодировку utf-8
+
         $this->_mysqli->set_charset('utf8');
     }
 

@@ -33,27 +33,26 @@ class ServiceFactory {
     private static function _instance($serviceClassName) {
 
         $contextServiceName = "Service\\Context";
-        if (array_key_exists($serviceClassName, self::$services) && $serviceClassName === $contextServiceName) {
+        if (array_key_exists($serviceClassName, self::$services) && $serviceClassName === $contextServiceName)
             return self::$services[$serviceClassName];
-        }
 
         /* @var $contextService Service\Context */
         if ($serviceClassName === $contextServiceName) {
             $contextService = new $serviceClassName();
             self::$services[$serviceClassName] = $contextService;
             return $contextService;
-        } else {
+        } else
             $contextService = self::_instance($contextServiceName);
-        }
+
 
         $isSingleton = forward_static_call([$serviceClassName, 'isSingleton']);
-        if ($isSingleton) {
+        if ($isSingleton)
             return forward_static_call([$serviceClassName, 'instanceSingleton']);
-        }
 
-        if (array_key_exists($serviceClassName.$contextService->hash(), self::$services) && $serviceClassName !== $contextServiceName) {
+        if (array_key_exists($serviceClassName.$contextService->hash(), self::$services) &&
+            $serviceClassName !== $contextServiceName)
             return self::$services[$serviceClassName.$contextService->hash()];
-        }
+
 
         $service = new $serviceClassName();
         self::$services[$serviceClassName.$contextService->hash()] = $service;

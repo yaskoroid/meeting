@@ -15,7 +15,7 @@ use Entity;
 class Settings extends Model {
 
     /**
-     * @var Service\User\Permission
+     * @var Service\Permission
      */
     private $_permissionService;
 
@@ -25,9 +25,19 @@ class Settings extends Model {
     private $_validatorService;
 
     /**
-     * @var Service\Settings
+     * @var Service\Entity\Settings
      */
     private $_settingsService;
+
+    /**
+     * @var Service\Downloader
+     */
+    private $_downloaderService;
+
+    /**
+     * @var Service\Entity\File
+     */
+    private $_fileService;
 
     function __construct() {
         parent::__construct();
@@ -37,6 +47,8 @@ class Settings extends Model {
         $this->_permissionService = ServiceLocator::permissionService();
         $this->_validatorService  = ServiceLocator::validatorService();
         $this->_settingsService   = ServiceLocator::settingsService();
+        $this->_downloaderService = ServiceLocator::downloaderService();
+        $this->_fileService       = ServiceLocator::fileService();
     }
 
     protected function _initRenderServices() {}
@@ -56,7 +68,7 @@ class Settings extends Model {
      * @return array
      */
     protected function _get($settingText, array $post) {
-        $setting = $this->_utilsService->spacedStringToMethodName($settingText);
+        $setting = ucfirst($this->_utilsService->spacedStringToMethodName($settingText));
         $this->_settingsCheckPermission('read', $this->_utilsService->camelCaseToUnderline($setting, false));
 
         return $this->_settingsService->get($setting, $post['id']);
@@ -82,7 +94,7 @@ class Settings extends Model {
      * @return array
      */
     protected function _create($settingText, array $post) {
-        $setting = $this->_utilsService->spacedStringToMethodName($settingText);
+        $setting = ucfirst($this->_utilsService->spacedStringToMethodName($settingText));
         $this->_settingsCheckPermission('create', $this->_utilsService->camelCaseToUnderline($setting, false));
 
         $this->_validatorService->check($this->{'_get' . ucfirst($setting) . 'Validators'}($post));
@@ -90,7 +102,10 @@ class Settings extends Model {
         $entity = $this->_getSettingByPost($post, 'Entity\\' . ucfirst($setting));
 
         $this->_settingsService->save($setting, $entity);
-        return array('text' => 'Вы успешно создали ' . mb_strtolower(Service\Settings::$entitiesNames[$setting]));
+        return array(
+            'text' => 'Вы успешно создали ' .
+                mb_strtolower($this->_settingsService->getEntityName($setting))
+        );
     }
 
     /**
@@ -99,7 +114,7 @@ class Settings extends Model {
      * @return array
      */
     protected function _update($settingText, array $post) {
-        $setting = $this->_utilsService->spacedStringToMethodName($settingText);
+        $setting = ucfirst($this->_utilsService->spacedStringToMethodName($settingText));
         $this->_settingsCheckPermission('update', $this->_utilsService->camelCaseToUnderline($setting, false));
 
         $validators = $this->{'_get' . ucfirst($setting) . 'Validators'}($post);
@@ -111,7 +126,10 @@ class Settings extends Model {
         $this->_setSettingByPost($post, $entity);
 
         $this->_settingsService->save($setting, $entity);
-        return array('text' => 'Вы успешно обновили ' . mb_strtolower(Service\Settings::$entitiesNames[$setting]));
+        return array(
+            'text' => 'Вы успешно обновили ' .
+                mb_strtolower($this->_settingsService->getEntityName($setting))
+        );
     }
 
     /**
@@ -120,13 +138,16 @@ class Settings extends Model {
      * @return array
      */
     protected function _delete($settingText, array $post) {
-        $setting = $this->_utilsService->spacedStringToMethodName($settingText);
+        $setting = ucfirst($this->_utilsService->spacedStringToMethodName($settingText));
         $this->_settingsCheckPermission('delete', $this->_utilsService->camelCaseToUnderline($setting, false));
 
         $this->_validatorService->check(array('intPositiveCommaSeparated' => $post['ids']));
 
-        $this->_settingsService->delete($setting, explode(',', $post['ids']));
-        return array('text' => 'Вы успешно удалили выбранные настройки ' . mb_strtolower(Service\Settings::$entitiesNames[$setting]));
+        $this->_settingsService->deleteByIds($setting, explode(',', $post['ids']));
+        return array(
+            'text' => 'Вы успешно удалили выбранные настройки ' .
+            mb_strtolower($this->_settingsService->getEntityName($setting))
+        );
     }
 
     /**
@@ -143,7 +164,7 @@ class Settings extends Model {
      * @throws \InvalidArgumentException
      */
     private function _settingsCheckPermission($permissionCrud, $permission) {
-        if (!$this->_permissionService->getPermission('read', $permission))
+        if (!$this->_permissionService->getPermission($permissionCrud, $permission))
             throw new \InvalidArgumentException("You have no permission to $permissionCrud $permission");
     }
 
@@ -187,7 +208,7 @@ class Settings extends Model {
         return array(
             'settingExists' => array(
                 $post['textbookId'],
-                array('textbook')
+                array('Textbook')
             ),
             'intPositive' => $post['number'],
             'strlen'      => array(
@@ -197,7 +218,7 @@ class Settings extends Model {
             'zeroone'     => array(
                 $post['isDialog'],
                 $post['isRead'],
-                $post['isSpeach']
+                $post['isSpeech']
             ),
         );
     }
@@ -257,9 +278,9 @@ class Settings extends Model {
     private function _getTaskDateTypeSourceCommentValidators(array $post) {
         return array(
             'settingExists' => array(
-                array($post['taskTypeId'], array('taskType')),
-                array($post['taskTargetDateId'], array('taskTargetDate')),
-                array($post['taskSourceId'], array('taskSource')),
+                array($post['taskTypeId'], array('TaskType')),
+                array($post['taskTargetDateId'], array('TaskTargetDate')),
+                array($post['taskSourceId'], array('TaskSource')),
             ),
             'strlen' => array(
                 array($post['comment'], array(1, 500)),

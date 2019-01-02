@@ -67,7 +67,14 @@ window.helper = {
         return result;
     },
     getVariableUnderlineNameFromCamelCase : function(variableName, separator = '_') {
+        variableName = this.lowerFirstLetter(variableName);
         return variableName.replace(/([A-Z])/g, separator + '$1').toLowerCase();
+    },
+    lowerFirstLetter(string) {
+        return string.charAt(0).toLowerCase() + string.slice(1);
+    },
+    upperFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
     },
     getObjectVariableNameBySessionCookie : function(cookieVariableName) {
         return window.helper.getVariableCamelCaseNameFromUpperCaseAndUnderline(cookieVariableName, null);
@@ -149,10 +156,6 @@ window.helper = {
     checkIntPositiveString(str) {
         var n = Math.floor(Number(str));
         return n !== Infinity && String(n) === str && n >= 0;
-    },
-    ucfirst(str) {
-        var f = str.charAt(0).toUpperCase();
-        return f + str.substr(1, str.length-1);
     }
 };
 

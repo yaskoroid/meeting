@@ -10,8 +10,7 @@ namespace Service;
 
 use core\Monitoring;
 
-class Basic
-{
+class Basic {
 
     /**
      * @param string $action

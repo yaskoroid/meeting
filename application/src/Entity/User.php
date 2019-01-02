@@ -13,14 +13,13 @@ class User extends Mapper {
     public $login;
     public $email;
     public $userTypeId;
+    public $imageFileId;
     public $name;
     public $surname;
     public $phone;
     public $sex;
     public $isReady;
     public $isReadyOnlyForPartnership;
-    public $image;
-    public $imageExt;
     public $comment;
     public $salt;
     public $password;

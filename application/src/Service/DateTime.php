@@ -8,8 +8,7 @@
 
 namespace Service;
 
-class DateTime extends Basic
-{
+class DateTime extends Basic {
     /**
      * @return \DateTime;
      */

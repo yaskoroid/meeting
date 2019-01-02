@@ -8,6 +8,7 @@
 
 namespace model\Def;
 
+use core\Service\ServiceLocator;
 use Service;
 
 class Settings extends Def {
@@ -16,10 +17,19 @@ class Settings extends Def {
     public static $constSettingsNames       = array();
     public static $constSettingsFieldsNames = array();
 
+    /**
+     * @var Service\Entity\Base
+     */
+    private $_entityBaseService;
+
     function __construct() {
-        self::$constSettings            = Service\Settings::$entities;
-        self::$constSettingsNames       = Service\Settings::$entitiesNames;
-        self::$constSettingsFieldsNames = Service\Settings::$entitiesFieldsNames;
+        $this->_entityBaseService = ServiceLocator::entityBaseService();
+
+        self::$constSettings = $this->_entityBaseService->getEntitiesSettingsNames();
+        array_walk(self::$constSettings, function($item, $key) {
+            self::$constSettingsNames[$item]       = $this->_entityBaseService->getEntityName($item);
+            self::$constSettingsFieldsNames[$item] = $this->_entityBaseService->getEntityFieldsNames($item);
+        });
     }
 
     public function get() {

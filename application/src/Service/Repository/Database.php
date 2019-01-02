@@ -10,8 +10,7 @@ namespace Service\Repository;
 
 use Service\Basic;
 
-class Database extends Basic
-{
+class Database extends Basic {
 
     /**
      * @var \PDO
@@ -23,8 +22,7 @@ class Database extends Basic
      */
     private $_pdoStatement;
 
-    function __construct()
-    {
+    function __construct() {
 
     }
 
@@ -36,9 +34,10 @@ class Database extends Basic
         return ((is_array($result) && count($result) > 0) || is_object($result));
     }
 
-    public function meetingConnection()
-    {
-        // Подключаемся к БД
+    /**
+     * @return \PDO
+     */
+    public function meetingConnection() {
         try {
             $db = new \PDO(
                 'mysql:host=' . $GLOBALS['config']['database']['meeting']['host'] .
@@ -46,23 +45,6 @@ class Database extends Basic
                 ';charset=utf8',
                 $GLOBALS['config']['database']['meeting']['user'],
                 $GLOBALS['config']['database']['meeting']['password'],
-                []);
-        } catch (\PDOException $e) {
-            logException($e);
-        }
-        return $db;
-    }
-
-    public function informationSchemaConnection()
-    {
-        // Подключаемся к БД
-        try {
-            $db = new \PDO(
-                'mysql:host=' . $GLOBALS['config']['database']['information_schema']['host'] .
-                ';port=3306;dbname=' . $GLOBALS['config']['database']['information_schema']['name'] .
-                ';charset=utf8',
-                $GLOBALS['config']['database']['information_schema']['user'],
-                $GLOBALS['config']['database']['information_schema']['password'],
                 []);
         } catch (\PDOException $e) {
             logException($e);

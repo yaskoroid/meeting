@@ -11,8 +11,8 @@ namespace Entity;
 
 class Email {
     public $id;
-    public $userEmailFrom;
-    public $userEmailTo;
+    public $emailFromUserId;
+    public $emailToUserId;
     public $type;
     public $title;
     public $body;

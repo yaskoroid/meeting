@@ -72,3 +72,11 @@
 2018-12-18T13:13:02+00:00 Error in DB query: SELECT taskTargetDate.* FROM taskTargetDate WHERE taskTargetDate.id=:TasktargetdateId with params: {"TasktargetdateId":"2"}
 2018-12-18T13:13:07+00:00 Error in DB query: SELECT taskTargetDate.* FROM taskTargetDate WHERE taskTargetDate.id=:TasktargetdateId with params: {"TasktargetdateId":"2"}
 2018-12-18T13:14:09+00:00 Error in DB query: SELECT taskTargetDate.* FROM taskTargetDate WHERE taskTargetDate.id=:TasktargetdateId with params: {"TasktargetdateId":"2"}
+2018-12-20T14:17:45+00:00 Bad password
+2018-12-27T09:34:07+00:00 SQLSTATE[HY000] [2002] Подключение не установлено, т.к. конечный компьютер отверг запрос на подключение.
+
+2018-12-27T09:34:07+00:00 SQLSTATE[HY000] [2002] Подключение не установлено, т.к. конечный компьютер отверг запрос на подключение.
+
+2018-12-27T11:47:02+00:00 Error in DB query: SELECT settings.* FROM settings WHERE settings.id=:SettingsId with params: {"SettingsId":"taskType"}
+2018-12-27T11:47:52+00:00 Error in DB query: SELECT settings.* FROM settings WHERE settings.id=:SettingsId with params: {"SettingsId":"taskType"}
+2018-12-27T11:48:24+00:00 Error in DB query: SELECT settings.* FROM settings WHERE settings.id=:SettingsId with params: {"SettingsId":"taskType"}

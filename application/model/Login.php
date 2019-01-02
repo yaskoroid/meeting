@@ -12,8 +12,7 @@ use core\Service\ServiceLocator;
 use Service;
 use Service\User;
 
-class Login extends Model
-{
+class Login extends Model {
     /**
      * @var Service\Auth
      */
@@ -25,9 +24,9 @@ class Login extends Model
     private $_contextService;
 
     /**
-     * @var User\Profile
+     * @var Service\Entity\User
      */
-    private $_userProfileService;
+    private $_userService;
 
     /**
      * @var Service\Validator
@@ -35,7 +34,7 @@ class Login extends Model
     private $_validatorService;
 
     /**
-     * @var Service\ChangeConfirm
+     * @var Service\Entity\ChangeConfirm
      */
     private $_changeConfirmService;
 
@@ -46,7 +45,7 @@ class Login extends Model
     protected function _initAjaxServices() {
         $this->_authService          = ServiceLocator::authService();
         $this->_contextService       = ServiceLocator::contextService();
-        $this->_userProfileService   = ServiceLocator::userProfileService();
+        $this->_userService          = ServiceLocator::userService();
         $this->_validatorService     = ServiceLocator::validatorService();
         $this->_changeConfirmService = ServiceLocator::changeConfirmService();
     }
@@ -86,7 +85,7 @@ class Login extends Model
     protected function _createNewPasswordRequest(array $post) {
         $this->_validatorService->check(array('login' => $post['login']));
 
-        $user = $this->_userProfileService->getUserByLogin($post['login']);
+        $user = $this->_userService->getUserByLogin($post['login']);
         if ($user === null)
             throw new \InvalidArgumentException('Bad login');
 

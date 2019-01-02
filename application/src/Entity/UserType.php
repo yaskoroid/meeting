@@ -43,11 +43,6 @@ class UserType extends Mapper {
     public $permissionDeleteTask;
     public $permissionReadTask;
 
-    public $permissionCreateTaskPartner;
-    public $permissionUpdateTaskPartner;
-    public $permissionDeleteTaskPartner;
-    public $permissionReadTaskPartner;
-
     public $permissionCreateTaskSource;
     public $permissionUpdateTaskSource;
     public $permissionDeleteTaskSource;

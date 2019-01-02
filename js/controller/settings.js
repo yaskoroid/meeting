@@ -10,6 +10,7 @@ $(document).ready(function() {
             this.entitiesFieldsNames = window['DEF_CONST_SETTINGS_FIELDS_NAMES'];
             this.permissions         = {};
             this.isNeedReloadSetting = {};
+            this.files               = {};
 
             this.createSettingsBlocks();
             this.setPermissions();
@@ -28,7 +29,7 @@ $(document).ready(function() {
 
                     return true;
                 },
-                window.helper.ucfirst(this.getSettingNames(setting)) + '. Ошибка получения',
+                window.helper.upperFirstLetter(this.getSettingNames(setting)) + '. Ошибка получения',
                 undefined,
                 undefined,
                 '.js-setting-' + setting
@@ -292,7 +293,7 @@ $(document).ready(function() {
 
                                 var settingEntityId = $settingTableRow.data('id');
                                 if (settingEntityId === undefined) {
-                                    console.log(window.helper.ucfirst(setting) + ' entity id not found');
+                                    console.log(window.helper.upperFirstLetter(setting) + ' entity id not found');
                                     return;
                                 }
                                 var className = 'js-' + setting + '-store-modal';
@@ -493,9 +494,19 @@ $(document).ready(function() {
                     $inputBlock.append(
                         '<select class="form-control"></select>'
                     );
+
+                    var relatedEntity           = self.getRelatedEntityByIdField(field);
+                    var relatedEntityFieldsById = self.getRelatedFieldsByIds(relatedEntity);
+
+                    $.each(relatedEntityFieldsById, function(id, value) {
+                        var $option = $('<option></option>');
+                        $option.val(id);
+                        $option.text(self.getNameOfEnyEntity(value));
+                        $inputBlock.find('select').append($option);
+                    });
                 } else if (self.isBoolField(field)) {
                     $inputBlock.append(
-                        '<input type="checkbox" class="form-control"></input>'
+                        '<input type="checkbox" class="form-control">'
                     );
                 } else {
                     $inputBlock.append(
@@ -518,7 +529,7 @@ $(document).ready(function() {
                     var $tableRow = $(inputCheckedCheckbox).closest('tr');
                     var id = parseInt($tableRow.data('id'));
                     if ('number' === typeof id)
-                    ids.push(id);
+                        ids.push(id);
                 });
             $setting.data('ids', ids);
             return $setting;
@@ -541,12 +552,9 @@ $(document).ready(function() {
                     var relatedEntityFieldsById = self.getRelatedFieldsByIds(relatedEntity);
 
                     $.each(relatedEntityFieldsById, function(id, value) {
-                        var $option = $('<option></option>');
-                        $option.val(id);
-                        $option.text(self.getNameOfEnyEntity(value));
+                        var $option = $select.find('option[value="' + id + '"]');
                         if ($option.text() === $(row).text())
                             $option.attr('selected', true);
-                        $select.append($option);
                     });
                     return;
                 }
@@ -610,12 +618,15 @@ $(document).ready(function() {
             return settingField.toLowerCase().indexOf('date') !== -1 &&
                 settingField.toLowerCase().indexOf('date') === settingField.toLowerCase().length - 'date'.length;
         }
+        isFilesField(settingField) {
+            return settingField.toLowerCase().indexOf('filesIds') !== -1;
+        }
         isRelatedEntityFieldId(settingField) {
             return settingField.toLowerCase() !== 'id' &&
                 settingField.indexOf('Id') === settingField.toLowerCase().length - 'id'.length;
         }
         getRelatedEntityByIdField(settingField) {
-            return settingField.slice(0, settingField.toLowerCase().indexOf('id'));
+            return window.helper.upperFirstLetter(settingField.slice(0, settingField.toLowerCase().indexOf('id')));
         }
         isBoolField(settingField) {
             return settingField.toLowerCase().indexOf('is') === 0;
@@ -667,7 +678,7 @@ $(document).ready(function() {
 
             if (!window.helper.checkNotEmptyObject(
                     this.permissions[permissionCrud],
-                    window.helper.ucfirst(permissionCrud) + ' permission'
+                    window.helper.upperFirstLetter(permissionCrud) + ' permission'
                 )
             )
                 return;
@@ -707,7 +718,7 @@ $(document).ready(function() {
 
             if (!window.helper.checkNotEmptyValue(
                     object[setting],
-                    window.helper.ucfirst(setting) + subName + ' names'
+                    window.helper.upperFirstLetter(setting) + subName + ' names'
                 )
             )
                 return;

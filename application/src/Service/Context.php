@@ -8,11 +8,10 @@
 
 namespace Service;
 
-use Service\Basic;
 use Entity;
 
-class Context extends Basic
-{
+class Context extends Basic {
+
     /**
      * @var Entity\User
      */

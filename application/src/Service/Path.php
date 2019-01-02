@@ -8,15 +8,23 @@
 
 namespace Service;
 
+use core\Service\ServiceLocator;
+use Service;
 use model\Def;
 
 class Path extends Basic {
+
+    /**
+     * Service\Utils
+     */
+    private $_utilsService;
 
     function __construct() {
         self::_initServices();
     }
 
     private function _initServices() {
+        $this->_utilsService   = ServiceLocator::utilsService();
     }
 
     /**
@@ -42,39 +50,59 @@ class Path extends Basic {
     /**
      * @return string
      */
-    public function getEtcPath() {
-        return $GLOBALS['config']['path']['file'] . DIRECTORY_SEPARATOR . 'image/etc';
+    /*public function getTempPath() {
+        return $GLOBALS['config']['path']['file'] . DIRECTORY_SEPARATOR . 'temp';
+    }*/
+
+    /**
+     * @param string $fileName
+     * @param string $fileExtension
+     * @return string
+     */
+   /* public function getTempFilePath($fileName, $fileExtension) {
+        return $this->getTempPath() . DIRECTORY_SEPARATOR . $fileName . '.' . $fileExtension;
+    }*/
+
+    /**
+     * @param string $fileType
+     * @return string
+     * @throws \InvalidArgumentException
+     */
+    public function getFileTypePath($fileType) {
+        $fileTypeExtensionsAllowed = $this->_utilsService->arrayGetRecursive(
+            Service\Entity\File::TYPE,
+            array($fileType)
+        );
+        if ($fileTypeExtensionsAllowed === null)
+            throw new \InvalidArgumentException('No such file type');
+
+        return $GLOBALS['config']['path']['file'] . DIRECTORY_SEPARATOR . $fileType;
     }
 
     /**
+     * @param string $fileType
+     * @param string $fileName
+     * @param string $fileExtension
      * @return string
      */
-    public function getTempUserImagePath() {
-        return $GLOBALS['config']['path']['file'] . DIRECTORY_SEPARATOR . 'image/user/temp';
+    public function getFileTypeFilePath($fileType, $fileName, $fileExtension) {
+        return $this->getFileTypePath($fileType) . DIRECTORY_SEPARATOR . $fileName . '.' . $fileExtension;
     }
 
     /**
-     * @param string $tempName
-     * @param string $extension
+     * @param string $filePath
      * @return string
      */
-    public function getTempUserImageFilePath($tempName, $extension) {
-        return $this->getTempUserImagePath() . DIRECTORY_SEPARATOR . $tempName . '.' . $extension;
+    public function getFileExtension($filePath) {
+        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+        return $extension === null ? '' : $extension;
     }
 
     /**
+     * @param string $filePath
      * @return string
      */
-    public function getUserImagePath() {
-        return $GLOBALS['config']['path']['file'] . DIRECTORY_SEPARATOR . 'image/user';
-    }
-
-    /**
-     * @param string $userId
-     * @param string $extension
-     * @return string
-     */
-    public function getUserImageFilePath($userId, $extension) {
-        return $this->getUserImagePath() . DIRECTORY_SEPARATOR . $userId . '.' . $extension;
+    public function getFileName($filePath) {
+        return pathinfo($filePath, PATHINFO_FILENAME);
     }
 }

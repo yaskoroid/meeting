@@ -115,8 +115,7 @@ class Utils extends Basic
      * @return bool
      * @throws \Exception
      */
-    public function checkMime($filePath, array $arrayPossibleTypes)
-    {
+    public function checkMime($filePath, array $arrayPossibleTypes) {
         /** @var \Fileinfo|bool */
         $finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type
 
@@ -137,18 +136,13 @@ class Utils extends Basic
     }
 
     /**
-     * @param string $filePath
+     * @param string $className
      * @return string
      */
-    public function getExtention($filePath) {
-        $fileName = substr($filePath, strrpos($filePath, DIRECTORY_SEPARATOR) + 1);
-        $pointPosition = strrpos($fileName, '.');
-
-        if ($pointPosition === false)
-            return '';
-
-        $fileExt = substr($fileName, $pointPosition + 1);
-        return $fileExt;
+    public function trimClassNamespace($className) {
+        $pos = strrpos($className, '\\');
+        if ($pos) return substr($className, $pos + 1);
+        return $className;
     }
 
     /**
@@ -156,8 +150,7 @@ class Utils extends Basic
      * @return string
      * @throws \Exception
      */
-    public function spacedStringToMethodName($intent)
-    {
+    public function spacedStringToMethodName($intent) {
         if (empty($intent)) {
             throw new \Exception('Empty string');
         }
@@ -176,13 +169,12 @@ class Utils extends Basic
      * @return string
      * @throws \Exception
      */
-    public function camelCaseToUnderline($camelCase, $isUpper = true)
-    {
+    public function camelCaseToUnderline($camelCase, $isUpper = true) {
         if (empty($camelCase)) {
             throw new \Exception('Empty string');
         }
 
-        $spaced = preg_replace('/([A-Z])/', ' $1', $camelCase);
+        $spaced = preg_replace('/([A-Z])/', ' $1', lcfirst($camelCase));
         $result = '';
         $words = explode(' ', $spaced);
         $isFirst = true;
@@ -204,8 +196,7 @@ class Utils extends Basic
      * @return string
      * @throws \Exception
      */
-    public function underlineToCamelCase($underline, $isFirstLow = true)
-    {
+    public function underlineToCamelCase($underline, $isFirstLow = true) {
         if (empty($underline)) {
             throw new \Exception('Empty string');
         }

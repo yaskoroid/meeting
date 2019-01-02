@@ -15,8 +15,7 @@ use Service\Repository\Database;
 use Respect\Relational;
 use Service\Basic;
 
-abstract class Repository extends Basic
-{
+abstract class Repository extends Basic {
 
     /**
      * @var \SplObjectStorage
@@ -284,22 +283,6 @@ abstract class Repository extends Basic
     protected function _fillMapper($mapperName, $items) {
         $mapperClassName = $this->_getMapper($mapperName);
         return $this->_utilsService->fillObjectBy(new $mapperClassName, $items);
-    }
-
-    /**
-     * @param mixed $object
-     * @return string
-     * @throws \Exception
-     */
-    protected function _getObjectType($object) {
-        if ($object instanceof Entity\User) {
-            $type = "user";
-        } elseif ($object instanceof Entity\UserType) {
-            $type = "user_detail";
-        } else {
-            throw new \Exception("Invalid object type " . get_class($object));
-        }
-        return $type;
     }
 
     /**

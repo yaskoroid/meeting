@@ -19,12 +19,6 @@ function prepareData(cancel = false) {
         hash:        $.urlParam('hash')
     };
 
-    if ($.urlParam('login'))
-        data['login'] = $.urlParam('login');
-
-    if ($.urlParam('imageExt'))
-        data['imageExt'] = $.urlParam('imageExt');
-
     $.each($('form input'), function() {
         data[$(this).attr('name')] = $(this).val();
     });

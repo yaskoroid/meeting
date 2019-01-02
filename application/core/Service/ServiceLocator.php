@@ -49,17 +49,17 @@ class ServiceLocator extends core\Service\BaseServiceLocator {
     }
 
     /**
-     * @return Service\User\Profile
+     * @return Service\Entity\User
      */
-    public static function userProfileService() {
-        return self::_factory()->get("Service\\User\\Profile");
+    public static function userService() {
+        return self::_factory()->get("Service\\Entity\\User");
     }
 
     /**
-     * @return Service\User\Type
+     * @return Service\Entity\UserType
      */
     public static function userTypeService() {
-        return self::_factory()->get("Service\\User\\Type");
+        return self::_factory()->get("Service\\Entity\\UserType");
     }
 
     /**
@@ -91,10 +91,10 @@ class ServiceLocator extends core\Service\BaseServiceLocator {
     }
 
     /**
-     * @return Service\User\Permission
+     * @return Service\Permission
      */
     public static function permissionService() {
-        return self::_factory()->get("Service\\User\\Permission");
+        return self::_factory()->get("Service\\Permission");
     }
 
     /**
@@ -112,17 +112,17 @@ class ServiceLocator extends core\Service\BaseServiceLocator {
     }
 
     /**
-     * @return Service\Email
+     * @return Service\Entity\Email
      */
     public static function emailService() {
-        return self::_factory()->get("Service\\Email");
+        return self::_factory()->get("Service\\Entity\\Email");
     }
 
     /**
-     * @return Service\ChangeConfirm
+     * @return Service\Entity\ChangeConfirm
      */
     public static function changeConfirmService() {
-        return self::_factory()->get("Service\\ChangeConfirm");
+        return self::_factory()->get("Service\\Entity\\ChangeConfirm");
     }
 
     /**
@@ -147,9 +147,30 @@ class ServiceLocator extends core\Service\BaseServiceLocator {
     }
 
     /**
-     * @return Service\Settings
+     * @return Service\Entity\Settings
      */
     public static function settingsService() {
-        return self::_factory()->get("Service\\Settings");
+        return self::_factory()->get("Service\\Entity\\Settings");
+    }
+
+    /**
+     * @return Service\Entity\File
+     */
+    public static function fileService() {
+        return self::_factory()->get("Service\\Entity\\File");
+    }
+
+    /**
+     * @return Service\Entity\Task
+     */
+    public static function taskService() {
+        return self::_factory()->get("Service\\Entity\\Task");
+    }
+
+    /**
+     * @return Service\Entity\Base
+     */
+    public static function entityBaseService() {
+        return self::_factory()->get("Service\\Entity\\Base");
     }
 }

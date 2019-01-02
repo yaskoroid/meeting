@@ -12,10 +12,11 @@ namespace Entity;
 class Task extends Mapper {
     public $id;
     public $meetingId;
-    public $taskNumber;
+    public $number;
     public $taskTypeId;
     public $lessonId;
-    public $userId;
+    public $responsibleUserId;
+    public $partnersUsersIds;
     public $isDone;
     public $isHall;
     public $comment;

@@ -11,7 +11,8 @@ $(document).ready(function() {
             this.sortingDirection           = this.getDefaultOrSessionCookie('DEF_SORTING_DIRECTION');
             this.userSearchText             = this.getDefaultOrSessionCookie('DEF_USER_SEARCH_TEXT');
             this.pageNumber                 = this.getDefaultOrSessionCookie('DEF_PAGE_NUMBER');
-            this.constImageUserPath         = this.getDefaultOrSessionCookie('DEF_CONST_IMAGE_USER_PATH');
+            this.constImagePath             = this.getDefaultOrSessionCookie('DEF_CONST_IMAGE_PATH');
+            this.files              = {};
             this.isNeedResearch     = true;
             this.usersCount         = 0;
             this.foundedUsersData   = undefined;
@@ -295,7 +296,7 @@ $(document).ready(function() {
                     '<div class="media">' +
                         '<div style="width: 250px;">' +
                             '<div class="media js-image">' +
-                                 '<img onerror="this.onerror=null;this.src=\'' + this.constImageUserPath + '/0.jpg\';" class="img-thumbnail rounded float-left" src="">' +
+                                 '<img onerror="this.onerror=null;this.src=\'' + this.constImagePath + '/EmptyUserImage.jpg\';" class="img-thumbnail rounded float-left" src="">' +
                             '</div>' +
                         '</div>' +
                         '<div class="media-body ml-3">' +
@@ -553,7 +554,7 @@ $(document).ready(function() {
                 });
             }
 
-            $tab.find('.js-image img').attr('src', this.constImageUserPath + '/' + user['image'] + '.' + user['imageExt']);
+            $tab.find('.js-image img').attr('src', this.constImagePath + '/' + this.getUserImageName(user));
             $tab.find('.js-name').text(user['name']);
             $tab.find('.js-surname').text(user['surname']);
             $tab.find('.js-email').text(user['email']);
@@ -657,8 +658,7 @@ $(document).ready(function() {
         }
         fillUserTabStoreRealValues(className, user) {
             var $tab = $('div.modal.fade.show.' + className + ' > div > div > div.modal-body > div');
-            $tab.find('.js-image img').attr('src', this.constImageUserPath + '/' + user['image'] +
-                '.' + user['imageExt']);
+            $tab.find('.js-image img').attr('src', this.constImagePath + '/' + this.getUserImageName(user));
             $tab.find('.js-login input').val(user['login']);
             $tab.find('.js-login input').data('startValue', user['login']);
             if (user['sex'] == false) {
@@ -710,6 +710,15 @@ $(document).ready(function() {
                         undefined
                     )
             });
+        }
+        getUserImageName(user) {
+            if (!window.helper.checkNotEmptyObject(this.files))
+                return '';
+
+            if (!window.helper.checkNotEmptyObject(this.files[user['imageFileId']]))
+                return '';
+
+            return this.files[user['imageFileId']]['name'] + '.' + this.files[user['imageFileId']]['extension'];
         }
         createModal(className, title, action, actionCallback, secondAction = undefined, secondActionCallback = undefined){
             var $modal = $(
@@ -805,14 +814,9 @@ $(document).ready(function() {
 
                     $.each(fields,
                         function(key, field) {
-                            $.each(
-                                field,
-                                function(key, value) {
-                                    if (self.userSorting === undefined)
-                                        self.setUsersObjectProperyAndSessionCookieByCookie('USER_SORTING', key);
-                                    self.createSelectOptions($select, key, value, self.userSorting);
-                                }
-                            )
+                            if (self.userSorting === undefined)
+                                self.setUsersObjectProperyAndSessionCookieByCookie('USER_SORTING', key);
+                            self.createSelectOptions($select, key, field, self.userSorting);
                         }
                     );
 
@@ -861,6 +865,7 @@ $(document).ready(function() {
                     self.foundedUsersData = response.users;
                     self.permissions.create = response.permissions.create;
                     self.permissions.users = response.permissions.users;
+                    self.files = response.files;
                     $('.js-users-block-spinner').remove();
                     self.createUsers();
                     self.createCreateBlock();

@@ -12,6 +12,7 @@ use core\Service\ServiceLocator;
 use Service\Basic;
 use Service\User;
 use Service\Context;
+use Service;
 use Entity;
 
 class Auth extends Basic
@@ -22,17 +23,17 @@ class Auth extends Basic
     private $_contextService;
 
     /**
-     * @var User\Profile
+     * @var Service\Entity\User
      */
-    private $_userProfileService;
+    private $_userService;
 
     function __construct() {
         self::_initServices();
     }
 
     private function _initServices() {
-        $this->_contextService     = ServiceLocator::contextService();
-        $this->_userProfileService = ServiceLocator::userProfileService();
+        $this->_contextService = ServiceLocator::contextService();
+        $this->_userService    = ServiceLocator::userService();
     }
 
     /**
@@ -44,7 +45,7 @@ class Auth extends Basic
     public function auth($login, $password) {
         session_start();
         /** @var Entity\User $user */
-        $user = $this->_userProfileService->getUserByLoginAndPassword($login, $password);
+        $user = $this->_userService->getUserByLoginAndPassword($login, $password);
         if ($user === null) {
             $this->_deauthentication();
             throw new \InvalidArgumentException('Bad login or password');
@@ -63,7 +64,7 @@ class Auth extends Basic
         session_start();
 
         /** @var Entity\User $user */
-        $user = $this->_userProfileService->getUserBySessionId($_COOKIE['PHPSESSID']);
+        $user = $this->_userService->getUserBySessionId($_COOKIE['PHPSESSID']);
         if ($user === null) {
             $this->_deauthentication();
             return;
@@ -141,6 +142,6 @@ class Auth extends Basic
         $user->sessionId = $_COOKIE['PHPSESSID'];
         setcookie('PHPSESSID', null, -1, '/');
 
-        $this->_userProfileService->saveUser($user);
+        $this->_userService->save($user);
     }
 }

@@ -17,9 +17,9 @@ class Validator extends Basic
 {
 
     /**
-     * @var Service\User\Profile
+     * @var Service\Entity\User
      */
-    private $_userProfileService;
+    private $_userService;
 
     /**
      * @var Service\Utils
@@ -32,12 +32,12 @@ class Validator extends Basic
     private $_userTypeService;
 
     /**
-     * @var Service\ChangeConfirm
+     * @var Service\Entity\ChangeConfirm
      */
     private $_changeConfirmService;
 
     /**
-     * @var Service\Settings
+     * @var Service\Entity\Settings
      */
     private $_settingsService;
 
@@ -46,11 +46,11 @@ class Validator extends Basic
     }
 
     private function _initServices() {
-        $this->_userProfileService   = ServiceLocator::userProfileService();
+        $this->_userService          = ServiceLocator::userService();
         $this->_utilsService         = ServiceLocator::utilsService();
         $this->_userTypeService      = ServiceLocator::userTypeService();
         $this->_changeConfirmService = ServiceLocator::changeConfirmService();
-        $this->_settingsService   = ServiceLocator::settingsService();
+        $this->_settingsService      = ServiceLocator::settingsService();
     }
 
     /**
@@ -236,7 +236,7 @@ class Validator extends Basic
      * @param string $login
      */
     private function _loginNotExists($login) {
-        $user = $this->_userProfileService->getUserByLogin($login);
+        $user = $this->_userService->getUserByLogin($login);
 
         if ($user === null)
             return;
@@ -270,7 +270,7 @@ class Validator extends Basic
      * @param string $email
      */
     private function _emailNotExists($email) {
-        $user = $this->_userProfileService->getUserByEmail($email);
+        $user = $this->_userService->getUserByEmail($email);
 
         if ($user === null)
             return;
@@ -320,7 +320,7 @@ class Validator extends Basic
      * @param string $phone
      */
     private function _phoneNotExists($phone) {
-        $user = $this->_userProfileService->getUserByPhone($phone);
+        $user = $this->_userService->getUserByPhone($phone);
 
         if ($user === null)
             return;
@@ -347,32 +347,6 @@ class Validator extends Basic
 
         if ($intZeroOne < 0 || $intZeroOne > 1)
             throw new \InvalidArgumentException("Value must be '0' or '1'");
-    }
-
-    /**
-     * @param string $filePath
-     */
-    private function _extImage($filePath) {
-        $imagesExt = Service\Downloader::EXT_IMG;
-
-        $fileExt = $this->_utilsService->getExtention($filePath);
-        if (!in_array(pathinfo($filePath, PATHINFO_EXTENSION), $imagesExt))
-            throw new \InvalidArgumentException('Bad image file extension');
-
-    }
-
-    /**
-     * @param string $filePath
-     */
-    private function _mimeImage($filePath) {
-        $imagesMime = Service\Downloader::MIME_IMG_TYPES;
-
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        if (!in_array(finfo_file($finfo, $filePath), $imagesMime)) {
-            finfo_close($finfo);
-            throw new \InvalidArgumentException('Bad image file type');
-        }
-        finfo_close($finfo);
     }
 
     /**

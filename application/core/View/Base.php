@@ -20,9 +20,9 @@ class Base {
     private $_templateService;
 
     /**
-     * @var Service\User\Profile
+     * @var Service\Entity\User
      */
-    private $_userProfileService;
+    private $_userService;
 
     /**
      * @var Service\User\Type
@@ -34,18 +34,17 @@ class Base {
     }
 
     private function _initServices() {
-        $this->_contextService     = ServiceLocator::contextService();
-        $this->_templateService    = ServiceLocator::templateService();
-        $this->_userProfileService = ServiceLocator::userProfileService();
-        $this->_userTypeService    = ServiceLocator::userTypeService();
+        $this->_contextService  = ServiceLocator::contextService();
+        $this->_templateService = ServiceLocator::templateService();
+        $this->_userService     = ServiceLocator::userService();
+        $this->_userTypeService = ServiceLocator::userTypeService();
     }
 
     /**
      * @param string $derivedView - dynamic content of view page
      * @param array $data - data of model
      */
-    function render($derivedView, array $data = array())
-    {
+    function render($derivedView, array $data = array()) {
         //@TODO test same code
         $this->changeConfirmService = ServiceLocator::changeConfirmService();
         //create user
@@ -54,7 +53,7 @@ class Base {
         $data['def']  = $this->_getDef($derivedView);
 
         $user = $this->_contextService->getUser();
-        $this->_userProfileService->filterSecureUserFields($user);
+        $this->_userService->filterPublicEntityFields('User', $user);
         $data['user'] = $user;
 
         $data['userType'] = $this->_userTypeService->getUserType($user);

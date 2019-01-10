@@ -30,7 +30,7 @@ class UserType extends Base {
         /** @var Ent\UserType[] */
         static $usersTypes;
         if (is_null($usersTypes)) {
-            $usersTypesNotChecked = $this->_meetingService->getUsersTypes();
+            $usersTypesNotChecked = $this->get('UserType');
             if (!is_array($usersTypesNotChecked)) {
                 throw new \Exception('No users types');
             }

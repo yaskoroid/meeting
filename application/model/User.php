@@ -94,9 +94,9 @@ class User extends Model {
     protected function _initRenderData() {
         $this->_result = array(
             'page'        => 'User',
-            'title'       => 'Братья и сестры собрания',
-            'description' => 'Собрание. Все братья и сестры участвующие в школе',
-            'keywords'    => 'Собрание, братья, сестры'
+            'title'       => 'Пользователи',
+            'description' => 'Собрание. Все участники обучающиеся по урокам',
+            'keywords'    => 'Собрание, участники, пользователи'
         );
 
         $user = $this->_contextService->getUser();

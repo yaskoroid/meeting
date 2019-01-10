@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net
 --
 -- Хост: localhost
--- Время создания: Янв 02 2019 г., 14:28
+-- Время создания: Янв 04 2019 г., 14:30
 -- Версия сервера: 5.6.35
 -- Версия PHP: 7.0.16
 
@@ -486,14 +486,14 @@ CREATE TABLE IF NOT EXISTS `user` (
 --
 
 INSERT INTO `user` (`id`, `login`, `email`, `user_type_id`, `image_file_id`, `name`, `surname`, `phone`, `sex`, `is_ready`, `is_ready_only_for_partnership`, `comment`, `salt`, `password`, `customizable_session_values`, `session_id`) VALUES
-(1, 'admin', 'rom-lux@gmail.com', 2, 27, 'Роман', 'Иванов', '+380951065886', 1, 1, 0, 'Глава', '123456789a', '7971e5c0d8443c128ac86c7af3b9ecd3', '{"SESSION_SORTING_DIRECTION":"asc","SESSION_USERS_SEARCH_TEXT":"g","SESSION_USERS_SORTING":"surname","SESSION_USER_SORTING":"login","SESSION_USER_SEARCH_TEXT":"","SESSION_PAGE_NUMBER":"1","SESSION_USERS_COUNT_ON_PAGE":"1"}', 'dock0f3d2jfisq68s992b6cn10'),
+(1, 'admin', 'admin@gmail.com', 2, 27, 'Роман', 'Иванов', '+380951065886', 1, 1, 0, 'Глава', '123456789a', '7971e5c0d8443c128ac86c7af3b9ecd3', '{"SESSION_SORTING_DIRECTION":"asc","SESSION_USERS_SEARCH_TEXT":"g","SESSION_USERS_SORTING":"surname","SESSION_USER_SORTING":"login","SESSION_USER_SEARCH_TEXT":"","SESSION_PAGE_NUMBER":"1","SESSION_USERS_COUNT_ON_PAGE":"1"}', 'dock0f3d2jfisq68s992b6cn10'),
 (2, 'vetal', 'vetal@rambler.ru', 1, 25, 'Виталий', 'Петров', '+380992356897', 1, 1, 1, 'Друг с велосипедом', '123456789a', 'a4856babce82c7c97251a339a2efa0ae', '', ''),
-(3, 'antonenko', 'rudec@rambler.ru', 1, 24, 'Вячеслав', 'Антоненко', '+380502224290', 1, 1, 1, 'Друг с насосной, который приходит неожиданно', '123456789a', 'a4856babce82c7c97251a339a2efa0ae', '', ''),
-(4, 'sergeeva', 'maksimova@rambler.ru', 1, 21, 'Людмила', 'Сергеева', '+380662354297', 0, 1, 0, 'Подруга с детьми', '123456789a', 'a4856babce82c7c97251a339a2efa0ae', '', ''),
-(5, 'agapyan', 'iskoroid2@gmail.com', 1, 19, 'Мария', 'Агапян', '+380999105040', 0, 1, 0, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', '123456789a', 'a4856babce82c7c97251a339a2efa0ae', '{"SESSION_USERS_COUNT_ON_PAGE":"3","SESSION_USER_SORTING":"id","SESSION_SORTING_DIRECTION":"asc","SESSION_USER_SEARCH_TEXT":"","SESSION_PAGE_NUMBER":"1"}', '3e80c6ushf7kn9rp7fbnlkjtd6'),
-(6, 'orevuar', 'dergach@rambler.ru', 1, 20, 'Игорь', 'Оревуар', '+380503256894', 1, 1, 1, 'Друг с женой', '123456789a', 'a4856babce82c7c97251a339a2efa0ae', '', ''),
-(7, 'kotelny', 'rachinsky@rambler.ru', 1, 22, 'Александр', 'Котельный', '+380632356874', 1, 1, 1, 'Друг старейшена', '123456789a', 'a4856babce82c7c97251a339a2efa0ae', '', ''),
-(8, 'olga', 'skoroid1234@gmail.com', 1, 18, 'Ольга', 'Петросян', '+380952356873', 1, 0, 1, 'Ольга ольга22', 'QQ}w&`W!Ei', '91f4086d889a74de3ab7011f2dc6a405', '{"SESSION_USER_SORTING":"id","SESSION_SORTING_DIRECTION":"asc","SESSION_USER_SEARCH_TEXT":"","SESSION_PAGE_NUMBER":"1"}', 'kb2nrapcos20lvke0f18ejd6b0'),
+(3, 'antonenko', 'antonenko@rambler.ru', 1, 24, 'Вячеслав', 'Антоненко', '+380502224290', 1, 1, 1, 'Друг с насосной, который приходит неожиданно', '123456789a', 'a4856babce82c7c97251a339a2efa0ae', '', ''),
+(4, 'sergeeva', 'sergeeva@rambler.ru', 1, 21, 'Людмила', 'Сергеева', '+380662354297', 0, 1, 0, 'Подруга с детьми', '123456789a', 'a4856babce82c7c97251a339a2efa0ae', '', ''),
+(5, 'agapyan', 'agapyan@gmail.com', 1, 19, 'Мария', 'Агапян', '+380999105040', 0, 1, 0, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', '123456789a', 'a4856babce82c7c97251a339a2efa0ae', '{"SESSION_USERS_COUNT_ON_PAGE":"3","SESSION_USER_SORTING":"id","SESSION_SORTING_DIRECTION":"asc","SESSION_USER_SEARCH_TEXT":"","SESSION_PAGE_NUMBER":"1"}', '3e80c6ushf7kn9rp7fbnlkjtd6'),
+(6, 'orevuar', 'orevuar@rambler.ru', 1, 20, 'Игорь', 'Оревуар', '+380503256894', 1, 1, 1, 'Друг с женой', '123456789a', 'a4856babce82c7c97251a339a2efa0ae', '', ''),
+(7, 'kotelny', 'kotelny@rambler.ru', 1, 22, 'Александр', 'Котельный', '+380632356874', 1, 1, 1, 'Друг оказался вдруг', '123456789a', 'a4856babce82c7c97251a339a2efa0ae', '', ''),
+(8, 'olga', 'skoroid12345@gmail.com', 1, 18, 'Ольга', 'Петросян', '+380952356873', 1, 0, 1, 'Ольга ольга22', 'QQ}w&`W!Ei', '91f4086d889a74de3ab7011f2dc6a405', '{"SESSION_USER_SORTING":"id","SESSION_SORTING_DIRECTION":"asc","SESSION_USER_SEARCH_TEXT":"","SESSION_PAGE_NUMBER":"1"}', 'kb2nrapcos20lvke0f18ejd6b0'),
 (9, 'dmitrenko', 'skoroid1234@gmail.com', 1, 29, 'Василий', 'Дмитренко', '+380652185198', 1, 1, 1, 'ываыва а', '8hk^B4yZoM', 'eaff27872dfdf7e9dc24a9689c7629b8', NULL, NULL),
 (10, 'assd', 'skoroid1234@gmail.com', 1, NULL, 'assd', 'ad', '+380519819819', 1, 1, 1, '1', ':lbW)xaaAD', '6198b5d4ec4f45a9f9acfe0e5a60703b', NULL, NULL),
 (11, 'asdf', 'skoroid12345@gmail.com', 1, 30, 'd', 'd', '+380578567856', 1, 1, 1, 'd', '_y)|4PXn2b', 'c0846993da570b903323d5d0a4c646e1', '{"SESSION_USERS_COUNT_ON_PAGE":"3","SESSION_USER_SORTING":"id","SESSION_SORTING_DIRECTION":"asc","SESSION_USER_SEARCH_TEXT":"","SESSION_PAGE_NUMBER":"1"}', 'hihn9v2gg6hk2k2k8kh7vs7161');

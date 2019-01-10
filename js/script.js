@@ -342,7 +342,7 @@ $.fn.myNotify = function(params) {
         },
         offset: 20,
         spacing: 10,
-        z_index: 1100,
+        z_index: 1500,
         delay: 5000,
         timer: 1000,
         url_target: '_blank',

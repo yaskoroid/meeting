@@ -58,10 +58,10 @@ class Base {
 
         $data['userType'] = $this->_userTypeService->getUserType($user);
 
-        $isModelData = !empty($data);
+        /*$isModelData = !empty($data);
         if ($isModelData)
             if (is_array($data))
-                array_push($data, $def);
+                array_push($data, $def);*/
 
         $derivedTemplate  = strtolower($derivedView) . '.tpl';
         print $this->_templateService->render($derivedTemplate, $data);

@@ -1,15 +1,11 @@
 <?php
-// Данные для подключения к БД на сайте zzz.com.ua
-/*define(DB_HOST,"mysql.zzz.com.ua");
-define(DB_USER,"user_skoroid");
-define(DB_USER_PASSWORD,"user_skoroid");
-define(DB_NAME,"iskoroid");*/
+
 namespace application;
 
 // Administrator
 $GLOBALS['config']['admin'] = array(
-    'name'    => 'Vasya',
-    'surname' => 'Pupkin',
+    'name'    => 'Alexander',
+    'surname' => 'Skoroid',
     'email'   => 'skoroid12345@gmail.com',
 );
 
@@ -17,32 +13,36 @@ $GLOBALS['config']['admin'] = array(
 $GLOBALS['config']['database']['meeting'] = array(
     'host'     => 'localhost',
     'name'     => 'meeting',
-    'user'     => 'skoroid_123',
-    'password' => '123',
+    'user'     => 'skoroid_123',//'u_meeting',
+    'password' => '123',//'vkGYD5VR'
 );
-$GLOBALS['config']['database']['information_schema'] = array(
+/*$GLOBALS['config']['database']['meeting'] = array(
     'host'     => 'localhost',
-    'name'     => 'INFORMATION_SCHEMA',
-    'user'     => 'skoroid_123',
-    'password' => '123',
-);
+    'name'     => 'skoroid2',
+    'user'     => 'skoroid',
+    'password' => '12345678aA!',
+);*/
 
 // Site
 $GLOBALS['site'] = array(
     'http'   => 'http',
     'domain' => 'roman.com',
 );
+/*$GLOBALS['site'] = array(
+    'http'   => 'http',
+    'domain' => 'meeting.kl.com.ua',
+);*/
 
 // Email
 $GLOBALS['config']['email_service.smtp.host'] = 'smtp.gmail.com';
 $GLOBALS['config']['email_service.smtp.port'] = '465';
 $GLOBALS['config']['email_service.smtp.user'] = 'skoroid12345@gmail.com';
-$GLOBALS['config']['email_service.smtp.password'] = '19A@ne63';
+$GLOBALS['config']['email_service.smtp.password'] = '12345678aA!';
 $GLOBALS['config']['email_service.smtp.email_from'] = 'skoroid12345@gmail.com';
 
 $GLOBALS['config']['email']['imap_port'] = '993';
 $GLOBALS['config']['email']['imap_host'] = 'imap.gmail.com';
-$GLOBALS['config']['email']['skoroid12345@gmail.com'] = '19A@ne63';
+$GLOBALS['config']['email']['skoroid12345@gmail.com'] = '12345678aA!';
 
 // Files
 $projectPath       = substr(dirname(__FILE__), 0, strrpos(dirname(__FILE__), DIRECTORY_SEPARATOR));

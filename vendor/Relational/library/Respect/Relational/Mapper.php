@@ -59,7 +59,7 @@ class Mapper extends AbstractMapper implements
         $coll    = $this->tracked[$entity];
         $cols    = $this->extractColumns($entity, $coll);
         $primary = $this->getStyle()->identifier($coll->getName());
-        
+
         if ($this->removed->contains($entity)) {
             $this->rawDelete($cols, $coll, $entity);
         } elseif ($this->new->contains($entity)) {
@@ -210,7 +210,7 @@ class Mapper extends AbstractMapper implements
             $conn->rollback();
             throw $e;
         }
-        
+
         $this->reset();
         $conn->commit();
     }

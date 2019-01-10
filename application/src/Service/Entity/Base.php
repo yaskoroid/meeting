@@ -268,10 +268,14 @@ class Base extends Service\Basic {
                 'permissionDeleteTaskSource' => array('name' => 'Разрешение удалять источник задания'),
                 'permissionReadTaskSource'   => array('name' => 'Разрешение читать источник задания'),
 
-                'permissionCreateTaskTargetDate' => array('name' => 'Разрешение создавать целевую дату задания'),
-                'permissionUpdateTaskTargetDate' => array('name' => 'Разрешение обновлять целевую дату задания'),
-                'permissionDeleteTaskTargetDate' => array('name' => 'Разрешение удалять целевую дату задания'),
-                'permissionReadTaskTargetDate'   => array('name' => 'Разрешение читать целевую дату задания'),
+                'permissionCreateTaskDateTypeSourceComment' =>
+                    array('name' => 'Разрешение создавать целевую дату задания'),
+                'permissionUpdateTaskDateTypeSourceComment' =>
+                    array('name' => 'Разрешение обновлять целевую дату задания'),
+                'permissionDeleteTaskDateTypeSourceComment' =>
+                    array('name' => 'Разрешение удалять целевую дату задания'),
+                'permissionReadTaskDateTypeSourceComment'   =>
+                    array('name' => 'Разрешение читать целевую дату задания'),
 
                 'permissionCreateTaskType' => array('name' => 'Разрешение создавать тип задания'),
                 'permissionUpdateTaskType' => array('name' => 'Разрешение обновлять тип задания'),

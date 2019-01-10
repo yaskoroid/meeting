@@ -41,25 +41,13 @@ class Meeting extends Repository {
     }
 
     /**
-     * @return Entity\UserType[]
-     */
-    public function getUsersTypes() {
-        try {
-            return $this->_loadObjects(array(), 'user_type');
-        } catch (\Exception $e) {
-            logException($e);
-            return null;
-        }
-    }
-
-    /**
      * @param string $sessionId
      * @return Entity\User
      */
     public function getUserBySessionId($sessionId) {
         try {
             /** @var Entity\User[] */
-            return $this->_loadObjectByFilter(array('session_id' => $sessionId), 'user');
+            return $this->_loadObjectByFilter(array('session_id' => $sessionId), 'User');
             //$user = $this->_loadObjects('user', null, true, true, array('session_id' => $sessionId), 'Entity\\User');
         } catch (\Exception $e) {
             logException($e);
@@ -73,7 +61,7 @@ class Meeting extends Repository {
      */
     public function getUserByLogin($login) {
         /** @var Entity\User */
-        return $this->_loadObjectByFilter(array('login' => $login), 'user');
+        return $this->_loadObjectByFilter(array('login' => $login), 'User');
     }
 
     /**
@@ -82,7 +70,7 @@ class Meeting extends Repository {
      */
     public function getUserByEmail($email) {
         /** @var Entity\User */
-        return $this->_loadObjectByFilter(array('email' => $email), 'user');
+        return $this->_loadObjectByFilter(array('email' => $email), 'User');
     }
 
     /**
@@ -91,7 +79,7 @@ class Meeting extends Repository {
      */
     public function getUserByPhone($phone) {
         /** @var Entity\User */
-        return $this->_loadObjectByFilter(array('phone' => $phone), 'user');
+        return $this->_loadObjectByFilter(array('phone' => $phone), 'User');
     }
 
     /**
@@ -100,7 +88,7 @@ class Meeting extends Repository {
      */
     public function getUserById($id) {
         /** @var Entity\User */
-        return $this->_loadObjectByFilter(array('id' => $id), 'user');
+        return $this->_loadObjectByFilter(array('id' => $id), 'User');
     }
 
     /**
@@ -159,7 +147,7 @@ class Meeting extends Repository {
 
         $select->and("( $permissionSelfCondition ($permissionUserTypeCondition))");
 
-        $select->orderBy($orderBy);
+        $select->orderBy($this->realProperty($orderBy));
 
         $direction ? $select->asc() : $select->desc();
 
@@ -191,26 +179,26 @@ class Meeting extends Repository {
     /**
      * @param Entity\User $user
      */
-    public function saveUser($user) {
+   /* public function saveUser($user) {
         $this->_mapper->user->persist($user);
         $this->_mapper->flush();
-    }
+    }*/
 
     /**
      * @param Entity\User $user
      */
-    public function deleteUser($user) {
+   /* public function deleteUser($user) {
         $this->_mapper->user->remove($user);
         $this->_mapper->flush();
-    }
+    }*/
 
     /**
      * @param Entity\Email $email
      */
-    public function saveEmail($email) {
+   /* public function saveEmail($email) {
         $this->_mapper->email->persist($email);
         $this->_mapper->flush();
-    }
+    }*/
 
 
     /**
@@ -257,11 +245,11 @@ class Meeting extends Repository {
     /**
      * @param string $entityName
      * @param array $filter
-     * @return Entity\ChangeConfirm[]
+     * @return Entity\ChangeConfirm[]|array
      */
     public function getChangeConfirmByEntityNameAndFilter($entityName, $filter) {
         $this->filterRealProperty($filter);
-        return $this->_mapper->{$this->realProperty('changeConfirm')}(
+        $changesConfirms = $this->_mapper->{$this->realProperty('changeConfirm')}(
             array_merge(
                 $filter,
                 array(
@@ -269,6 +257,8 @@ class Meeting extends Repository {
                 )
             )
         )->fetchAll();
+
+        return $this->_setRealMappers($changesConfirms, 'ChangeConfirm');
     }
 
     /**
@@ -306,33 +296,33 @@ class Meeting extends Repository {
      * @param string $setting
      * @return mixed
      */
-    public function getSettings($setting) {
+    /*public function getSettings($setting) {
         return $this->_mapper->{$this->realProperty($setting)}->fetchAll();
-    }
+    }*/
 
     /**
      * @param string $setting
      * @param int $id
      * @return mixed
      */
-    public function getSettingById($setting, $id) {
-        return $this->_loadObjectByFilter(array('id' => $id), $this->realProperty($setting));
-    }
+    /*public function getSettingById($setting, $id) {
+        return $this->_loadObjectByFilter(array('id' => $id), $setting);
+    }*/
 
     /**
      * @param string $setting
      * @param mixed $entity
      */
-    public function saveSetting($setting, $entity) {
+    /*public function saveSetting($setting, $entity) {
         $this->_mapper->{$this->realProperty($setting)}->persist($entity);
         $this->_mapper->flush();
-    }
+    }*/
 
     /**
      * @param string $setting
      * @param array $ids
      */
-    public function deleteSettingsByIds($setting, array $ids) {
+    /*public function deleteSettingsByIds($setting, array $ids) {
 
         $settingEntitiesToDelete =
             $this->_db
@@ -345,25 +335,26 @@ class Meeting extends Repository {
 
         if (count($settingEntitiesToDelete) > 0)
             $this->deleteSettings($setting, $settingEntitiesToDelete);
-    }
+    }*/
 
     /**
      * @param string $settingName
      * @param array $settings
      */
-    public function deleteSettings($settingName, array $settings) {
+    /*public function deleteSettings($settingName, array $settings) {
         foreach ($settings as $setting) {
             $this->_mapper->{$this->realProperty($settingName)}->remove($setting);
         }
         $this->_mapper->flush();
-    }
+    }*/
 
     /**
      * @param string $entityName
      * @return array
      */
     public function getEntities($entityName) {
-        return $this->_mapper->{$this->realProperty($entityName)}->fetchAll();
+        $entities = $this->_mapper->{$this->realProperty($entityName)}->fetchAll();
+        return $this->_setRealMappers($entities, $entityName);
     }
 
     /**
@@ -372,7 +363,7 @@ class Meeting extends Repository {
      * @return mixed
      */
     public function getEntityById($entityName, $id) {
-        return $this->_loadObjectByFilter(array('id' => $id), $this->realProperty($entityName));
+        return $this->_loadObjectByFilter(array('id' => $id), $entityName);
     }
 
     /**

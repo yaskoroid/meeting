@@ -262,8 +262,8 @@ class Validator extends Basic
         if (!filter_var($email, FILTER_VALIDATE_EMAIL))
             throw new \InvalidArgumentException('Bad email value');
 
-        if (!checkdnsrr(substr($email, strpos($email, "@") + 1, strlen($email)), 'MX'))
-                throw new \InvalidArgumentException('Bad email');
+        /*if (!checkdnsrr(substr($email, strpos($email, "@") + 1, strlen($email)), 'MX'))
+                throw new \InvalidArgumentException('Bad email');*/
     }
 
     /**

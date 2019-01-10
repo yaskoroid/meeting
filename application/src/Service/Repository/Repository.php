@@ -14,6 +14,7 @@ use Service\Utils;
 use Service\Repository\Database;
 use Respect\Relational;
 use Service\Basic;
+use Entity\Factory\Factory;
 
 abstract class Repository extends Basic {
 
@@ -84,6 +85,28 @@ abstract class Repository extends Basic {
     }
 
     /**
+     * @param array $entities
+     * @param string $entityName
+     * @return array
+     */
+    protected function _setRealMappers(array $entities, $entityName) {
+        if (count($entities) === 0)
+            return array();
+
+        if (get_class($entities[0]) === 'stdClass') {
+            $entitiesMappers = array();
+            foreach ($entities as $entity)
+                array_push(
+                    $entitiesMappers,
+                    Factory::createEntity((array) $entity, $this->_mapper->entityNamespace . ucfirst($entityName))
+                );
+
+            return $entitiesMappers;
+        }
+        return $entities;
+    }
+
+    /**
      * @param \PDO $connection
      * @return Relational\Mapper
      */
@@ -120,21 +143,6 @@ abstract class Repository extends Basic {
         }
         $this->_monitoringStopRepository('{$table}');
         return $res;
-    }
-
-    /**
-     * @param array $filter
-     * @param string $objectName
-     * @return array
-     */
-    protected function _loadObjects(array $filter = [], $objectName) {
-        $this->_monitoringStartRepository("_loadObjects_{$objectName}");
-        $object = $this->_mapper->$objectName($filter)->fetchAll();
-        $this->_monitoringStopRepository("_loadObjects_{$objectName}");
-        if (!$this->_databaseService->isValidResult($object)) {
-            return null;
-        }
-        return $object;
     }
 
     /**
@@ -213,12 +221,14 @@ abstract class Repository extends Basic {
     protected function _loadObjectByFilter(array $params, $objectName) {
         $this->_monitoringStartRepository("_loadObjectByFilter_{$objectName}");
 
-        $object = $this->_mapper->$objectName($params)->fetch();
+        $object = $this->_mapper->{$this->realProperty($objectName)}($params)->fetch();
+
         $this->_monitoringStopRepository("_loadObjectByFilter_{$objectName}");
         if (!$this->_databaseService->isValidResult($object)) {
             return null;
         }
-        return $object;
+
+        return $this->_setRealMappers(array($object), $objectName)[0];
     }
 
     /**

@@ -13,7 +13,7 @@ use Service;
 
 class Logout extends Model {
     /**
-     * @var Service\Auth;
+     * @var Service\Core\Auth;
      */
     private $_authService;
 

@@ -201,7 +201,7 @@ class ChangeConfirm extends Base {
 
         $imageFileId = $user->imageFileId;
 
-        $this->_userService->delete($user);
+        $this->_userService->delete(array($user));
 
         if ($imageFileId !== null)
             $this->_fileService->deleteByIdsAndStorage(array($imageFileId));
@@ -349,7 +349,6 @@ class ChangeConfirm extends Base {
         $this->_userService->save($user);
 
         $this->_removeAllEntitiesByEntityIdAndType('User', self::CHANGE_USER_PASSWORD, $user->id);
-
     }
 
     /**

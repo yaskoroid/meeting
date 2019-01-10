@@ -31,7 +31,7 @@ class Factory {
         $entity = new $entityClassName;
         foreach ($entity as $name=>$value) {
             $keyInFields = $isCamelCase
-                ? $name
+                ? lcfirst($name)
                 : self::$_utilsService->camelCaseToUnderline($name, false);
 
             if (array_key_exists($keyInFields, $fields)) {

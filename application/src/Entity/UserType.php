@@ -58,10 +58,10 @@ class UserType extends Mapper {
     public $permissionDeleteTaskType;
     public $permissionReadTaskType;
 
-    public $permissionCreateTaskTypeDateComment;
-    public $permissionUpdateTaskTypeDateComment;
-    public $permissionDeleteTaskTypeDateComment;
-    public $permissionReadTaskTypeDateComment;
+    public $permissionCreateTaskDateTypeSourceComment;
+    public $permissionUpdateTaskDateTypeSourceComment;
+    public $permissionDeleteTaskDateTypeSourceComment;
+    public $permissionReadTaskDateTypeSourceComment;
 
     public $permissionCreateTextbook;
     public $permissionUpdateTextbook;

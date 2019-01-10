@@ -79,7 +79,7 @@ class Downloader extends Basic {
         } catch (\Exception $e) {
             $this->_fileService->deleteFile($pathReal);
             throw new \Exception($e->getMessage());
-        }  catch (\InvalidArgumentException $eInvalid) {
+        } catch (\InvalidArgumentException $eInvalid) {
             $this->_fileService->deleteFile($pathReal);
             throw new \InvalidArgumentException($eInvalid->getMessage());
         } catch (\Throwable $t) {
@@ -112,7 +112,7 @@ class Downloader extends Basic {
             $this->_fileService->deleteFile($pathReal);
             $this->_fileService->deleteFile($path);
             throw new \Exception($e->getMessage());
-        }  catch (\InvalidArgumentException $eInvalid) {
+        } catch (\InvalidArgumentException $eInvalid) {
             $this->_fileService->deleteFile($pathReal);
             $this->_fileService->deleteFile($path);
             throw new \InvalidArgumentException($eInvalid->getMessage());
